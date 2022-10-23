@@ -37,3 +37,11 @@ export const notAuthenticated = () => {
   error.status = 401;
   return error;
 };
+
+export const invalidRefreshToken = () => {
+  const error = new Error();
+  error.message = `Refresh token invalid or already used`;
+  error.name = "REFRESH TOKEN NOT VALID";
+  error.status = 401;
+  return error;
+};

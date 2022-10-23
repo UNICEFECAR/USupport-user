@@ -24,7 +24,7 @@ const localStrategy = passportLocal.Strategy;
 const jwtStrategy = passportJWT.Strategy;
 const extractJWT = passportJWT.ExtractJwt;
 
-const JWT_PUB_KEY = process.env.JWT_PUB_KEY;
+const JWT_KEY = process.env.JWT_KEY;
 
 passport.use(
   "signup",
@@ -120,22 +120,22 @@ passport.use(
             throw err;
           });
 
-        const ip_address =
-          req.header("X-Real-IP") || req.header("x-forwarded-for");
+        // const ip_address =
+        //   req.header("X-Real-IP") || req.header("x-forwarded-for");
 
         if (!user) {
           return done(incorrectEmail());
         }
 
-        const validate = await bcrypt.compare(password, user.password);
+        const validatePassword = await bcrypt.compare(password, user.password);
 
-        if (!validate) {
-          //   Log login attempt
+        if (!validatePassword) {
+          // TODO: Log login attempt
 
           return done(incorrectPassword());
         }
 
-        // Log login attempt
+        // TODO: Log login attempt
 
         return done(null, user);
       } catch (error) {
@@ -168,10 +168,10 @@ passport.use(
   new jwtStrategy(
     {
       jwtFromRequest: extractJWT.fromAuthHeaderAsBearerToken(),
-      secretOrKey: JWT_PUB_KEY,
-      issuer: "online.usupport.app",
+      secretOrKey: JWT_KEY,
+      issuer: "online.usupport.userApi",
       audience: "online.usupport.app",
-      algorithms: ["RS256"],
+      algorithms: ["HS256"],
     },
     async (jwt_payload, done) => {
       try {
