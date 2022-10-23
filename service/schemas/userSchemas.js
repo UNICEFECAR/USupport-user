@@ -1,5 +1,9 @@
 import * as yup from "yup";
 
+export const getUserByIdSchema = yup.object().shape({
+  user_id: yup.string().uuid().required(),
+});
+
 export const getUserByEmailSchema = yup.object().shape({
   email: yup.string().email().required(),
 });

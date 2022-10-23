@@ -15,7 +15,7 @@ export const getClientUserByEmail = async (email) =>
 
         SELECT * 
         FROM user
-            JOIN clientData ON clientData.client_detail_id = user.client_detail_id
+          JOIN clientData ON clientData.client_detail_id = user.client_detail_id
         ORDER BY created_at DESC
         LIMIT 1;
 
@@ -41,7 +41,7 @@ export const getProviderUserByEmail = async (email) =>
 
         SELECT * 
         FROM user
-            JOIN providerData ON providerData.provider_detail_id = user.provider_detail_id
+          JOIN providerData ON providerData.provider_detail_id = user.provider_detail_id
         ORDER BY created_at DESC
         LIMIT 1;
 
@@ -55,7 +55,7 @@ export const getProviderUserByEmail = async (email) =>
 export const getUserByID = async (user_id) =>
   await pool.query(
     `
-        SELECT * 
+        SELECT user_id, country_id, type, client_detail_id, notification_preference_id
         FROM user
         WHERE user_id = $1
         ORDER BY created_at DESC
@@ -139,8 +139,8 @@ export const createUser = async ({
 
         SELECT * 
         FROM newUser 
-            JOIN newProviderDetails 
-            ON newUser.provider_detail_id = newProviderDetails.provider_detail_id;
+          JOIN newProviderDetails 
+          ON newUser.provider_detail_id = newProviderDetails.provider_detail_id;
         `,
       [
         countryID,
