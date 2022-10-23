@@ -44,7 +44,16 @@ export const refreshAccessToken = async ({ refreshToken }) => {
       throw err;
     });
 
+  const now = new Date().getTime();
+  const expiresIn =
+    new Date(refreshTokenData.created_at).getTime() + 1000 * 3600 * 24 * 31; // valid for 31 days
+
   if (!refreshTokenData || refreshTokenData.used) {
+    throw invalidRefreshToken();
+  } else if (expiresIn < now) {
+    await invalidateRefreshToken(refreshAccessToken).catch((err) => {
+      throw err;
+    });
     throw invalidRefreshToken();
   } else {
     await invalidateRefreshToken(refreshAccessToken).catch((err) => {
