@@ -1,13 +1,18 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
+import { nanoid } from "nanoid";
 
 import {
   storeRefreshToken,
   getRefreshToken,
   invalidateRefreshToken,
 } from "#queries/authTokens";
+import { getClientUserByEmailOrAccessToken } from "#queries/users";
 
-import { invalidRefreshToken } from "#utils/errors";
+import {
+  invalidRefreshToken,
+  cannotGenerateUserAccessToken,
+} from "#utils/errors";
 
 const JWT_KEY = process.env.JWT_KEY;
 
@@ -30,7 +35,7 @@ export const issueAccessToken = async ({ user_id }) => {
 export const issueRefreshToken = async ({ user_id }) => {
   const refreshToken = uuidv4();
 
-  storeRefreshToken(user_id).catch((err) => {
+  storeRefreshToken(user_id, refreshToken).catch((err) => {
     throw err;
   });
 
@@ -70,5 +75,27 @@ export const refreshAccessToken = async ({ refreshToken }) => {
       ...newAccessToken,
       refreshToken: newRefreshToken,
     };
+  }
+};
+
+export const generateAccessToken = async (retryStep = 0) => {
+  if (retryStep === 3) {
+    // Retry to generate new token 3 times if newly generated is used
+    throw cannotGenerateUserAccessToken();
+  }
+
+  const newUserAccessToken = nanoid(10);
+
+  const isAccessTokenAvailableQuery = await getClientUserByEmailOrAccessToken(
+    null,
+    newUserAccessToken
+  ).catch((err) => {
+    throw err;
+  });
+
+  if (isAccessTokenAvailableQuery.rowCount > 0) {
+    return generateAccessToken(retryStep + 1);
+  } else {
+    return newUserAccessToken;
   }
 };

@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 
 import {
   getUserByID,
-  getClientUserByEmail,
+  getClientUserByEmailOrAccessToken,
   getProviderUserByEmail,
   createUser,
 } from "#queries/users";
@@ -36,7 +36,6 @@ passport.use(
     },
     async (req, emailIn, passwordIn, done) => {
       try {
-        // TODO: Validate signup req payload
         const {
           countryID,
           email,
@@ -59,7 +58,7 @@ passport.use(
         let userWithEmail;
 
         if (userType === "client") {
-          userWithEmail = await getClientUserByEmail(email)
+          userWithEmail = await getClientUserByEmailOrAccessToken(email, null)
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
@@ -114,7 +113,7 @@ passport.use(
     },
     async (req, email, password, done) => {
       try {
-        const user = getClientUserByEmail({ email })
+        const user = getClientUserByEmailOrAccessToken(email, null)
           .then((res) => res.rows[0])
           .catch((err) => {
             throw err;

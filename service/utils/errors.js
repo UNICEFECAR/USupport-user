@@ -45,3 +45,11 @@ export const invalidRefreshToken = () => {
   error.status = 401;
   return error;
 };
+
+export const cannotGenerateUserAccessToken = () => {
+  const error = new Error();
+  error.message = `Couldn't generate a new random user access token. Please try again`;
+  error.name = "CANNOT GENERATE USER ACCESS TOKEN";
+  error.status = 401;
+  return error;
+};

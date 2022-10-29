@@ -1,13 +1,14 @@
 import { pool } from "#utils/dbConfig";
 
-export const getClientUserByEmail = async (email) =>
+export const getClientUserByEmailOrAccessToken = async (email, accessToken) =>
   await pool.query(
     `
     WITH clientData AS (
 
         SELECT * 
         FROM client_detail
-        WHERE email = $1
+        WHERE ($1::VARCHAR IS NULL OR email = $1) 
+           OR ($2::VARCHAR IS NULL OR access_token = $2)
         ORDER BY created_at DESC
         LIMIT 1;
 
@@ -23,7 +24,7 @@ export const getClientUserByEmail = async (email) =>
 
     SELECT * FROM fullUserData; 
     `,
-    [email]
+    [email, accessToken]
   );
 
 export const getProviderUserByEmail = async (email) =>

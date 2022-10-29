@@ -1,13 +1,13 @@
 import { pool } from "#utils/dbConfig";
 
-export const storeRefreshToken = async (user_id) =>
+export const storeRefreshToken = async (user_id, refreshToken) =>
   await pool.query(
     `
         INSERT INTO refresh_token (user_id, token)
         VALUES ($1, $2)
         RETURNING *;
     `,
-    [user_id]
+    [user_id, refreshToken]
   );
 
 export const getRefreshToken = async (token) =>

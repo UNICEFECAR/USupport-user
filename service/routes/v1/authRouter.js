@@ -5,6 +5,7 @@ import {
   issueAccessToken,
   issueRefreshToken,
   refreshAccessToken,
+  generateAccessToken,
 } from "#controllers/auth";
 
 import { refreshAccessTokenSchema } from "#schemas/authSchemas";
@@ -54,6 +55,16 @@ router.post(
     return res.status(200).send(result);
   }
 );
+
+router.get("/user-access-token", async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/auth/user-access-token
+   * #desc    Generate Access token
+   */
+  return await generateAccessToken
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
 
 router.post("/refresh-token", async (req, res, next) => {
   /**
