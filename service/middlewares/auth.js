@@ -11,6 +11,7 @@ import {
 } from "#queries/users";
 
 import { createUserSchema } from "#schemas/userSchemas";
+import { userLoginSchema } from "#schemas/authSchemas";
 
 import {
   emailUsed,
@@ -119,13 +120,36 @@ passport.use(
       passwordField: "password",
       passReqToCallback: true,
     },
-    async (req, email, password, done) => {
+    async (req, emailIn, passwordIn, done) => {
       try {
-        const user = getClientUserByEmailOrAccessToken(email, null)
-          .then((res) => res.rows[0])
-          .catch((err) => {
-            throw err;
-          });
+        const { email, password, userAccessToken, userType } =
+          await userLoginSchema
+            .noUnknown(true)
+            .strict()
+            .validate({
+              email: emailIn,
+              password: passwordIn,
+              ...req.body,
+            })
+            .catch((err) => {
+              throw err;
+            });
+
+        let user;
+
+        if (userType === "client") {
+          user = getClientUserByEmailOrAccessToken(email, userAccessToken)
+            .then((res) => res.rows[0])
+            .catch((err) => {
+              throw err;
+            });
+        } else if (userType === "provider") {
+          user = getProviderUserByEmail(email)
+            .then((res) => res.rows[0])
+            .catch((err) => {
+              throw err;
+            });
+        }
 
         // const ip_address =
         //   req.header("X-Real-IP") || req.header("x-forwarded-for");
