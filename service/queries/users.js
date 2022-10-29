@@ -77,8 +77,8 @@ export const createUser = async ({
       `
         WITH newClientDetails AS (
 
-            INSERT INTO client_detail (name, surname, preferred_name, username, email, image, sex, year_of_birth)
-            VALUES ($3, $4, $5, $6, $7, $8, $9, $10)
+            INSERT INTO client_detail (name, surname, preferred_name, username, email, image, sex, year_of_birth, access_token)
+            VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11)
             RETURNING * 
 
         ), newNotificationPreferences AS (
@@ -112,6 +112,7 @@ export const createUser = async ({
         clientData.image,
         clientData.sex,
         clientData.yob,
+        clientData.userAccessToken,
       ]
     );
   } else {

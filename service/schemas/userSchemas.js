@@ -30,7 +30,23 @@ const createClientSchema = yup.object().shape({
   name: yup.string().required(),
   surname: yup.string().required(),
   preferredName: yup.string().required(),
-  email: yup.string().email().required(),
+  email: yup.when("userAccessToken", {
+    is: (value) => value === undefined,
+    then: yup
+      .string()
+      .email()
+      .required(
+        "You need to provide either email or valid user access token to signup"
+      ),
+  }),
+  userAccessToken: yup.when("email", {
+    is: (value) => value === undefined,
+    then: yup
+      .string()
+      .required(
+        "You need to provide either email or valid user access token to signup"
+      ),
+  }),
   image: yup.string().notRequired(),
   sex: sexTypeSchema.notRequired(),
   yob: yup.number().positive().notRequired(),

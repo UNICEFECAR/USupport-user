@@ -14,6 +14,14 @@ export const emailUsed = () => {
   return error;
 };
 
+export const userAccessTokenUsed = () => {
+  const error = new Error();
+  error.message = `This user access token is not available`;
+  error.name = "USER ACCESS TOKEN ALREADY USED";
+  error.status = 409;
+  return error;
+};
+
 export const incorrectEmail = () => {
   const error = new Error();
   error.message = `There is no user with this email`;
@@ -50,6 +58,6 @@ export const cannotGenerateUserAccessToken = () => {
   const error = new Error();
   error.message = `Couldn't generate a new random user access token. Please try again`;
   error.name = "CANNOT GENERATE USER ACCESS TOKEN";
-  error.status = 401;
+  error.status = 409;
   return error;
 };

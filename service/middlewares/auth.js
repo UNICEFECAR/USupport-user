@@ -18,6 +18,7 @@ import {
   incorrectPassword,
   notAuthenticated,
   userNotFound,
+  userAccessTokenUsed,
 } from "#utils/errors";
 
 const localStrategy = passportLocal.Strategy;
@@ -55,24 +56,31 @@ passport.use(
             throw err;
           });
 
-        let userWithEmail;
+        let currentUser;
 
         if (userType === "client") {
-          userWithEmail = await getClientUserByEmailOrAccessToken(email, null)
+          currentUser = await getClientUserByEmailOrAccessToken(
+            email,
+            clientData.userAccessToken
+          )
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
             });
         } else if (userType === "provider") {
-          userWithEmail = await getProviderUserByEmail(email)
+          currentUser = await getProviderUserByEmail(email)
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
             });
         }
 
-        if (!userWithEmail) {
-          return done(emailUsed());
+        if (!currentUser) {
+          if (email) {
+            return done(emailUsed());
+          } else if (clientData.userAccessToken) {
+            return done(userAccessTokenUsed());
+          }
         }
 
         const salt = await bcrypt.genSalt(12);
