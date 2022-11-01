@@ -19,7 +19,7 @@ router.get("/", securedRoute, async (req, res) => {
     .strict(true)
     .validate({ user_id })
     .then(getSharedUserData)
-    .then((result) => res.json(result).status(200));
+    .then((result) => res.status(200).send(result));
 });
 
 export { router };

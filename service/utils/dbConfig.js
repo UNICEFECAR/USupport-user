@@ -1,8 +1,8 @@
-import { Pool } from "pg";
+import pg from "pg";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const PG_CONNECTION_STRING = process.env.PG_CONNECTION_STRING;
+const USER_DB_URL = process.env.USER_DB_URL;
 
-export const pool = new Pool({ connectionString: PG_CONNECTION_STRING });
+export const pool = new pg.Pool({ connectionString: USER_DB_URL });
