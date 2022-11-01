@@ -8,7 +8,7 @@ import middleware from "#middlewares/index";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3010;
 
 /*------------- Security Config -------------*/
 
@@ -20,6 +20,7 @@ app.use(helmet());
 
 // Example router
 app.use("/user/v1/user", v1.UserRouter);
+app.use("/user/v1/upload-file", v1.UploadFileRouter);
 
 /*------------- Error middleware -------------*/
 
