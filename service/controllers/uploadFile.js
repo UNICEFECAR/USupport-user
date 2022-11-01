@@ -12,7 +12,7 @@ const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
  * @returns Object | Error
  *  */
 export const uploadFile = async (props) => {
-  const { fileName, fileContent } = props;
+  const { fileName, fileContent, mimeType } = props;
 
   const s3 = new AWS.S3({
     accessKeyId: AWS_ACCESS_KEY_ID,
@@ -24,6 +24,7 @@ export const uploadFile = async (props) => {
     Bucket: AWS_BUCKET_NAME,
     Key: fileName,
     Body: Buffer.from(fileContent, "binary"),
+    ContentType: mimeType,
     ACL: "public-read",
   };
 
