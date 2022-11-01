@@ -3,8 +3,8 @@ import { pool } from "#utils/dbConfig";
 export const storeRefreshToken = async (user_id, refreshToken) =>
   await pool.query(
     `
-        INSERT INTO refresh_token (user_id, token)
-        VALUES ($1, $2)
+        INSERT INTO refresh_token (user_id, token, expires_at)
+        VALUES ($1, $2, NOW() + INTERVAL '31 DAYS')
         RETURNING *;
     `,
     [user_id, refreshToken]

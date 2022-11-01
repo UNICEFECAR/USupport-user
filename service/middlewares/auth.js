@@ -32,36 +32,29 @@ passport.use(
   "signup",
   new localStrategy(
     {
-      usernameField: "email",
+      usernameField: "password",
       passwordField: "password",
       passReqToCallback: true,
     },
     async (req, emailIn, passwordIn, done) => {
       try {
-        const {
-          countryID,
-          email,
-          password,
-          userType,
-          clientData,
-          providerData,
-        } = await createUserSchema
-          .noUnknown(true)
-          .strict()
-          .validate({
-            email: emailIn,
-            password: passwordIn,
-            ...req.body,
-          })
-          .catch((err) => {
-            throw err;
-          });
+        const { countryID, password, userType, clientData, providerData } =
+          await createUserSchema
+            .noUnknown(true)
+            .strict()
+            .validate({
+              password: passwordIn,
+              ...req.body,
+            })
+            .catch((err) => {
+              throw err;
+            });
 
         let currentUser;
-
+        console.log(userType);
         if (userType === "client") {
           currentUser = await getClientUserByEmailOrAccessToken(
-            email,
+            clientData.email,
             clientData.userAccessToken
           )
             .then((res) => res.rows[0])
@@ -69,15 +62,15 @@ passport.use(
               throw err;
             });
         } else if (userType === "provider") {
-          currentUser = await getProviderUserByEmail(email)
+          currentUser = await getProviderUserByEmail(providerData.email)
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
             });
         }
-
-        if (!currentUser) {
-          if (email) {
+        console.log(currentUser);
+        if (currentUser) {
+          if (clientData?.email || providerData?.email) {
             return done(emailUsed());
           } else if (clientData.userAccessToken) {
             return done(userAccessTokenUsed());
@@ -87,20 +80,16 @@ passport.use(
         const salt = await bcrypt.genSalt(12);
         const hashedPass = await bcrypt.hash(password, salt);
 
-        let newUser;
-        if (userType === "client") {
-          newUser = await createUser({ countryID, hashedPass, clientData })
-            .then((res) => res.rows[0])
-            .catch((err) => {
-              throw err;
-            });
-        } else if (userType === "provider") {
-          newUser = await createUser({ countryID, hashedPass, providerData })
-            .then((res) => res.rows[0])
-            .catch((err) => {
-              throw err;
-            });
-        }
+        let newUser = await createUser({
+          countryID,
+          hashedPass,
+          clientData,
+          providerData,
+        })
+          .then((res) => res.rows[0])
+          .catch((err) => {
+            throw err;
+          });
 
         // TODO: Send welcome email
 
@@ -116,7 +105,7 @@ passport.use(
   "login",
   new localStrategy(
     {
-      usernameField: "email",
+      usernameField: "password",
       passwordField: "password",
       passReqToCallback: true,
     },
@@ -127,7 +116,6 @@ passport.use(
             .noUnknown(true)
             .strict()
             .validate({
-              email: emailIn,
               password: passwordIn,
               ...req.body,
             })
@@ -136,20 +124,20 @@ passport.use(
             });
 
         let user;
-
         if (userType === "client") {
-          user = getClientUserByEmailOrAccessToken(email, userAccessToken)
+          user = await getClientUserByEmailOrAccessToken(email, userAccessToken)
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
             });
         } else if (userType === "provider") {
-          user = getProviderUserByEmail(email)
+          user = await getProviderUserByEmail(email)
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
             });
         }
+        console.log(user);
 
         // const ip_address =
         //   req.header("X-Real-IP") || req.header("x-forwarded-for");
@@ -175,24 +163,6 @@ passport.use(
     }
   )
 );
-
-passport.serializeUser((user, done) => {
-  done(null, user.user_id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  const user = await getUserByID(id)
-    .then((res) => res.rows[0])
-    .catch((err) => {
-      throw err;
-    });
-
-  if (!user) {
-    return done(userNotFound());
-  }
-
-  done(null, user);
-});
 
 passport.use(
   "jwt",

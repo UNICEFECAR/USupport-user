@@ -8,19 +8,19 @@ export const getClientUserByEmailOrAccessToken = async (email, accessToken) =>
         SELECT * 
         FROM client_detail
         WHERE ($1::VARCHAR IS NULL OR email = $1) 
-           OR ($2::VARCHAR IS NULL OR access_token = $2)
+          AND ($2::VARCHAR IS NULL OR access_token = $2)
         ORDER BY created_at DESC
-        LIMIT 1;
+        LIMIT 1
 
     ), fullUserData AS (
 
         SELECT * 
-        FROM user
-          JOIN clientData ON clientData.client_detail_id = user.client_detail_id
-        ORDER BY created_at DESC
-        LIMIT 1;
+        FROM "user"
+          JOIN clientData ON clientData.client_detail_id = "user".client_detail_id
+        ORDER BY "user".created_at DESC
+        LIMIT 1
 
-    ), 
+    )
 
     SELECT * FROM fullUserData; 
     `,
@@ -36,15 +36,15 @@ export const getProviderUserByEmail = async (email) =>
         FROM provider_detail
         WHERE email = $1
         ORDER BY created_at DESC
-        LIMIT 1;
+        LIMIT 1
 
     ), fullUserData AS (
 
         SELECT * 
-        FROM user
-          JOIN providerData ON providerData.provider_detail_id = user.provider_detail_id
+        FROM "user"
+          JOIN providerData ON providerData.provider_detail_id = "user".provider_detail_id
         ORDER BY created_at DESC
-        LIMIT 1;
+        LIMIT 1
 
     ), 
 
@@ -57,7 +57,7 @@ export const getUserByID = async (user_id) =>
   await pool.query(
     `
         SELECT user_id, country_id, type, client_detail_id, notification_preference_id
-        FROM user
+        FROM "user"
         WHERE user_id = $1
         ORDER BY created_at DESC
         LIMIT 1;
@@ -88,9 +88,10 @@ export const createUser = async ({
 
         ), newUser AS (
 
-            INSERT INTO user (country_id, type, client_detail_id, password, notification_preference_id)
-            VALUES ($1, 'client', (SELECT client_detail_id FROM newClientDetails), 
-                    $2, (SELECT notification_preference_id FROM newNotificationPreferences))
+            INSERT INTO "user" (country_id, type, client_detail_id, password, notification_preference_id)
+              SELECT $1, 'client', client_detail_id, 
+                      $2, (SELECT notification_preference_id FROM newNotificationPreferences)
+              FROM newClientDetails
             RETURNING * 
 
         )
@@ -132,9 +133,10 @@ export const createUser = async ({
 
         ), newUser AS (
 
-            INSERT INTO user (country_id, type, provider_detail_id, password, notification_preference_id)
-            VALUES ($1, 'provider', (SELECT provider_detail_id FROM newProviderDetails), 
-                    $2, (SELECT notification_preference_id FROM newNotificationPreferences))
+          INSERT INTO "user" (country_id, type, client_detail_id, password, notification_preference_id)
+              SELECT $1, 'provider', client_detail_id, 
+                      $2, (SELECT notification_preference_id FROM newNotificationPreferences)
+              FROM newClientDetails
             RETURNING * 
 
         )

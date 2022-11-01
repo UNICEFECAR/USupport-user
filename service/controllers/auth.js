@@ -50,8 +50,8 @@ export const refreshAccessToken = async ({ refreshToken }) => {
     });
 
   const now = new Date().getTime();
-  const expiresIn =
-    new Date(refreshTokenData.created_at).getTime() + 1000 * 3600 * 24 * 31; // valid for 31 days
+  const expiresIn = new Date(refreshTokenData.expires_at).getTime();
+  // valid for 31 days
 
   if (!refreshTokenData || refreshTokenData.used) {
     throw invalidRefreshToken();

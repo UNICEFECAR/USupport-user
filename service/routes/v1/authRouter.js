@@ -20,6 +20,7 @@ router.post(
      * #route   POST /user/v1/auth/signup
      * #desc    Create a new user and create a JWT session
      */
+
     const user = req.user;
 
     const accessToken = await issueAccessToken({ user_id: user.user_id });

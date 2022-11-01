@@ -1,5 +1,7 @@
 import * as yup from "yup";
 
+const PASSWORD_REGEX = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}");
+
 export const getUserByIdSchema = yup.object().shape({
   user_id: yup.string().uuid().required(),
 });
@@ -17,6 +19,7 @@ const createClientSchema = yup.object().shape(
     name: yup.string().required(),
     surname: yup.string().required(),
     preferredName: yup.string().required(),
+    username: yup.string().required(),
     email: yup.string().when("userAccessToken", {
       is: undefined,
       then: yup
@@ -62,9 +65,9 @@ const createProviderSchema = yup.object().shape({
 
 export const createUserSchema = yup.object().shape(
   {
-    userType: yup.string().oneOf(["client", "provider"]).required(),
+    userType: yup.string().default("client"),
     countryID: yup.string().uuid().required(),
-    password: yup.string().required(), // TODO: Add password regex
+    password: yup.string().matches(PASSWORD_REGEX).required(),
     clientData: createClientSchema.when("userType", {
       is: "client",
       then: createClientSchema.required(),
