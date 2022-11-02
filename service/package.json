@@ -14,7 +14,9 @@
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.0.3",
+    "aws-sdk": "^2.1240.0",
     "express": "^4.18.1",
+    "formidable": "^2.0.1",
     "helmet": "^6.0.0",
     "nanoid": "^4.0.0",
     "node-fetch": "^3.2.10",
