@@ -39,7 +39,7 @@ export const getErrorResponse = (error) => {
   };
 };
 
-export const errorHandler = (err, req, res) => {
+export const errorHandler = (err, req, res, next) => {
   //all errors pass through here
   const { name, message, status } = getErrorResponse(err);
   console.log(err);
@@ -51,7 +51,8 @@ export const errorHandler = (err, req, res) => {
       message,
     },
   };
-  res.status(status).json(errorObj);
+
+  res.status(status).send(errorObj);
 };
 
 export const notFound = (req, res, next) => {
