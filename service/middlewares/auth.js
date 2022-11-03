@@ -8,6 +8,7 @@ import {
   getClientUserByEmailOrAccessToken,
   getProviderUserByEmail,
   createUser,
+  loginAttempt,
 } from "#queries/users";
 
 import { createUserSchema } from "#schemas/userSchemas";
@@ -18,7 +19,6 @@ import {
   incorrectEmail,
   incorrectPassword,
   notAuthenticated,
-  userNotFound,
   userAccessTokenUsed,
 } from "#utils/errors";
 
@@ -51,7 +51,7 @@ passport.use(
             });
 
         let currentUser;
-        console.log(userType);
+
         if (userType === "client") {
           currentUser = await getClientUserByEmailOrAccessToken(
             clientData.email,
@@ -68,7 +68,7 @@ passport.use(
               throw err;
             });
         }
-        console.log(currentUser);
+
         if (currentUser) {
           if (clientData?.email || providerData?.email) {
             return done(emailUsed());
@@ -137,24 +137,25 @@ passport.use(
               throw err;
             });
         }
-        console.log(user);
-
-        // const ip_address =
-        //   req.header("X-Real-IP") || req.header("x-forwarded-for");
 
         if (!user) {
           return done(incorrectEmail());
         }
 
         const validatePassword = await bcrypt.compare(password, user.password);
+        const ip_address =
+          req.header("X-Real-IP") || req.header("x-forwarded-for") || "0.0.0.0";
+
+        loginAttempt({
+          user_id: user.user_id,
+          ip_address,
+          location: "GB",
+          status: !validatePassword ? "failed" : "successful",
+        });
 
         if (!validatePassword) {
-          // TODO: Log login attempt
-
           return done(incorrectPassword());
         }
-
-        // TODO: Log login attempt
 
         return done(null, user);
       } catch (error) {

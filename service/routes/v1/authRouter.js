@@ -62,7 +62,7 @@ router.get("/user-access-token", async (req, res, next) => {
    * #route   GET /user/v1/auth/user-access-token
    * #desc    Generate User Access token
    */
-  return await generateAccessToken
+  return await generateAccessToken()
     .then((result) => res.status(200).send(result))
     .catch(next);
 });

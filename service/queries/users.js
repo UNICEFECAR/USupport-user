@@ -168,3 +168,13 @@ export const createUser = async ({
     );
   }
 };
+
+export const loginAttempt = async ({ user_id, ip_address, location, status }) =>
+  await pool.query(
+    `
+      INSERT INTO login_attempt (user_id, ip_address, location, status)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `,
+    [user_id, ip_address, location, status]
+  );
