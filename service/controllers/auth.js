@@ -96,6 +96,6 @@ export const generateAccessToken = async (retryStep = 0) => {
   if (isAccessTokenAvailableQuery.rowCount > 0) {
     return generateAccessToken(retryStep + 1);
   } else {
-    return newUserAccessToken;
+    return { userAccessToken: newUserAccessToken };
   }
 };

@@ -144,7 +144,7 @@ passport.use(
 
         const validatePassword = await bcrypt.compare(password, user.password);
         const ip_address =
-          req.header("X-Real-IP") || req.header("x-forwarded-for");
+          req.header("X-Real-IP") || req.header("x-forwarded-for") || "0.0.0.0";
 
         loginAttempt({
           user_id: user.user_id,
