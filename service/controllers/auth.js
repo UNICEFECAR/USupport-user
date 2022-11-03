@@ -56,12 +56,12 @@ export const refreshAccessToken = async ({ refreshToken }) => {
   if (!refreshTokenData || refreshTokenData.used) {
     throw invalidRefreshToken();
   } else if (expiresIn < now) {
-    await invalidateRefreshToken(refreshAccessToken).catch((err) => {
+    await invalidateRefreshToken(refreshToken).catch((err) => {
       throw err;
     });
     throw invalidRefreshToken();
   } else {
-    await invalidateRefreshToken(refreshAccessToken).catch((err) => {
+    await invalidateRefreshToken(refreshToken).catch((err) => {
       throw err;
     });
     const newAccessToken = await issueAccessToken({
