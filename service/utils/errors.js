@@ -61,3 +61,11 @@ export const cannotGenerateUserAccessToken = () => {
   error.status = 409;
   return error;
 };
+
+export const invalidResetPasswordToken = () => {
+  const error = new Error();
+  error.message = `Invalid or expired reset password token`;
+  error.name = "INVALID RESET PASSWORD TOKEN";
+  error.status = 409;
+  return error;
+};

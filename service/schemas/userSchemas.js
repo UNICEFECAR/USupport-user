@@ -1,6 +1,8 @@
 import * as yup from "yup";
 
-const PASSWORD_REGEX = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}");
+export const PASSWORD_REGEX = new RegExp(
+  "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}"
+);
 
 export const getUserByIdSchema = yup.object().shape({
   user_id: yup.string().uuid().required(),
