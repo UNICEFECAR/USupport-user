@@ -16,10 +16,10 @@ const sexTypeSchema = yup
 
 const createClientSchema = yup.object().shape(
   {
-    name: yup.string().required(),
-    surname: yup.string().required(),
-    preferredName: yup.string().required(),
-    username: yup.string().required(),
+    name: yup.string().notRequired(),
+    surname: yup.string().notRequired(),
+    preferredName: yup.string().notRequired(),
+    username: yup.string().notRequired(),
     email: yup.string().when("userAccessToken", {
       is: undefined,
       then: yup
@@ -67,7 +67,9 @@ export const createUserSchema = yup.object().shape(
   {
     userType: yup.string().default("client"),
     countryID: yup.string().uuid().required(),
-    password: yup.string().matches(PASSWORD_REGEX).required(),
+    password: yup.string().matches(PASSWORD_REGEX).required().label(
+      "Password should contain at least 8 characters, 1 uppercase letter, 1 lowercase letter and 1 number" // TODO: add server side translations
+    ),
     clientData: createClientSchema.when("userType", {
       is: "client",
       then: createClientSchema.required(),
