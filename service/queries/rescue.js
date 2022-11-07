@@ -7,7 +7,7 @@ export const storeForgotPasswordTokenQuery = async ({
   await pool.query(
     `
         INSERT INTO password_reset (user_id, reset_token, expires_at)
-        VALUES ($1, $2, NOW() + INTERVAL '1 DAY)
+        VALUES ($1, $2, NOW() + INTERVAL '1 DAY')
         RETURNING *;
     `,
     [user_id, forgotPassToken]

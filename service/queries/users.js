@@ -182,7 +182,7 @@ export const loginAttempt = async ({ user_id, ip_address, location, status }) =>
 export const updateUserPassword = async ({ password, user_id }) =>
   await pool.query(
     `
-        UPDATE "users"
+        UPDATE "user"
         SET password = $1
         WHERE user_id = $2
         

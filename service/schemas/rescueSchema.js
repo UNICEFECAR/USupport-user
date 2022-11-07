@@ -1,6 +1,6 @@
 import * as yup from "yup";
 
-import { PASSWORD_REGEX } from "./userSchemas";
+import { PASSWORD_REGEX } from "./userSchemas.js";
 
 export const initForgotPasswordSchema = yup.object().shape({
   email: yup.string().email().required(),
