@@ -1,7 +1,9 @@
 import * as yup from "yup";
 import { t } from "#translations/index";
 
-const PASSWORD_REGEX = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}");
+export const PASSWORD_REGEX = new RegExp(
+  "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}"
+);
 
 export const getUserByIdSchema = yup.object().shape({
   user_id: yup.string().uuid().required(),
@@ -82,3 +84,9 @@ export const createUserSchema = (language) =>
     },
     ["client", "provider"]
   );
+
+export const changePasswordSchema = yup.object().shape({
+  user_id: yup.string().uuid().required(),
+  oldPassword: yup.string().required(),
+  newPassword: yup.string().matches(PASSWORD_REGEX).required(),
+});

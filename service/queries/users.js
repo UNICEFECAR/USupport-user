@@ -56,7 +56,7 @@ export const getProviderUserByEmail = async (email) =>
 export const getUserByID = async (user_id) =>
   await pool.query(
     `
-        SELECT user_id, country_id, type, client_detail_id, notification_preference_id
+        SELECT user_id, country_id, type, client_detail_id, notification_preference_id, password
         FROM "user"
         WHERE user_id = $1
         ORDER BY created_at DESC
@@ -177,4 +177,15 @@ export const loginAttempt = async ({ user_id, ip_address, location, status }) =>
       RETURNING *;
     `,
     [user_id, ip_address, location, status]
+  );
+
+export const updateUserPassword = async ({ password, user_id }) =>
+  await pool.query(
+    `
+        UPDATE "user"
+        SET password = $1
+        WHERE user_id = $2
+        
+    `,
+    [password, user_id]
   );
