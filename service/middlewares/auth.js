@@ -38,6 +38,7 @@ passport.use(
     },
     async (req, emailIn, passwordIn, done) => {
       try {
+        const country = req.header("x-country-alpha-2");
         const { countryID, password, userType, clientData, providerData } =
           await createUserSchema
             .noUnknown(true)
@@ -54,6 +55,7 @@ passport.use(
 
         if (userType === "client") {
           currentUser = await getClientUserByEmailOrAccessToken(
+            country,
             clientData.email,
             clientData.userAccessToken
           )
@@ -62,7 +64,10 @@ passport.use(
               throw err;
             });
         } else if (userType === "provider") {
-          currentUser = await getProviderUserByEmail(providerData.email)
+          currentUser = await getProviderUserByEmail(
+            country,
+            providerData.email
+          )
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
@@ -81,6 +86,7 @@ passport.use(
         const hashedPass = await bcrypt.hash(password, salt);
 
         let newUser = await createUser({
+          country,
           countryID,
           hashedPass,
           clientData,
@@ -111,6 +117,7 @@ passport.use(
     },
     async (req, emailIn, passwordIn, done) => {
       try {
+        const country = req.header("x-country-alpha-2");
         const { email, password, userAccessToken, userType } =
           await userLoginSchema
             .noUnknown(true)
@@ -125,13 +132,17 @@ passport.use(
 
         let user;
         if (userType === "client") {
-          user = await getClientUserByEmailOrAccessToken(email, userAccessToken)
+          user = await getClientUserByEmailOrAccessToken(
+            country,
+            email,
+            userAccessToken
+          )
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
             });
         } else if (userType === "provider") {
-          user = await getProviderUserByEmail(email)
+          user = await getProviderUserByEmail(country, email)
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
@@ -147,9 +158,10 @@ passport.use(
           req.header("X-Real-IP") || req.header("x-forwarded-for") || "0.0.0.0";
 
         loginAttempt({
+          poolCountry: country,
           user_id: user.user_id,
           ip_address,
-          location: "GB",
+          location: country,
           status: !validatePassword ? "failed" : "successful",
         });
 
@@ -174,11 +186,13 @@ passport.use(
       issuer: "online.usupport.userApi",
       audience: "online.usupport.app",
       algorithms: ["HS256"],
+      passReqToCallback: true,
     },
-    async (jwt_payload, done) => {
+    async (req, jwt_payload, done) => {
       try {
+        const country = req.header("x-country-alpha-2");
         const user_id = jwt_payload.sub;
-        const user = await getUserByID(user_id)
+        const user = await getUserByID(country, user_id)
           .then((res) => res.rows[0])
           .catch((err) => {
             throw err;

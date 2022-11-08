@@ -1,6 +1,7 @@
 import * as yup from "yup";
 
 export const refreshAccessTokenSchema = yup.object().shape({
+  country: yup.string().required(),
   refreshToken: yup.string().uuid().required(),
 });
 

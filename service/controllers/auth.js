@@ -32,18 +32,18 @@ export const issueAccessToken = async ({ user_id }) => {
   };
 };
 
-export const issueRefreshToken = async ({ user_id }) => {
+export const issueRefreshToken = async ({ country, user_id }) => {
   const refreshToken = uuidv4();
 
-  storeRefreshToken(user_id, refreshToken).catch((err) => {
+  storeRefreshToken(country, user_id, refreshToken).catch((err) => {
     throw err;
   });
 
   return refreshToken;
 };
 
-export const refreshAccessToken = async ({ refreshToken }) => {
-  const refreshTokenData = await getRefreshToken(refreshToken)
+export const refreshAccessToken = async ({ country, refreshToken }) => {
+  const refreshTokenData = await getRefreshToken(country, refreshToken)
     .then((res) => res.rows[0])
     .catch((err) => {
       throw err;
@@ -56,18 +56,19 @@ export const refreshAccessToken = async ({ refreshToken }) => {
   if (!refreshTokenData || refreshTokenData.used) {
     throw invalidRefreshToken();
   } else if (expiresIn < now) {
-    await invalidateRefreshToken(refreshToken).catch((err) => {
+    await invalidateRefreshToken(country, refreshToken).catch((err) => {
       throw err;
     });
     throw invalidRefreshToken();
   } else {
-    await invalidateRefreshToken(refreshToken).catch((err) => {
+    await invalidateRefreshToken(country, refreshToken).catch((err) => {
       throw err;
     });
     const newAccessToken = await issueAccessToken({
       user_id: refreshTokenData.user_id,
     });
     const newRefreshToken = await issueRefreshToken({
+      country,
       user_id: refreshTokenData.user_id,
     });
 
@@ -78,7 +79,7 @@ export const refreshAccessToken = async ({ refreshToken }) => {
   }
 };
 
-export const generateAccessToken = async (retryStep = 0) => {
+export const generateAccessToken = async (country, retryStep = 0) => {
   if (retryStep === 3) {
     // Retry to generate new token 3 times if newly generated is used
     throw cannotGenerateUserAccessToken();
@@ -87,6 +88,7 @@ export const generateAccessToken = async (retryStep = 0) => {
   const newUserAccessToken = nanoid(10);
 
   const isAccessTokenAvailableQuery = await getClientUserByEmailOrAccessToken(
+    country,
     null,
     newUserAccessToken
   ).catch((err) => {
@@ -94,7 +96,7 @@ export const generateAccessToken = async (retryStep = 0) => {
   });
 
   if (isAccessTokenAvailableQuery.rowCount > 0) {
-    return generateAccessToken(retryStep + 1);
+    return generateAccessToken(country, retryStep + 1);
   } else {
     return { userAccessToken: newUserAccessToken };
   }
