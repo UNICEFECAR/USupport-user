@@ -56,7 +56,7 @@ export const getProviderUserByEmail = async (email) =>
 export const getUserByID = async (user_id) =>
   await pool.query(
     `
-        SELECT user_id, country_id, type, client_detail_id, notification_preference_id
+        SELECT user_id, country_id, type, client_detail_id, notification_preference_id, password
         FROM "user"
         WHERE user_id = $1
         ORDER BY created_at DESC

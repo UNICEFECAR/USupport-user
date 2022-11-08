@@ -16,9 +16,9 @@ export const storeForgotPasswordTokenQuery = async ({
 export const getForgotPasswordTokenQuery = async ({ forgotPassToken }) =>
   await pool.query(
     `
-          SELECT * 
-          FROM password_reset
-          WHERE reset_token = $1; 
-      `,
+      SELECT * 
+      FROM password_reset
+      WHERE reset_token = $1; 
+    `,
     [forgotPassToken]
   );

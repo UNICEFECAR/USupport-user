@@ -81,3 +81,9 @@ export const createUserSchema = yup.object().shape(
   },
   ["client", "provider"]
 );
+
+export const changePasswordSchema = yup.object().shape({
+  user_id: yup.string().uuid().required(),
+  oldPassword: yup.string().required(),
+  newPassword: yup.string().matches(PASSWORD_REGEX).required(),
+});

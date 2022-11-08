@@ -1,14 +1,12 @@
 import { nanoid } from "nanoid";
-import bcrypt from "bcryptjs";
 
-import {
-  getClientUserByEmailOrAccessToken,
-  updateUserPassword,
-} from "#queries/users";
+import { getClientUserByEmailOrAccessToken } from "#queries/users";
 import {
   storeForgotPasswordTokenQuery,
   getForgotPasswordTokenQuery,
 } from "#queries/rescue";
+
+import { updatePassword } from "#utils/helperFunctions";
 
 import { userNotFound, invalidResetPasswordToken } from "#utils/errors";
 
@@ -53,16 +51,7 @@ export const resetForgotPassword = async ({ token, password }) => {
     throw invalidResetPasswordToken();
   }
 
-  const salt = await bcrypt.genSalt(12);
-  const hashedPass = await bcrypt.hash(password, salt);
-
-  await updateUserPassword({
-    user_id: tokenData.user_id,
-    password: hashedPass,
-  }).catch((err) => {
-    throw err;
-  });
-
+  await updatePassword({ user_id: tokenData.user_id, password });
   //   TODO: Invalidate current token (DB schema needs to be updated)
 
   return { success: true };
