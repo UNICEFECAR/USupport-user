@@ -37,9 +37,11 @@ passport.use(
       passReqToCallback: true,
     },
     async (req, emailIn, passwordIn, done) => {
+      const language = req.header("x-language-alpha-2");
+
       try {
         const { countryID, password, userType, clientData, providerData } =
-          await createUserSchema
+          await createUserSchema(language)
             .noUnknown(true)
             .strict()
             .validate({
@@ -110,9 +112,11 @@ passport.use(
       passReqToCallback: true,
     },
     async (req, emailIn, passwordIn, done) => {
+      const language = req.header("x-language-alpha-2");
+
       try {
         const { email, password, userAccessToken, userType } =
-          await userLoginSchema
+          await userLoginSchema(language)
             .noUnknown(true)
             .strict()
             .validate({
@@ -145,11 +149,12 @@ passport.use(
         const validatePassword = await bcrypt.compare(password, user.password);
         const ip_address =
           req.header("X-Real-IP") || req.header("x-forwarded-for") || "0.0.0.0";
+        const location = req.header("x-location");
 
         loginAttempt({
           user_id: user.user_id,
           ip_address,
-          location: "GB",
+          location,
           status: !validatePassword ? "failed" : "successful",
         });
 
