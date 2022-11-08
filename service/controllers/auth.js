@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
-import { nanoid } from "nanoid";
+import { customAlphabet } from "nanoid";
 
 import {
   storeRefreshToken,
@@ -85,7 +85,10 @@ export const generateAccessToken = async (country, retryStep = 0) => {
     throw cannotGenerateUserAccessToken();
   }
 
-  const newUserAccessToken = nanoid(10);
+  const alphabet =
+    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const nanoid = customAlphabet(alphabet, 10);
+  const newUserAccessToken = nanoid();
 
   const isAccessTokenAvailableQuery = await getClientUserByEmailOrAccessToken(
     country,
