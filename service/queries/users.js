@@ -1,2 +1,180 @@
-// Example file for queries
-// All user related queries go here
+import { pool } from "#utils/dbConfig";
+
+export const getClientUserByEmailOrAccessToken = async (email, accessToken) =>
+  await pool.query(
+    `
+    WITH clientData AS (
+
+        SELECT * 
+        FROM client_detail
+        WHERE ($1::VARCHAR IS NULL OR email = $1) 
+          AND ($2::VARCHAR IS NULL OR access_token = $2)
+        ORDER BY created_at DESC
+        LIMIT 1
+
+    ), fullUserData AS (
+
+        SELECT * 
+        FROM "user"
+          JOIN clientData ON clientData.client_detail_id = "user".client_detail_id
+        ORDER BY "user".created_at DESC
+        LIMIT 1
+
+    )
+
+    SELECT * FROM fullUserData; 
+    `,
+    [email, accessToken]
+  );
+
+export const getProviderUserByEmail = async (email) =>
+  await pool.query(
+    `
+    WITH providerData AS (
+
+        SELECT * 
+        FROM provider_detail
+        WHERE email = $1
+        ORDER BY created_at DESC
+        LIMIT 1
+
+    ), fullUserData AS (
+
+        SELECT * 
+        FROM "user"
+          JOIN providerData ON providerData.provider_detail_id = "user".provider_detail_id
+        ORDER BY created_at DESC
+        LIMIT 1
+
+    ), 
+
+    SELECT * FROM fullUserData; 
+    `,
+    [email]
+  );
+
+export const getUserByID = async (user_id) =>
+  await pool.query(
+    `
+        SELECT user_id, country_id, type, client_detail_id, notification_preference_id
+        FROM "user"
+        WHERE user_id = $1
+        ORDER BY created_at DESC
+        LIMIT 1;
+        
+    `,
+    [user_id]
+  );
+
+export const createUser = async ({
+  countryID,
+  hashedPass,
+  clientData,
+  providerData,
+}) => {
+  if (clientData) {
+    return await pool.query(
+      `
+        WITH newClientDetails AS (
+
+            INSERT INTO client_detail (name, surname, preferred_name, username, email, image, sex, year_of_birth, access_token)
+            VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11)
+            RETURNING * 
+
+        ), newNotificationPreferences AS (
+
+            INSERT INTO notification_preference DEFAULT VALUES
+            RETURNING * 
+
+        ), newUser AS (
+
+            INSERT INTO "user" (country_id, type, client_detail_id, password, notification_preference_id)
+              SELECT $1, 'client', client_detail_id, 
+                      $2, (SELECT notification_preference_id FROM newNotificationPreferences)
+              FROM newClientDetails
+            RETURNING * 
+
+        )
+
+        SELECT * 
+        FROM newUser 
+            JOIN newClientDetails 
+            ON newUser.client_detail_id = newClientDetails.client_detail_id;
+
+        `,
+      [
+        countryID,
+        hashedPass,
+        clientData.name,
+        clientData.surname,
+        clientData.preferredName,
+        clientData.username,
+        clientData.email,
+        clientData.image,
+        clientData.sex,
+        clientData.yob,
+        clientData.userAccessToken,
+      ]
+    );
+  } else {
+    return await pool.query(
+      `
+        WITH newProviderDetails AS (
+
+            INSERT INTO client_detail (name, surname, patronym, preferredName, username, email, phone_prefix, 
+                                        phone, image, address, video, education, sex, consultation_price, description)
+            VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+            RETURNING * 
+
+        ), newNotificationPreferences AS (
+
+            INSERT INTO notification_preference DEFAULT VALUES
+            RETURNING * 
+
+        ), newUser AS (
+
+          INSERT INTO "user" (country_id, type, client_detail_id, password, notification_preference_id)
+              SELECT $1, 'provider', client_detail_id, 
+                      $2, (SELECT notification_preference_id FROM newNotificationPreferences)
+              FROM newClientDetails
+            RETURNING * 
+
+        )
+
+        SELECT * 
+        FROM newUser 
+          JOIN newProviderDetails 
+          ON newUser.provider_detail_id = newProviderDetails.provider_detail_id;
+        `,
+      [
+        countryID,
+        hashedPass,
+        providerData.name,
+        providerData.surname,
+        providerData.patronym,
+        providerData.preferredName,
+        providerData.username,
+        providerData.email,
+        providerData.phonePrefix,
+        providerData.phone,
+        providerData.image,
+        providerData.address,
+        providerData.video,
+        providerData.education,
+        providerData.sex,
+        providerData.consultationPrice,
+        providerData.description,
+      ]
+    );
+  }
+};
+
+export const loginAttempt = async ({ user_id, ip_address, location, status }) =>
+  await pool.query(
+    `
+      INSERT INTO login_attempt (user_id, ip_address, location, status)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *;
+    `,
+    [user_id, ip_address, location, status]
+  );
