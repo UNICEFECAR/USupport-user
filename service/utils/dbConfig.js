@@ -12,7 +12,7 @@ const CLINICAL_DB_URL_KZ = process.env.CLINICAL_DB_URL_KZ;
 
 export const getDBPool = (dbType, country) => {
   let currentConnString = null;
-  console.log(country, "COUNTRY");
+
   if (dbType === "masterDb") currentConnString = MASTER_DB_URL;
   else {
     switch (country) {
