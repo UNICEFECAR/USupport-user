@@ -1,13 +1,13 @@
 import express from "express";
 
-import { getSharedUserData } from "#controllers/users";
+import { getSharedUserData, changeUserPassword } from "#controllers/users";
 
 import { securedRoute } from "#middlewares/auth";
-import { getUserByIdSchema } from "#schemas/userSchemas";
+import { getUserByIdSchema, changePasswordSchema } from "#schemas/userSchemas";
 
 const router = express.Router();
 
-router.get("/", securedRoute, async (req, res) => {
+router.get("/", securedRoute, async (req, res, next) => {
   /**
    * #route   GET /user/v1/user
    * #desc    Get shared user data
@@ -20,7 +20,25 @@ router.get("/", securedRoute, async (req, res) => {
     .strict(true)
     .validate({ country, user_id })
     .then(getSharedUserData)
-    .then((result) => res.status(200).send(result));
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.patch("/password", securedRoute, async (req, res, next) => {
+  /**
+   * #route   PATCH /user/v1/user/password
+   * #desc    Update user's password
+   */
+  const user_id = req.user.user_id;
+  const payload = req.body;
+
+  return await changePasswordSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ user_id, ...payload })
+    .then(changeUserPassword)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
 });
 
 export { router };
