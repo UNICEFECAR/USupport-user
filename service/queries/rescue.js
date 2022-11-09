@@ -1,10 +1,11 @@
-import { pool } from "#utils/dbConfig";
+import { getDBPool } from "#utils/dbConfig";
 
 export const storeForgotPasswordTokenQuery = async ({
+  poolCountry,
   user_id,
   forgotPassToken,
 }) =>
-  await pool.query(
+  await getDBPool("piiDb", poolCountry).query(
     `
         INSERT INTO password_reset (user_id, reset_token, expires_at)
         VALUES ($1, $2, NOW() + INTERVAL '1 DAY')
@@ -13,8 +14,11 @@ export const storeForgotPasswordTokenQuery = async ({
     [user_id, forgotPassToken]
   );
 
-export const getForgotPasswordTokenQuery = async ({ forgotPassToken }) =>
-  await pool.query(
+export const getForgotPasswordTokenQuery = async ({
+  poolCountry,
+  forgotPassToken,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
       SELECT * 
       FROM password_reset
@@ -23,8 +27,11 @@ export const getForgotPasswordTokenQuery = async ({ forgotPassToken }) =>
     [forgotPassToken]
   );
 
-export const invalidatePasswordResetTokenQuery = async ({ token }) =>
-  await pool.query(
+export const invalidatePasswordResetTokenQuery = async ({
+  poolCountry,
+  token,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
         UPDATE password_reset
         SET used = true

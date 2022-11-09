@@ -29,13 +29,14 @@ router.patch("/password", securedRoute, async (req, res, next) => {
    * #route   PATCH /user/v1/user/password
    * #desc    Update user's password
    */
+  const country = req.header("x-country-alpha-2");
   const user_id = req.user.user_id;
   const payload = req.body;
 
   return await changePasswordSchema
     .noUnknown(true)
     .strict(true)
-    .validate({ user_id, ...payload })
+    .validate({ country, user_id, ...payload })
     .then(changeUserPassword)
     .then((result) => res.status(200).send(result))
     .catch(next);

@@ -190,8 +190,8 @@ export const loginAttempt = async ({
     [user_id, ip_address, location, status]
   );
 
-export const updateUserPassword = async ({ password, user_id }) =>
-  await pool.query(
+export const updateUserPassword = async ({ poolCountry, password, user_id }) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
         UPDATE "user"
         SET password = $1

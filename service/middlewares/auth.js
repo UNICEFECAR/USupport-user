@@ -88,7 +88,7 @@ passport.use(
         const hashedPass = await bcrypt.hash(password, salt);
 
         let newUser = await createUser({
-          country,
+          poolCountry: country,
           countryID,
           hashedPass,
           clientData,

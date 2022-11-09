@@ -11,8 +11,8 @@ import { updatePassword } from "#utils/helperFunctions";
 
 import { userNotFound, invalidResetPasswordToken } from "#utils/errors";
 
-export const sendForgotPasswordEmail = async ({ email }) => {
-  const clientUser = await getClientUserByEmailOrAccessToken(email)
+export const sendForgotPasswordEmail = async ({ country, email }) => {
+  const clientUser = await getClientUserByEmailOrAccessToken(country, email)
     .then((raw) => {
       if (raw.rowCount === 0) {
         throw userNotFound();
@@ -27,6 +27,7 @@ export const sendForgotPasswordEmail = async ({ email }) => {
   const forgotPassToken = nanoid(16);
 
   await storeForgotPasswordTokenQuery({
+    poolCountry: country,
     user_id: clientUser.user_id,
     forgotPassToken,
   });
@@ -36,8 +37,9 @@ export const sendForgotPasswordEmail = async ({ email }) => {
   return { forgotPassToken };
 };
 
-export const resetForgotPassword = async ({ token, password }) => {
+export const resetForgotPassword = async ({ country, token, password }) => {
   const tokenData = await getForgotPasswordTokenQuery({
+    poolCountry: country,
     forgotPassToken: token,
   })
     .then((raw) => raw.rows[0])
@@ -52,9 +54,13 @@ export const resetForgotPassword = async ({ token, password }) => {
     throw invalidResetPasswordToken();
   }
 
-  await updatePassword({ user_id: tokenData.user_id, password });
+  await updatePassword({
+    poolCountry: country,
+    user_id: tokenData.user_id,
+    password,
+  });
 
-  await invalidatePasswordResetTokenQuery({ token });
+  await invalidatePasswordResetTokenQuery({ poolCountry: country, token });
 
   return { success: true };
 };

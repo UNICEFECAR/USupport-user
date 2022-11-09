@@ -1,7 +1,7 @@
-import { masterPool } from "#utils/dbConfig";
+import { getDBPool } from "#utils/dbConfig";
 
 export const getAllActiveCountries = async () =>
-  await masterPool.query(
+  await getDBPool("masterDb").query(
     `
       SELECT * 
       FROM "country"

@@ -19,12 +19,13 @@ router
      * #route   GET /user/v1/rescue/forgot-password
      * #desc    Send forgot password email
      */
+    const country = req.header("x-country-alpha-2");
     const { email } = req.query;
 
     return await initForgotPasswordSchema
       .noUnknown(true)
       .strict(true)
-      .validate({ email })
+      .validate({ country, email })
       .then(sendForgotPasswordEmail)
       .then((result) => res.status(200).send(result))
       .catch(next);
@@ -34,12 +35,13 @@ router
      * #route   POST /user/v1/rescue/forgot-password
      * #desc    Reset forgot password with token
      */
+    const country = req.header("x-country-alpha-2");
     const payload = req.body;
 
     return await resetForgotPasswordSchema
       .noUnknown(true)
       .strict(true)
-      .validate(payload)
+      .validate({ country, ...payload })
       .then(resetForgotPassword)
       .then((result) => res.status(200).send(result))
       .catch(next);

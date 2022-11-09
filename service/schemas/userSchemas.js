@@ -10,10 +10,6 @@ export const getUserByIdSchema = yup.object().shape({
   user_id: yup.string().uuid().required(),
 });
 
-export const getUserByEmailSchema = yup.object().shape({
-  email: yup.string().email().required(),
-});
-
 const sexTypeSchema = yup
   .string()
   .oneOf(["male", "female", "unspecified", "notMentioned"]);
@@ -87,6 +83,7 @@ export const createUserSchema = (language) =>
   );
 
 export const changePasswordSchema = yup.object().shape({
+  country: yup.string().required(),
   user_id: yup.string().uuid().required(),
   oldPassword: yup.string().required(),
   newPassword: yup.string().matches(PASSWORD_REGEX).required(),

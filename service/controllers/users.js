@@ -21,18 +21,23 @@ export const getSharedUserData = async ({ country, user_id }) => {
 };
 
 export const changeUserPassword = async ({
+  country,
   user_id,
   oldPassword,
   newPassword,
 }) => {
-  const userData = await getSharedUserData({ user_id });
+  const userData = await getSharedUserData({ country, user_id });
   const validatePassword = await bcrypt.compare(oldPassword, userData.password);
 
   if (!validatePassword) {
     throw incorrectPassword();
   }
 
-  await updatePassword({ user_id, password: newPassword });
+  await updatePassword({
+    poolCountry: country,
+    user_id,
+    password: newPassword,
+  });
 
   return { success: true };
 };
