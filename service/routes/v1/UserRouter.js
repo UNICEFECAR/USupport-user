@@ -13,12 +13,13 @@ router.get("/", securedRoute, async (req, res, next) => {
    * #desc    Get shared user data
    */
   const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
   const user_id = req.user.user_id;
 
   return await getUserByIdSchema
     .noUnknown(true)
     .strict(true)
-    .validate({ country, user_id })
+    .validate({ country, language, user_id })
     .then(getSharedUserData)
     .then((result) => res.status(200).send(result))
     .catch(next);
@@ -30,13 +31,15 @@ router.patch("/password", securedRoute, async (req, res, next) => {
    * #desc    Update user's password
    */
   const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
   const user_id = req.user.user_id;
   const payload = req.body;
 
   return await changePasswordSchema
     .noUnknown(true)
     .strict(true)
-    .validate({ country, user_id, ...payload })
+    .validate({ country, language, user_id, ...payload })
     .then(changeUserPassword)
     .then((result) => res.status(200).send(result))
     .catch(next);

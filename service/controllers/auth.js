@@ -42,7 +42,11 @@ export const issueRefreshToken = async ({ country, user_id }) => {
   return refreshToken;
 };
 
-export const refreshAccessToken = async ({ country, refreshToken }) => {
+export const refreshAccessToken = async ({
+  country,
+  language,
+  refreshToken,
+}) => {
   const refreshTokenData = await getRefreshToken(country, refreshToken)
     .then((res) => res.rows[0])
     .catch((err) => {
@@ -54,12 +58,12 @@ export const refreshAccessToken = async ({ country, refreshToken }) => {
   // valid for 31 days
 
   if (!refreshTokenData || refreshTokenData.used) {
-    throw invalidRefreshToken();
+    throw invalidRefreshToken(language);
   } else if (expiresIn < now) {
     await invalidateRefreshToken(country, refreshToken).catch((err) => {
       throw err;
     });
-    throw invalidRefreshToken();
+    throw invalidRefreshToken(language);
   } else {
     await invalidateRefreshToken(country, refreshToken).catch((err) => {
       throw err;
@@ -79,10 +83,10 @@ export const refreshAccessToken = async ({ country, refreshToken }) => {
   }
 };
 
-export const generateAccessToken = async (country, retryStep = 0) => {
+export const generateAccessToken = async (country, language, retryStep = 0) => {
   if (retryStep === 3) {
     // Retry to generate new token 3 times if newly generated is used
-    throw cannotGenerateUserAccessToken();
+    throw cannotGenerateUserAccessToken(language);
   }
 
   const alphabet =
@@ -99,7 +103,7 @@ export const generateAccessToken = async (country, retryStep = 0) => {
   });
 
   if (isAccessTokenAvailableQuery.rowCount > 0) {
-    return generateAccessToken(country, retryStep + 1);
+    return generateAccessToken(country, language, retryStep + 1);
   } else {
     return { userAccessToken: newUserAccessToken };
   }

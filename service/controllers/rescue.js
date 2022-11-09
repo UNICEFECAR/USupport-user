@@ -11,11 +11,11 @@ import { updatePassword } from "#utils/helperFunctions";
 
 import { userNotFound, invalidResetPasswordToken } from "#utils/errors";
 
-export const sendForgotPasswordEmail = async ({ country, email }) => {
+export const sendForgotPasswordEmail = async ({ country, language, email }) => {
   const clientUser = await getClientUserByEmailOrAccessToken(country, email)
     .then((raw) => {
       if (raw.rowCount === 0) {
-        throw userNotFound();
+        throw userNotFound(language);
       } else {
         return raw.rows[0];
       }
@@ -37,7 +37,12 @@ export const sendForgotPasswordEmail = async ({ country, email }) => {
   return { forgotPassToken };
 };
 
-export const resetForgotPassword = async ({ country, token, password }) => {
+export const resetForgotPassword = async ({
+  country,
+  language,
+  token,
+  password,
+}) => {
   const tokenData = await getForgotPasswordTokenQuery({
     poolCountry: country,
     forgotPassToken: token,
@@ -51,7 +56,7 @@ export const resetForgotPassword = async ({ country, token, password }) => {
   const tokenExpiresIn = new Date(tokenData.expires_at).getTime();
 
   if (!tokenData || tokenExpiresIn < now || tokenData.used) {
-    throw invalidResetPasswordToken();
+    throw invalidResetPasswordToken(language);
   }
 
   await updatePassword({

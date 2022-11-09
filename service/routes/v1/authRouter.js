@@ -70,8 +70,9 @@ router.get("/user-access-token", async (req, res, next) => {
    * #desc    Generate User Access token
    */
   const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
 
-  return await generateAccessToken(country)
+  return await generateAccessToken(country, language)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
@@ -82,12 +83,14 @@ router.post("/refresh-token", async (req, res, next) => {
    * #desc    Refresh access token
    */
   const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
   const payload = req.body;
 
   return await refreshAccessTokenSchema
     .noUnknown(true)
     .strict()
-    .validate({ country, ...payload })
+    .validate({ country, language, ...payload })
     .then(refreshAccessToken)
     .then((result) => res.status(200).send(result))
     .catch(next);

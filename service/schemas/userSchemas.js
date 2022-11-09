@@ -7,6 +7,7 @@ export const PASSWORD_REGEX = new RegExp(
 
 export const getUserByIdSchema = yup.object().shape({
   country: yup.string().required(),
+  language: yup.string().required(),
   user_id: yup.string().uuid().required(),
 });
 
@@ -84,6 +85,7 @@ export const createUserSchema = (language) =>
 
 export const changePasswordSchema = yup.object().shape({
   country: yup.string().required(),
+  language: yup.string().required(),
   user_id: yup.string().uuid().required(),
   oldPassword: yup.string().required(),
   newPassword: yup.string().matches(PASSWORD_REGEX).required(),

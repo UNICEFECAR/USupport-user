@@ -78,9 +78,9 @@ passport.use(
 
         if (currentUser) {
           if (clientData?.email || providerData?.email) {
-            return done(emailUsed());
+            return done(emailUsed(language));
           } else if (clientData.userAccessToken) {
-            return done(userAccessTokenUsed());
+            return done(userAccessTokenUsed(language));
           }
         }
 
@@ -154,7 +154,7 @@ passport.use(
         }
 
         if (!user) {
-          return done(incorrectEmail());
+          return done(incorrectEmail(language));
         }
 
         const validatePassword = await bcrypt.compare(password, user.password);
@@ -171,7 +171,7 @@ passport.use(
         });
 
         if (!validatePassword) {
-          return done(incorrectPassword());
+          return done(incorrectPassword(language));
         }
 
         return done(null, user);
@@ -217,8 +217,10 @@ passport.use(
 
 export const authenticateJWT = (isMiddleWare, req, res, next) => {
   passport.authenticate("jwt", { session: false }, async (err, user) => {
+    const language = req.header("x-language-alpha-2");
+
     if (err || !user) {
-      return next(notAuthenticated());
+      return next(notAuthenticated(language));
     }
     req.user = user;
 

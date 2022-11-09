@@ -3,6 +3,7 @@ import { t } from "#translations/index";
 
 export const refreshAccessTokenSchema = yup.object().shape({
   country: yup.string().required(),
+  language: yup.string().required(),
   refreshToken: yup.string().uuid().required(),
 });
 

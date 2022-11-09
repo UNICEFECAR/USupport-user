@@ -6,11 +6,11 @@ import { updatePassword } from "#utils/helperFunctions";
 
 import { incorrectPassword } from "#utils/errors";
 
-export const getSharedUserData = async ({ country, user_id }) => {
+export const getSharedUserData = async ({ country, language, user_id }) => {
   return await getUserByID(country, user_id)
     .then((res) => {
       if (res.rowCount === 0) {
-        throw userNotFound();
+        throw userNotFound(language);
       } else {
         return res.rows[0];
       }
@@ -22,6 +22,7 @@ export const getSharedUserData = async ({ country, user_id }) => {
 
 export const changeUserPassword = async ({
   country,
+  language,
   user_id,
   oldPassword,
   newPassword,
@@ -30,7 +31,7 @@ export const changeUserPassword = async ({
   const validatePassword = await bcrypt.compare(oldPassword, userData.password);
 
   if (!validatePassword) {
-    throw incorrectPassword();
+    throw incorrectPassword(language);
   }
 
   await updatePassword({
