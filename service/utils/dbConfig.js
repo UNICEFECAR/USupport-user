@@ -3,10 +3,28 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const USER_DB_URL = process.env.USER_DB_URL;
+// GB Database connection strings
+const PII_DB_URL_GB = process.env.PII_DB_URL_GB;
+const CLINICAL_DB_URL_GB = process.env.CLINICAL_DB_URL_GB;
+const MASTER_DB_URL_GB = process.env.MASTER_DB_URL_GB;
 
-export const pool = new pg.Pool({ connectionString: USER_DB_URL });
+// Add other DB connection strings here
 
-const MASTER_DB_URL = process.env.MASTER_DB_URL;
+export const getDBPool = (dbType, country) => {
+  let currentConnString = null;
 
-export const masterPool = new pg.Pool({ connectionString: MASTER_DB_URL });
+  switch (country) {
+    // Add new countries here
+    case "GB":
+      if (dbType === "piiDb") currentConnString = PII_DB_URL_GB;
+      else if (dbType === "clinicalDb") currentConnString = CLINICAL_DB_URL_GB;
+      else if (dbType === "masterDb") currentConnString = MASTER_DB_URL_GB;
+      else throw Error("DB Type not recognized");
+
+      break;
+    default:
+      throw Error("DB Country not recognized");
+  }
+
+  return new pg.Pool({ connectionString: currentConnString });
+};

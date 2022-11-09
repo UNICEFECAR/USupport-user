@@ -6,8 +6,8 @@ import { updatePassword } from "#utils/helperFunctions";
 
 import { incorrectPassword } from "#utils/errors";
 
-export const getSharedUserData = async ({ user_id }) => {
-  return await getUserByID(user_id)
+export const getSharedUserData = async ({ country, user_id }) => {
+  return await getUserByID(country, user_id)
     .then((res) => {
       if (res.rowCount === 0) {
         throw userNotFound();

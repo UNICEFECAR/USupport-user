@@ -1,7 +1,11 @@
-import { pool } from "#utils/dbConfig";
+import { getDBPool } from "#utils/dbConfig";
 
-export const getClientUserByEmailOrAccessToken = async (email, accessToken) =>
-  await pool.query(
+export const getClientUserByEmailOrAccessToken = async (
+  poolCountry,
+  email,
+  accessToken
+) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
     WITH clientData AS (
 
@@ -27,8 +31,8 @@ export const getClientUserByEmailOrAccessToken = async (email, accessToken) =>
     [email, accessToken]
   );
 
-export const getProviderUserByEmail = async (email) =>
-  await pool.query(
+export const getProviderUserByEmail = async (poolCountry, email) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
     WITH providerData AS (
 
@@ -53,8 +57,8 @@ export const getProviderUserByEmail = async (email) =>
     [email]
   );
 
-export const getUserByID = async (user_id) =>
-  await pool.query(
+export const getUserByID = async (poolCountry, user_id) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
         SELECT user_id, country_id, type, client_detail_id, notification_preference_id, password
         FROM "user"
@@ -67,13 +71,14 @@ export const getUserByID = async (user_id) =>
   );
 
 export const createUser = async ({
+  poolCountry,
   countryID,
   hashedPass,
   clientData,
   providerData,
 }) => {
   if (clientData) {
-    return await pool.query(
+    return await getDBPool("piiDb", poolCountry).query(
       `
         WITH newClientDetails AS (
 
@@ -117,7 +122,7 @@ export const createUser = async ({
       ]
     );
   } else {
-    return await pool.query(
+    return await getDBPool("piiDb", poolCountry).query(
       `
         WITH newProviderDetails AS (
 
@@ -169,8 +174,14 @@ export const createUser = async ({
   }
 };
 
-export const loginAttempt = async ({ user_id, ip_address, location, status }) =>
-  await pool.query(
+export const loginAttempt = async ({
+  poolCountry,
+  user_id,
+  ip_address,
+  location,
+  status,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
       INSERT INTO login_attempt (user_id, ip_address, location, status)
       VALUES ($1, $2, $3, $4)

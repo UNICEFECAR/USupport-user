@@ -1,7 +1,7 @@
-import { pool } from "#utils/dbConfig";
+import { getDBPool } from "#utils/dbConfig";
 
-export const storeRefreshToken = async (user_id, refreshToken) =>
-  await pool.query(
+export const storeRefreshToken = async (poolCountry, user_id, refreshToken) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
         INSERT INTO refresh_token (user_id, token, expires_at)
         VALUES ($1, $2, NOW() + INTERVAL '31 DAYS')
@@ -10,8 +10,8 @@ export const storeRefreshToken = async (user_id, refreshToken) =>
     [user_id, refreshToken]
   );
 
-export const getRefreshToken = async (token) =>
-  await pool.query(
+export const getRefreshToken = async (poolCountry, token) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
         SELECT * 
         FROM refresh_token
@@ -22,8 +22,8 @@ export const getRefreshToken = async (token) =>
     [token]
   );
 
-export const invalidateRefreshToken = async (token) =>
-  await pool.query(
+export const invalidateRefreshToken = async (poolCountry, token) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
         UPDATE refresh_token
         SET used = true

@@ -6,6 +6,7 @@ export const PASSWORD_REGEX = new RegExp(
 );
 
 export const getUserByIdSchema = yup.object().shape({
+  country: yup.string().required(),
   user_id: yup.string().uuid().required(),
 });
 
