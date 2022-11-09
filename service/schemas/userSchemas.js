@@ -20,7 +20,6 @@ const createClientSchema = (language) =>
     {
       name: yup.string().notRequired(),
       surname: yup.string().notRequired(),
-      preferredName: yup.string().notRequired(),
       username: yup.string().notRequired(),
       email: yup.string().when("userAccessToken", {
         is: undefined,
@@ -45,7 +44,6 @@ const createClientSchema = (language) =>
 const createProviderSchema = yup.object().shape({
   name: yup.string().required(),
   surname: yup.string().required(),
-  preferredName: yup.string().required(),
   email: yup.string().email().required(),
   username: yup.string().notRequired(),
   patronym: yup.string().required(),
