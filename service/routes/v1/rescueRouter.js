@@ -14,7 +14,7 @@ const router = express.Router();
 
 router
   .route("/forgot-password")
-  .get(async (req, res) => {
+  .get(async (req, res, next) => {
     /**
      * #route   GET /user/v1/rescue/forgot-password
      * #desc    Send forgot password email
@@ -26,9 +26,10 @@ router
       .strict(true)
       .validate({ email })
       .then(sendForgotPasswordEmail)
-      .then((result) => res.status(200).send(result));
+      .then((result) => res.status(200).send(result))
+      .catch(next);
   })
-  .post(async (req, res) => {
+  .post(async (req, res, next) => {
     /**
      * #route   POST /user/v1/rescue/forgot-password
      * #desc    Reset forgot password with token
@@ -40,7 +41,8 @@ router
       .strict(true)
       .validate(payload)
       .then(resetForgotPassword)
-      .then((result) => res.status(200).send(result));
+      .then((result) => res.status(200).send(result))
+      .catch(next);
   });
 
 export { router };
