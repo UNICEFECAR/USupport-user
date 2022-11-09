@@ -22,3 +22,13 @@ export const getForgotPasswordTokenQuery = async ({ forgotPassToken }) =>
     `,
     [forgotPassToken]
   );
+
+export const invalidatePasswordResetTokenQuery = async ({ token }) =>
+  await pool.query(
+    `
+        UPDATE password_reset
+        SET used = true
+        WHERE reset_token = $1;
+    `,
+    [token]
+  );

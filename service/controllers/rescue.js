@@ -4,6 +4,7 @@ import { getClientUserByEmailOrAccessToken } from "#queries/users";
 import {
   storeForgotPasswordTokenQuery,
   getForgotPasswordTokenQuery,
+  invalidatePasswordResetTokenQuery,
 } from "#queries/rescue";
 
 import { updatePassword } from "#utils/helperFunctions";
@@ -47,12 +48,13 @@ export const resetForgotPassword = async ({ token, password }) => {
   const now = new Date().getTime();
   const tokenExpiresIn = new Date(tokenData.expires_at).getTime();
 
-  if (!tokenData || tokenExpiresIn < now) {
+  if (!tokenData || tokenExpiresIn < now || tokenData.used) {
     throw invalidResetPasswordToken();
   }
 
   await updatePassword({ user_id: tokenData.user_id, password });
-  //   TODO: Invalidate current token (DB schema needs to be updated)
+
+  await invalidatePasswordResetTokenQuery({ token });
 
   return { success: true };
 };
