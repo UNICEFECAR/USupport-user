@@ -2,13 +2,15 @@ import express from "express";
 import formidable from "formidable";
 import fs from "fs";
 
+import { securedRoute } from "#middlewares/auth";
+
 import { uploadFile } from "#controllers/uploadFile";
 
 import { uploadFileSchema } from "#schemas/UploadFileSchema";
 
 const router = express.Router();
 
-router.route("/").post(async (req, res, next) => {
+router.route("/").post(securedRoute, async (req, res, next) => {
   /**
    * #route   POST /user/v1/file-upload/
    * #desc    Request to upload a file to AWS S3 bucket
