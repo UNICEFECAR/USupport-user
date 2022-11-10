@@ -1,6 +1,7 @@
 export default {
   email_or_access_token_required_error:
     "You need to provide either email or valid user access token to signup",
+  nickname_required_error: "You need to provide a nickname",
   password_validation_error:
     "Password should contain at least 8 characters, 1 uppercase letter, 1 lowercase letter and 1 number",
   user_not_found_error: "User not found",

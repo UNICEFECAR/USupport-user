@@ -20,7 +20,7 @@ const createClientSchema = (language) =>
     {
       name: yup.string().notRequired(),
       surname: yup.string().notRequired(),
-      username: yup.string().notRequired(),
+      nickname: yup.string().required(t("nickname_required_error", language)),
       email: yup.string().when("userAccessToken", {
         is: undefined,
         then: yup
@@ -36,7 +36,7 @@ const createClientSchema = (language) =>
       }),
       image: yup.string().notRequired(),
       sex: sexTypeSchema.notRequired(),
-      yob: yup.number().positive().notRequired(),
+      yearOfBirth: yup.number().positive().notRequired(),
     },
     ["userAccessToken", "email"]
   );
@@ -45,7 +45,7 @@ const createProviderSchema = yup.object().shape({
   name: yup.string().required(),
   surname: yup.string().required(),
   email: yup.string().email().required(),
-  username: yup.string().notRequired(),
+  nickname: yup.string().notRequired(),
   patronym: yup.string().required(),
   phone: yup.string().notRequired(),
   phonePrefix: yup.string().notRequired(),

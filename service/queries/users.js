@@ -82,7 +82,7 @@ export const createUser = async ({
       `
         WITH newClientDetails AS (
 
-            INSERT INTO client_detail (name, surname, username, email, image, sex, year_of_birth, access_token)
+            INSERT INTO client_detail (name, surname, nickname, email, image, sex, year_of_birth, access_token)
             VALUES ($3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING * 
 
@@ -112,11 +112,11 @@ export const createUser = async ({
         hashedPass,
         clientData.name,
         clientData.surname,
-        clientData.username,
+        clientData.nickname,
         clientData.email,
         clientData.image,
         clientData.sex,
-        clientData.yob,
+        clientData.yearOfBirth,
         clientData.userAccessToken,
       ]
     );
@@ -125,7 +125,7 @@ export const createUser = async ({
       `
         WITH newProviderDetails AS (
 
-            INSERT INTO client_detail (name, surname, patronym, username, email, phone_prefix, 
+            INSERT INTO client_detail (name, surname, patronym, nickname, email, phone_prefix, 
                                         phone, image, address, video, education, sex, consultation_price, description)
             VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
             RETURNING * 
@@ -156,7 +156,7 @@ export const createUser = async ({
         providerData.name,
         providerData.surname,
         providerData.patronym,
-        providerData.username,
+        providerData.nickname,
         providerData.email,
         providerData.phonePrefix,
         providerData.phone,
