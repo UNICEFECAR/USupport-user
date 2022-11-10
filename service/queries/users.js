@@ -60,9 +60,10 @@ export const getProviderUserByEmail = async (poolCountry, email) =>
 export const getUserByID = async (poolCountry, user_id) =>
   await getDBPool("piiDb", poolCountry).query(
     `
-        SELECT user_id, country_id, type, client_detail_id, notification_preference_id, password
+        SELECT user_id, country_id, type, client_detail_id, notification_preference_id, password, is_deleted
         FROM "user"
         WHERE user_id = $1
+        AND is_deleted = false
         ORDER BY created_at DESC
         LIMIT 1;
         
