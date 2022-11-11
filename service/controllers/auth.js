@@ -14,6 +14,8 @@ import {
   cannotGenerateUserAccessToken,
 } from "#utils/errors";
 
+import { getYearInMilliseconds } from "#utils/helperFunctions";
+
 const JWT_KEY = process.env.JWT_KEY;
 
 export const issueAccessToken = async ({ user_id }) => {
@@ -29,6 +31,22 @@ export const issueAccessToken = async ({ user_id }) => {
   return {
     token: signedToken,
     expiresIn: new Date(new Date().getTime() + 120 * 60000), // 2h expiration
+  };
+};
+
+export const issueTmpAccessToken = async () => {
+  const payload = { sub: "tmp-user", iat: Math.floor(Date.now() / 1000) };
+
+  const signedToken = jwt.sign(payload, JWT_KEY, {
+    expiresIn: "9999 years", // never expires
+    issuer: "online.usupport.userApi",
+    audience: "online.usupport.app",
+    algorithm: "HS256",
+  });
+
+  return {
+    token: signedToken,
+    expiresIn: new Date(new Date().getTime() + 9999 * getYearInMilliseconds()), // 9999 years expiration
   };
 };
 

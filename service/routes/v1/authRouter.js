@@ -3,6 +3,7 @@ import passport from "passport";
 
 import {
   issueAccessToken,
+  issueTmpAccessToken,
   issueRefreshToken,
   refreshAccessToken,
   generateAccessToken,
@@ -63,6 +64,21 @@ router.post(
     return res.status(200).send(result);
   }
 );
+
+router.post("/tmp-login", async (req, res) => {
+  /**
+   * #route   POST /user/v1/auth/tmp-login
+   * #desc    Temporrary login a user
+   */
+  const tmpAccessToken = await issueTmpAccessToken();
+  const refreshToken = "tmp-refresh-token";
+
+  const result = {
+    token: { ...tmpAccessToken, refreshToken },
+  };
+
+  return res.status(200).send(result);
+});
 
 router.get("/user-access-token", async (req, res, next) => {
   /**
