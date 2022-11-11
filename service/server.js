@@ -20,7 +20,6 @@ app.use(passport.initialize());
 
 /*------------- User Service Endpoints -------------*/
 
-// Example router
 app.use("/user/v1/user", v1.UserRouter);
 app.use("/user/v1/auth", v1.AuthRouter);
 app.use("/user/v1/rescue", v1.RescueRouter);
