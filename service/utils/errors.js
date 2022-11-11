@@ -71,3 +71,11 @@ export const invalidResetPasswordToken = (language) => {
   error.status = 409;
   return error;
 };
+
+export const notificationPreferencesNotFound = (language) => {
+  const error = new Error();
+  error.message = t("notification_preferences_not_found_error", language);
+  error.name = "NOTIFICATION PREFERENCES NOT FOUND";
+  error.status = 404;
+  return error;
+};

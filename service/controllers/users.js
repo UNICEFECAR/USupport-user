@@ -1,7 +1,11 @@
 import bcrypt from "bcryptjs";
 
-import { getUserByID } from "#queries/users";
-import { userNotFound } from "#utils/errors";
+import {
+  getUserByID,
+  getNotificationPreferencesQuery,
+  updateNotificationPreferencesQuery,
+} from "#queries/users";
+import { userNotFound, notificationPreferencesNotFound } from "#utils/errors";
 import { updatePassword } from "#utils/helperFunctions";
 
 import { incorrectPassword } from "#utils/errors";
@@ -41,4 +45,56 @@ export const changeUserPassword = async ({
   });
 
   return { success: true };
+};
+
+export const getNotificationPreferences = async ({
+  country,
+  language,
+  notification_preference_id,
+}) => {
+  return await getNotificationPreferencesQuery(
+    country,
+    notification_preference_id
+  )
+    .then((res) => {
+      if (res.rowCount === 0) {
+        throw notificationPreferencesNotFound(language);
+      } else {
+        return res.rows[0];
+      }
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const updateNotificationPreferences = async ({
+  country,
+  language,
+  notification_preference_id,
+  email,
+  consultation_reminder,
+  consultation_reminder_min,
+  in_platform,
+  push,
+}) => {
+  return await updateNotificationPreferencesQuery({
+    poolCountry: country,
+    notification_preference_id,
+    email,
+    consultation_reminder,
+    consultation_reminder_min,
+    in_platform,
+    push,
+  })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        throw notificationPreferencesNotFound(language);
+      } else {
+        return res.rows[0];
+      }
+    })
+    .catch((err) => {
+      throw err;
+    });
 };

@@ -1,9 +1,19 @@
 import express from "express";
 
-import { getSharedUserData, changeUserPassword } from "#controllers/users";
+import {
+  getSharedUserData,
+  changeUserPassword,
+  getNotificationPreferences,
+  updateNotificationPreferences,
+} from "#controllers/users";
 
 import { securedRoute } from "#middlewares/auth";
-import { getUserByIdSchema, changePasswordSchema } from "#schemas/userSchemas";
+import {
+  getUserByIdSchema,
+  changePasswordSchema,
+  getNotificationPreferencesSchema,
+  updateNotificationPreferencesSchema,
+} from "#schemas/userSchemas";
 
 const router = express.Router();
 
@@ -44,5 +54,45 @@ router.patch("/password", securedRoute, async (req, res, next) => {
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
+
+router
+  .route("/notification-preferences")
+  .get(securedRoute, async (req, res, next) => {
+    /**
+     * #route   GET /user/v1/user/notification-preferences
+     * #desc    Get user's notification preferences
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+    const notification_preference_id = req.user.notification_preference_id;
+
+    return await getNotificationPreferencesSchema
+      .noUnknown(true)
+      .strict(true)
+      .validate({ country, language, notification_preference_id })
+      .then(getNotificationPreferences)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  })
+  .put(securedRoute, async (req, res, next) => {
+    /**
+     * #route   PUT /user/v1/user/notification-preferences
+     * #desc    Update user's notification preferences
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+
+    const notification_preference_id = req.user.notification_preference_id;
+
+    const payload = req.body;
+
+    return await updateNotificationPreferencesSchema
+      .noUnknown(true)
+      .strict(true)
+      .validate({ country, language, notification_preference_id, ...payload })
+      .then(updateNotificationPreferences)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  });
 
 export { router };

@@ -199,3 +199,50 @@ export const updateUserPassword = async ({ poolCountry, password, user_id }) =>
     `,
     [password, user_id]
   );
+
+export const getNotificationPreferencesQuery = async (
+  poolCountry,
+  notification_preferences_id
+) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        SELECT email, consultation_reminder, consultation_reminder_min, in_platform, push
+        FROM "notification_preference"
+        WHERE notification_preference_id = $1
+        ORDER BY created_at DESC
+        LIMIT 1;
+        
+    `,
+    [notification_preferences_id]
+  );
+
+export const updateNotificationPreferencesQuery = async ({
+  poolCountry,
+  notification_preference_id,
+  email,
+  consultation_reminder,
+  consultation_reminder_min,
+  in_platform,
+  push,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        UPDATE "notification_preference"
+        SET email = $1,
+            consultation_reminder = $2,
+            consultation_reminder_min = $3,
+            in_platform = $4,
+            push = $5
+        WHERE notification_preference_id = $6
+        RETURNING *;
+        
+    `,
+    [
+      email,
+      consultation_reminder,
+      consultation_reminder_min,
+      in_platform,
+      push,
+      notification_preference_id,
+    ]
+  );

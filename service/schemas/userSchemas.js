@@ -88,3 +88,20 @@ export const changePasswordSchema = yup.object().shape({
   oldPassword: yup.string().required(),
   newPassword: yup.string().matches(PASSWORD_REGEX).required(),
 });
+
+export const getNotificationPreferencesSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  notification_preference_id: yup.string().uuid().required(),
+});
+
+export const updateNotificationPreferencesSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  notification_preference_id: yup.string().uuid().required(),
+  email: yup.boolean().required(),
+  consultation_reminder: yup.boolean().required(),
+  consultation_reminder_min: yup.number().positive().max(60).required(),
+  in_platform: yup.boolean().required(),
+  push: yup.boolean().required(),
+});
