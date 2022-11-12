@@ -1,6 +1,9 @@
 import { nanoid } from "nanoid";
 
-import { getClientUserByEmailOrAccessToken } from "#queries/users";
+import {
+  getClientUserByEmailOrAccessToken,
+  getProviderUserByEmail,
+} from "#queries/users";
 import {
   storeForgotPasswordTokenQuery,
   getForgotPasswordTokenQuery,
@@ -11,24 +14,45 @@ import { updatePassword } from "#utils/helperFunctions";
 
 import { userNotFound, invalidResetPasswordToken } from "#utils/errors";
 
-export const sendForgotPasswordEmail = async ({ country, language, email }) => {
-  const clientUser = await getClientUserByEmailOrAccessToken(country, email)
-    .then((raw) => {
-      if (raw.rowCount === 0) {
-        throw userNotFound(language);
-      } else {
-        return raw.rows[0];
-      }
-    })
-    .catch((err) => {
-      throw err;
-    });
+export const sendForgotPasswordEmail = async ({
+  country,
+  language,
+  email,
+  type,
+}) => {
+  let user = null;
+
+  if (type === "client") {
+    user = await getClientUserByEmailOrAccessToken(country, email)
+      .then((raw) => {
+        if (raw.rowCount === 0) {
+          throw userNotFound(language);
+        } else {
+          return raw.rows[0];
+        }
+      })
+      .catch((err) => {
+        throw err;
+      });
+  } else if (type === "provider") {
+    user = await getProviderUserByEmail(country, email)
+      .then((raw) => {
+        if (raw.rowCount === 0) {
+          throw userNotFound(language);
+        } else {
+          return raw.rows[0];
+        }
+      })
+      .catch((err) => {
+        throw err;
+      });
+  }
 
   const forgotPassToken = nanoid(16);
 
   await storeForgotPasswordTokenQuery({
     poolCountry: country,
-    user_id: clientUser.user_id,
+    user_id: user.user_id,
     forgotPassToken,
   });
 

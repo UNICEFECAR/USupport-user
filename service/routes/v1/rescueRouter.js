@@ -23,11 +23,12 @@ router
     const language = req.header("x-language-alpha-2");
 
     const { email } = req.query;
+    const { type } = req.query;
 
     return await initForgotPasswordSchema
       .noUnknown(true)
       .strict(true)
-      .validate({ country, language, email })
+      .validate({ country, language, email, type })
       .then(sendForgotPasswordEmail)
       .then((result) => res.status(200).send(result))
       .catch(next);

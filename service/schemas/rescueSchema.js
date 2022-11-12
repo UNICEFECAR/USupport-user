@@ -6,6 +6,7 @@ export const initForgotPasswordSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
   email: yup.string().email().required(),
+  type: yup.string().oneOf(["client", "provider"]).required(),
 });
 
 export const resetForgotPasswordSchema = yup.object().shape({
