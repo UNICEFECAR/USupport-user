@@ -73,18 +73,18 @@ export const updateNotificationPreferences = async ({
   language,
   notification_preference_id,
   email,
-  consultation_reminder,
-  consultation_reminder_min,
-  in_platform,
+  consultationReminder,
+  consultationReminderMin,
+  inPlatform,
   push,
 }) => {
   return await updateNotificationPreferencesQuery({
     poolCountry: country,
     notification_preference_id,
     email,
-    consultation_reminder,
-    consultation_reminder_min,
-    in_platform,
+    consultationReminder,
+    consultationReminderMin,
+    inPlatform,
     push,
   })
     .then((res) => {

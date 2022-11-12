@@ -100,8 +100,8 @@ export const updateNotificationPreferencesSchema = yup.object().shape({
   language: yup.string().required(),
   notification_preference_id: yup.string().uuid().required(),
   email: yup.boolean().required(),
-  consultation_reminder: yup.boolean().required(),
-  consultation_reminder_min: yup.number().positive().max(60).required(),
-  in_platform: yup.boolean().required(),
+  consultationReminder: yup.boolean().required(),
+  consultationReminderMin: yup.number().positive().max(60).required(),
+  inPlatform: yup.boolean().required(),
   push: yup.boolean().required(),
 });

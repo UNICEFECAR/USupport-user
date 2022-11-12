@@ -220,9 +220,9 @@ export const updateNotificationPreferencesQuery = async ({
   poolCountry,
   notification_preference_id,
   email,
-  consultation_reminder,
-  consultation_reminder_min,
-  in_platform,
+  consultationReminder,
+  consultationReminderMin,
+  inPlatform,
   push,
 }) =>
   await getDBPool("piiDb", poolCountry).query(
@@ -239,9 +239,9 @@ export const updateNotificationPreferencesQuery = async ({
     `,
     [
       email,
-      consultation_reminder,
-      consultation_reminder_min,
-      in_platform,
+      consultationReminder,
+      consultationReminderMin,
+      inPlatform,
       push,
       notification_preference_id,
     ]
