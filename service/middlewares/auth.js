@@ -96,25 +96,31 @@ passport.use(
           clientData,
           providerData,
         })
-          .then((res) => {
-            if (providerData.workWithIds?.length > 0) {
-              // loop through workWithIds and create a new row in the provider_detail_work_with_links table
-              for (let i = 0; i < providerData.workWithIds.length; i++) {
-                createProviderDetailWorkWithLink({
-                  poolCountry: country,
-                  providerDetailId: res.rows[0].provider_detail_id,
-                  workWithId: providerData.workWithIds[i],
-                });
+          .then(async (res) => {
+            if (userType === "provider") {
+              if (providerData.workWithIds?.length > 0) {
+                // loop through workWithIds and create a new row in the provider_detail_work_with_links table
+                for (let i = 0; i < providerData.workWithIds.length; i++) {
+                  await createProviderDetailWorkWithLink({
+                    poolCountry: country,
+                    providerDetailId: res.rows[0].provider_detail_id,
+                    workWithId: providerData.workWithIds[i],
+                  }).catch((err) => {
+                    throw err;
+                  });
+                }
               }
-            }
-            if (providerData.languageIds?.length > 0) {
-              // loop through languageIds and create a new row in the provider_detail_language_links table
-              for (let i = 0; i < providerData.languageIds.length; i++) {
-                createProviderDetailLanguageLink({
-                  poolCountry: country,
-                  providerDetailId: res.rows[0].provider_detail_id,
-                  languageId: providerData.languageIds[i],
-                });
+              if (providerData.languageIds?.length > 0) {
+                // loop through languageIds and create a new row in the provider_detail_language_links table
+                for (let i = 0; i < providerData.languageIds.length; i++) {
+                  await createProviderDetailLanguageLink({
+                    poolCountry: country,
+                    providerDetailId: res.rows[0].provider_detail_id,
+                    languageId: providerData.languageIds[i],
+                  }).catch((err) => {
+                    throw err;
+                  });
+                }
               }
             }
 
