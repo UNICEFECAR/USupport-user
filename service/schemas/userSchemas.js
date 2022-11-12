@@ -15,6 +15,10 @@ const sexTypeSchema = yup
   .string()
   .oneOf(["male", "female", "unspecified", "notMentioned"]);
 
+const providerTypeSchema = yup
+  .array()
+  .of(yup.array(["psychologist", "psychotherapist", "psychiatrist", "coach"]));
+
 const createClientSchema = (language) =>
   yup.object().shape(
     {
@@ -43,20 +47,21 @@ const createClientSchema = (language) =>
 
 const createProviderSchema = yup.object().shape({
   name: yup.string().required(),
+  patronym: yup.string().notRequired(),
   surname: yup.string().required(),
-  email: yup.string().email().required(),
   nickname: yup.string().notRequired(),
-  patronym: yup.string().required(),
-  phone: yup.string().notRequired(),
+  email: yup.string().email().required(),
   phonePrefix: yup.string().notRequired(),
+  phone: yup.string().notRequired(),
   image: yup.string().notRequired(),
+  type: providerTypeSchema.notRequired(),
   address: yup.string().notRequired(),
-  video: yup.string().notRequired(),
-  education: yup.string().notRequired(),
+  education: yup.array().of(yup.string()).notRequired(),
   sex: sexTypeSchema.notRequired(),
   consultationPrice: yup.number().positive().notRequired(),
   description: yup.string().notRequired(),
-  workWith: yup.array().notRequired(),
+  workWithIds: yup.array().of(yup.string().uuid()).notRequired(),
+  languageIds: yup.array().of(yup.string().uuid()).notRequired(),
 });
 
 export const createUserSchema = (language) =>

@@ -9,6 +9,8 @@ import {
   getProviderUserByEmail,
   createUser,
   loginAttempt,
+  createProviderDetailWorkWithLink,
+  createProviderDetailLanguageLink,
 } from "#queries/users";
 
 import { createUserSchema } from "#schemas/userSchemas";
@@ -94,7 +96,30 @@ passport.use(
           clientData,
           providerData,
         })
-          .then((res) => res.rows[0])
+          .then((res) => {
+            if (providerData.workWithIds?.length > 0) {
+              // loop through workWithIds and create a new row in the provider_detail_work_with_links table
+              for (let i = 0; i < providerData.workWithIds.length; i++) {
+                createProviderDetailWorkWithLink({
+                  poolCountry: country,
+                  providerDetailId: res.rows[0].provider_detail_id,
+                  workWithId: providerData.workWithIds[i],
+                });
+              }
+            }
+            if (providerData.languageIds?.length > 0) {
+              // loop through languageIds and create a new row in the provider_detail_language_links table
+              for (let i = 0; i < providerData.languageIds.length; i++) {
+                createProviderDetailLanguageLink({
+                  poolCountry: country,
+                  providerDetailId: res.rows[0].provider_detail_id,
+                  languageId: providerData.languageIds[i],
+                });
+              }
+            }
+
+            return res.rows[0];
+          })
           .catch((err) => {
             throw err;
           });

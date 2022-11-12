@@ -47,10 +47,10 @@ export const getProviderUserByEmail = async (poolCountry, email) =>
         SELECT * 
         FROM "user"
           JOIN providerData ON providerData.provider_detail_id = "user".provider_detail_id
-        ORDER BY created_at DESC
+        ORDER BY "user".created_at DESC
         LIMIT 1
 
-    ), 
+    )
 
     SELECT * FROM fullUserData; 
     `,
@@ -126,8 +126,8 @@ export const createUser = async ({
       `
         WITH newProviderDetails AS (
 
-            INSERT INTO client_detail (name, surname, patronym, nickname, email, phone_prefix, 
-                                        phone, image, address, video, education, sex, consultation_price, description)
+            INSERT INTO provider_detail (name, patronym, surname, nickname, email, phone_prefix, 
+                                        phone, image, type, address, education, sex, consultation_price, description)
             VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
             RETURNING * 
 
@@ -138,10 +138,10 @@ export const createUser = async ({
 
         ), newUser AS (
 
-          INSERT INTO "user" (country_id, type, client_detail_id, password, notification_preference_id)
-              SELECT $1, 'provider', client_detail_id, 
+          INSERT INTO "user" (country_id, type, provider_detail_id, password, notification_preference_id)
+              SELECT $1, 'provider', provider_detail_id, 
                       $2, (SELECT notification_preference_id FROM newNotificationPreferences)
-              FROM newClientDetails
+              FROM newProviderDetails
             RETURNING * 
 
         )
@@ -155,15 +155,15 @@ export const createUser = async ({
         countryID,
         hashedPass,
         providerData.name,
-        providerData.surname,
         providerData.patronym,
+        providerData.surname,
         providerData.nickname,
         providerData.email,
         providerData.phonePrefix,
         providerData.phone,
         providerData.image ? providerData.image : "default",
+        providerData.type,
         providerData.address,
-        providerData.video,
         providerData.education,
         providerData.sex,
         providerData.consultationPrice,
@@ -172,6 +172,34 @@ export const createUser = async ({
     );
   }
 };
+
+export const createProviderDetailWorkWithLink = async ({
+  poolCountry,
+  providerDetailId,
+  workWithId,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        INSERT INTO provider_detail_work_with_links (provider_detail_id, work_with_id)
+        VALUES ($1, $2)
+        RETURNING *;
+    `,
+    [providerDetailId, workWithId]
+  );
+
+export const createProviderDetailLanguageLink = async ({
+  poolCountry,
+  providerDetailId,
+  languageId,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        INSERT INTO provider_detail_language_links (provider_detail_id, language_id)
+        VALUES ($1, $2)
+        RETURNING *;
+    `,
+    [providerDetailId, languageId]
+  );
 
 export const loginAttempt = async ({
   poolCountry,
