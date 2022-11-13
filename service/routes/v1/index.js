@@ -4,3 +4,4 @@ export { router as RescueRouter } from "./rescueRouter.js";
 export { router as UploadFileRouter } from "./UploadFileRouter.js";
 export { router as LanguageRouter } from "./LanguageRouter.js";
 export { router as CountryRouter } from "./CountryRouter.js";
+export { router as WorkWithRouter } from "./WorkWithRouter.js";
