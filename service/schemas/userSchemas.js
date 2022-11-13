@@ -15,7 +15,7 @@ const sexTypeSchema = yup
   .string()
   .oneOf(["male", "female", "unspecified", "notMentioned"]);
 
-const providerTypeSchema = yup
+const specializationsTypeSchema = yup
   .array()
   .of(yup.array(["psychologist", "psychotherapist", "psychiatrist", "coach"]));
 
@@ -53,7 +53,7 @@ const createProviderSchema = yup.object().shape({
   email: yup.string().email().required(),
   phonePrefix: yup.string().notRequired(),
   phone: yup.string().notRequired(),
-  type: providerTypeSchema.notRequired(),
+  specializations: specializationsTypeSchema.notRequired(),
   address: yup.string().notRequired(),
   education: yup.array().of(yup.string()).notRequired(),
   sex: sexTypeSchema.notRequired(),

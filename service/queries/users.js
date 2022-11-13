@@ -127,7 +127,7 @@ export const createUser = async ({
         WITH newProviderDetails AS (
 
             INSERT INTO provider_detail (name, patronym, surname, nickname, email, phone_prefix, 
-                                        phone, image, type, address, education, sex, consultation_price, description)
+                                        phone, image, specializations, address, education, sex, consultation_price, description)
             VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
             RETURNING * 
 
@@ -162,7 +162,7 @@ export const createUser = async ({
         providerData.phonePrefix,
         providerData.phone,
         providerData.image ? providerData.image : "default",
-        providerData.type,
+        providerData.specializations,
         providerData.address,
         providerData.education,
         providerData.sex,

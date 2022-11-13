@@ -24,7 +24,10 @@ router.post(
     const country = req.header("x-country-alpha-2");
     const user = req.user;
 
-    const accessToken = await issueAccessToken({ user_id: user.user_id });
+    const accessToken = await issueAccessToken({
+      user_id: user.user_id,
+      userType: user.type,
+    });
     const refreshToken = await issueRefreshToken({
       country,
       user_id: user.user_id,
@@ -50,7 +53,11 @@ router.post(
     const country = req.header("x-country-alpha-2");
     const user = req.user;
 
-    const accessToken = await issueAccessToken({ user_id: user.user_id });
+    console.log(user, "user");
+    const accessToken = await issueAccessToken({
+      user_id: user.user_id,
+      userType: user.type,
+    });
     const refreshToken = await issueRefreshToken({
       country,
       user_id: user.user_id,

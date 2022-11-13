@@ -18,8 +18,12 @@ import { getYearInMilliseconds } from "#utils/helperFunctions";
 
 const JWT_KEY = process.env.JWT_KEY;
 
-export const issueAccessToken = async ({ user_id }) => {
-  const payload = { sub: user_id, iat: Math.floor(Date.now() / 1000) };
+export const issueAccessToken = async ({ user_id, userType }) => {
+  const payload = {
+    sub: user_id,
+    userType,
+    iat: Math.floor(Date.now() / 1000),
+  };
 
   const signedToken = jwt.sign(payload, JWT_KEY, {
     expiresIn: "2h",
@@ -88,6 +92,7 @@ export const refreshAccessToken = async ({
     });
     const newAccessToken = await issueAccessToken({
       user_id: refreshTokenData.user_id,
+      userType: refreshTokenData.user_type,
     });
     const newRefreshToken = await issueRefreshToken({
       country,

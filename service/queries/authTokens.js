@@ -13,10 +13,11 @@ export const storeRefreshToken = async (poolCountry, user_id, refreshToken) =>
 export const getRefreshToken = async (poolCountry, token) =>
   await getDBPool("piiDb", poolCountry).query(
     `
-        SELECT * 
+        SELECT "refresh_token".user_id, expires_at, used, "user".type as user_type
         FROM refresh_token
+          JOIN "user" ON "user".user_id = refresh_token.user_id
         WHERE token = $1
-        ORDER BY created_at DESC
+        ORDER BY "refresh_token".created_at DESC
         LIMIT 1;
     `,
     [token]
