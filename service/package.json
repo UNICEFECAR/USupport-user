@@ -5,24 +5,22 @@
   "description": "Express.js app for the USupport user API service",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"No tests set up\" && exit 1",
-    "dev": "NODE_ENV=dev nodemon server.js",
-    "build": "echo \"No build command set up\" && exit 1",
-    "prod": "NODE_ENV=production npm run build && node build/server.js"
+    "dev": "nodemon server.js",
+    "prod": "node server.js"
   },
   "license": "GPL-3.0",
   "dependencies": {
+    "aws-sdk": "^2.1240.0",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.0.3",
-    "aws-sdk": "^2.1240.0",
     "express": "^4.18.1",
     "formidable": "^2.0.1",
     "helmet": "^6.0.0",
     "nanoid": "^4.0.0",
     "node-fetch": "^3.2.10",
-    "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "passport-local": "^1.0.0",
+    "passport": "^0.4.1",
     "pg": "^8.8.0",
     "uuid": "^9.0.0",
     "yup": "^0.32.11"

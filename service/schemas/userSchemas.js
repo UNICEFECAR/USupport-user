@@ -1,27 +1,30 @@
 import * as yup from "yup";
 import { t } from "#translations/index";
 
-const PASSWORD_REGEX = new RegExp("^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}");
+export const PASSWORD_REGEX = new RegExp(
+  "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}"
+);
 
 export const getUserByIdSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
   user_id: yup.string().uuid().required(),
-});
-
-export const getUserByEmailSchema = yup.object().shape({
-  email: yup.string().email().required(),
 });
 
 const sexTypeSchema = yup
   .string()
   .oneOf(["male", "female", "unspecified", "notMentioned"]);
 
+const specializationsTypeSchema = yup
+  .array()
+  .of(yup.array(["psychologist", "psychotherapist", "psychiatrist", "coach"]));
+
 const createClientSchema = (language) =>
   yup.object().shape(
     {
       name: yup.string().notRequired(),
       surname: yup.string().notRequired(),
-      preferredName: yup.string().notRequired(),
-      username: yup.string().notRequired(),
+      nickname: yup.string().required(t("nickname_required_error", language)),
       email: yup.string().when("userAccessToken", {
         is: undefined,
         then: yup
@@ -37,28 +40,27 @@ const createClientSchema = (language) =>
       }),
       image: yup.string().notRequired(),
       sex: sexTypeSchema.notRequired(),
-      yob: yup.number().positive().notRequired(),
+      yearOfBirth: yup.number().positive().notRequired(),
     },
     ["userAccessToken", "email"]
   );
 
 const createProviderSchema = yup.object().shape({
   name: yup.string().required(),
+  patronym: yup.string().notRequired(),
   surname: yup.string().required(),
-  preferredName: yup.string().required(),
+  nickname: yup.string().notRequired(),
   email: yup.string().email().required(),
-  username: yup.string().notRequired(),
-  patronym: yup.string().required(),
-  phone: yup.string().notRequired(),
   phonePrefix: yup.string().notRequired(),
-  image: yup.string().notRequired(),
+  phone: yup.string().notRequired(),
+  specializations: specializationsTypeSchema.notRequired(),
   address: yup.string().notRequired(),
-  video: yup.string().notRequired(),
-  education: yup.string().notRequired(),
+  education: yup.array().of(yup.string()).notRequired(),
   sex: sexTypeSchema.notRequired(),
   consultationPrice: yup.number().positive().notRequired(),
   description: yup.string().notRequired(),
-  workWith: yup.array().notRequired(),
+  workWithIds: yup.array().of(yup.string().uuid()).notRequired(),
+  languageIds: yup.array().of(yup.string().uuid()).notRequired(),
 });
 
 export const createUserSchema = (language) =>
@@ -82,3 +84,28 @@ export const createUserSchema = (language) =>
     },
     ["client", "provider"]
   );
+
+export const changePasswordSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  user_id: yup.string().uuid().required(),
+  oldPassword: yup.string().required(),
+  newPassword: yup.string().matches(PASSWORD_REGEX).required(),
+});
+
+export const getNotificationPreferencesSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  notification_preference_id: yup.string().uuid().required(),
+});
+
+export const updateNotificationPreferencesSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  notification_preference_id: yup.string().uuid().required(),
+  email: yup.boolean().required(),
+  consultationReminder: yup.boolean().required(),
+  consultationReminderMin: yup.number().positive().max(60).required(),
+  inPlatform: yup.boolean().required(),
+  push: yup.boolean().required(),
+});

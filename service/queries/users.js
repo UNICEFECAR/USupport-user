@@ -1,7 +1,11 @@
-import { pool } from "#utils/dbConfig";
+import { getDBPool } from "#utils/dbConfig";
 
-export const getClientUserByEmailOrAccessToken = async (email, accessToken) =>
-  await pool.query(
+export const getClientUserByEmailOrAccessToken = async (
+  poolCountry,
+  email,
+  accessToken
+) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
     WITH clientData AS (
 
@@ -27,8 +31,8 @@ export const getClientUserByEmailOrAccessToken = async (email, accessToken) =>
     [email, accessToken]
   );
 
-export const getProviderUserByEmail = async (email) =>
-  await pool.query(
+export const getProviderUserByEmail = async (poolCountry, email) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
     WITH providerData AS (
 
@@ -43,22 +47,23 @@ export const getProviderUserByEmail = async (email) =>
         SELECT * 
         FROM "user"
           JOIN providerData ON providerData.provider_detail_id = "user".provider_detail_id
-        ORDER BY created_at DESC
+        ORDER BY "user".created_at DESC
         LIMIT 1
 
-    ), 
+    )
 
     SELECT * FROM fullUserData; 
     `,
     [email]
   );
 
-export const getUserByID = async (user_id) =>
-  await pool.query(
+export const getUserByID = async (poolCountry, user_id) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
-        SELECT user_id, country_id, type, client_detail_id, notification_preference_id
+        SELECT user_id, country_id, type, client_detail_id, notification_preference_id, password
         FROM "user"
         WHERE user_id = $1
+        AND deleted_at IS NULL
         ORDER BY created_at DESC
         LIMIT 1;
         
@@ -67,18 +72,19 @@ export const getUserByID = async (user_id) =>
   );
 
 export const createUser = async ({
+  poolCountry,
   countryID,
   hashedPass,
   clientData,
   providerData,
 }) => {
   if (clientData) {
-    return await pool.query(
+    return await getDBPool("piiDb", poolCountry).query(
       `
         WITH newClientDetails AS (
 
-            INSERT INTO client_detail (name, surname, preferred_name, username, email, image, sex, year_of_birth, access_token)
-            VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11)
+            INSERT INTO client_detail (name, surname, nickname, email, image, sex, year_of_birth, access_token)
+            VALUES ($3, $4, $5, $6, $7, $8, $9, $10)
             RETURNING * 
 
         ), newNotificationPreferences AS (
@@ -107,23 +113,22 @@ export const createUser = async ({
         hashedPass,
         clientData.name,
         clientData.surname,
-        clientData.preferredName,
-        clientData.username,
+        clientData.nickname,
         clientData.email,
-        clientData.image,
+        clientData.image ? clientData.image : "default",
         clientData.sex,
-        clientData.yob,
+        clientData.yearOfBirth,
         clientData.userAccessToken,
       ]
     );
   } else {
-    return await pool.query(
+    return await getDBPool("piiDb", poolCountry).query(
       `
         WITH newProviderDetails AS (
 
-            INSERT INTO client_detail (name, surname, patronym, preferredName, username, email, phone_prefix, 
-                                        phone, image, address, video, education, sex, consultation_price, description)
-            VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+            INSERT INTO provider_detail (name, patronym, surname, nickname, email, phone_prefix, 
+                                        phone, image, specializations, address, education, sex, consultation_price, description)
+            VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
             RETURNING * 
 
         ), newNotificationPreferences AS (
@@ -133,10 +138,10 @@ export const createUser = async ({
 
         ), newUser AS (
 
-          INSERT INTO "user" (country_id, type, client_detail_id, password, notification_preference_id)
-              SELECT $1, 'provider', client_detail_id, 
+          INSERT INTO "user" (country_id, type, provider_detail_id, password, notification_preference_id)
+              SELECT $1, 'provider', provider_detail_id, 
                       $2, (SELECT notification_preference_id FROM newNotificationPreferences)
-              FROM newClientDetails
+              FROM newProviderDetails
             RETURNING * 
 
         )
@@ -150,16 +155,15 @@ export const createUser = async ({
         countryID,
         hashedPass,
         providerData.name,
-        providerData.surname,
         providerData.patronym,
-        providerData.preferredName,
-        providerData.username,
+        providerData.surname,
+        providerData.nickname,
         providerData.email,
         providerData.phonePrefix,
         providerData.phone,
-        providerData.image,
+        providerData.image ? providerData.image : "default",
+        providerData.specializations,
         providerData.address,
-        providerData.video,
         providerData.education,
         providerData.sex,
         providerData.consultationPrice,
@@ -169,12 +173,104 @@ export const createUser = async ({
   }
 };
 
-export const loginAttempt = async ({ user_id, ip_address, location, status }) =>
-  await pool.query(
+export const createProviderDetailWorkWithLink = async ({
+  poolCountry,
+  providerDetailId,
+  workWithId,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        INSERT INTO provider_detail_work_with_links (provider_detail_id, work_with_id)
+        VALUES ($1, $2)
+        RETURNING *;
+    `,
+    [providerDetailId, workWithId]
+  );
+
+export const createProviderDetailLanguageLink = async ({
+  poolCountry,
+  providerDetailId,
+  languageId,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        INSERT INTO provider_detail_language_links (provider_detail_id, language_id)
+        VALUES ($1, $2)
+        RETURNING *;
+    `,
+    [providerDetailId, languageId]
+  );
+
+export const loginAttempt = async ({
+  poolCountry,
+  user_id,
+  ip_address,
+  location,
+  status,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
     `
       INSERT INTO login_attempt (user_id, ip_address, location, status)
       VALUES ($1, $2, $3, $4)
       RETURNING *;
     `,
     [user_id, ip_address, location, status]
+  );
+
+export const updateUserPassword = async ({ poolCountry, password, user_id }) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        UPDATE "user"
+        SET password = $1
+        WHERE user_id = $2
+        
+    `,
+    [password, user_id]
+  );
+
+export const getNotificationPreferencesQuery = async (
+  poolCountry,
+  notification_preferences_id
+) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        SELECT email, consultation_reminder, consultation_reminder_min, in_platform, push
+        FROM "notification_preference"
+        WHERE notification_preference_id = $1
+        ORDER BY created_at DESC
+        LIMIT 1;
+        
+    `,
+    [notification_preferences_id]
+  );
+
+export const updateNotificationPreferencesQuery = async ({
+  poolCountry,
+  notification_preference_id,
+  email,
+  consultationReminder,
+  consultationReminderMin,
+  inPlatform,
+  push,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        UPDATE "notification_preference"
+        SET email = $1,
+            consultation_reminder = $2,
+            consultation_reminder_min = $3,
+            in_platform = $4,
+            push = $5
+        WHERE notification_preference_id = $6
+        RETURNING *;
+        
+    `,
+    [
+      email,
+      consultationReminder,
+      consultationReminderMin,
+      inPlatform,
+      push,
+      notification_preference_id,
+    ]
   );

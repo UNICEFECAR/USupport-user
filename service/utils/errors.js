@@ -1,63 +1,81 @@
-export const userNotFound = () => {
+import { t } from "#translations/index";
+
+export const userNotFound = (language) => {
   const error = new Error();
-  error.message = `User not found`;
+  error.message = t("user_not_found_error", language);
   error.name = "USER NOT FOUND";
   error.status = 404;
   return error;
 };
 
-export const emailUsed = () => {
+export const emailUsed = (language) => {
   const error = new Error();
-  error.message = `This email is already used`;
+  error.message = t("email_already_used_error", language);
   error.name = "EMAIL ALREADY USED";
   error.status = 409;
   return error;
 };
 
-export const userAccessTokenUsed = () => {
+export const userAccessTokenUsed = (language) => {
   const error = new Error();
-  error.message = `This user access token is not available`;
+  error.message = t("user_access_token_already_used_error", language);
   error.name = "USER ACCESS TOKEN ALREADY USED";
   error.status = 409;
   return error;
 };
 
-export const incorrectEmail = () => {
+export const incorrectEmail = (language) => {
   const error = new Error();
-  error.message = `There is no user with this email`;
+  error.message = t("incorrect_email_error", language);
   error.name = "INCORRECT EMAIl";
   error.status = 404;
   return error;
 };
 
-export const incorrectPassword = () => {
+export const incorrectPassword = (language) => {
   const error = new Error();
-  error.message = `There is no user with this password`;
+  error.message = t("incorrect_password_error", language);
   error.name = "INCORRECT PASSWORD";
   error.status = 404;
   return error;
 };
 
-export const notAuthenticated = () => {
+export const notAuthenticated = (language) => {
   const error = new Error();
-  error.message = `User needs to authenticate to access this resource`;
+  error.message = t("not_authenticated_error", language);
   error.name = "NOT AUTHENTICATED";
   error.status = 401;
   return error;
 };
 
-export const invalidRefreshToken = () => {
+export const invalidRefreshToken = (language) => {
   const error = new Error();
-  error.message = `Refresh token invalid or already used`;
+  error.message = t("invalid_refresh_token_error", language);
   error.name = "REFRESH TOKEN NOT VALID";
   error.status = 401;
   return error;
 };
 
-export const cannotGenerateUserAccessToken = () => {
+export const cannotGenerateUserAccessToken = (language) => {
   const error = new Error();
-  error.message = `Couldn't generate a new random user access token. Please try again`;
+  error.message = t("cannot_generate_user_access_token_error", language);
   error.name = "CANNOT GENERATE USER ACCESS TOKEN";
   error.status = 409;
+  return error;
+};
+
+export const invalidResetPasswordToken = (language) => {
+  const error = new Error();
+  error.message = t("invalid_reset_password_token_error", language);
+  error.name = "INVALID RESET PASSWORD TOKEN";
+  error.status = 409;
+  return error;
+};
+
+export const notificationPreferencesNotFound = (language) => {
+  const error = new Error();
+  error.message = t("notification_preferences_not_found_error", language);
+  error.name = "NOTIFICATION PREFERENCES NOT FOUND";
+  error.status = 404;
   return error;
 };

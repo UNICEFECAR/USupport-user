@@ -9,6 +9,8 @@ import {
   getProviderUserByEmail,
   createUser,
   loginAttempt,
+  createProviderDetailWorkWithLink,
+  createProviderDetailLanguageLink,
 } from "#queries/users";
 
 import { createUserSchema } from "#schemas/userSchemas";
@@ -40,6 +42,7 @@ passport.use(
       const language = req.header("x-language-alpha-2");
 
       try {
+        const country = req.header("x-country-alpha-2");
         const { countryID, password, userType, clientData, providerData } =
           await createUserSchema(language)
             .noUnknown(true)
@@ -56,6 +59,7 @@ passport.use(
 
         if (userType === "client") {
           currentUser = await getClientUserByEmailOrAccessToken(
+            country,
             clientData.email,
             clientData.userAccessToken
           )
@@ -64,7 +68,10 @@ passport.use(
               throw err;
             });
         } else if (userType === "provider") {
-          currentUser = await getProviderUserByEmail(providerData.email)
+          currentUser = await getProviderUserByEmail(
+            country,
+            providerData.email
+          )
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
@@ -73,9 +80,9 @@ passport.use(
 
         if (currentUser) {
           if (clientData?.email || providerData?.email) {
-            return done(emailUsed());
+            return done(emailUsed(language));
           } else if (clientData.userAccessToken) {
-            return done(userAccessTokenUsed());
+            return done(userAccessTokenUsed(language));
           }
         }
 
@@ -83,12 +90,42 @@ passport.use(
         const hashedPass = await bcrypt.hash(password, salt);
 
         let newUser = await createUser({
+          poolCountry: country,
           countryID,
           hashedPass,
           clientData,
           providerData,
         })
-          .then((res) => res.rows[0])
+          .then(async (res) => {
+            if (userType === "provider") {
+              if (providerData.workWithIds?.length > 0) {
+                // loop through workWithIds and create a new row in the provider_detail_work_with_links table
+                for (let i = 0; i < providerData.workWithIds.length; i++) {
+                  await createProviderDetailWorkWithLink({
+                    poolCountry: country,
+                    providerDetailId: res.rows[0].provider_detail_id,
+                    workWithId: providerData.workWithIds[i],
+                  }).catch((err) => {
+                    throw err;
+                  });
+                }
+              }
+              if (providerData.languageIds?.length > 0) {
+                // loop through languageIds and create a new row in the provider_detail_language_links table
+                for (let i = 0; i < providerData.languageIds.length; i++) {
+                  await createProviderDetailLanguageLink({
+                    poolCountry: country,
+                    providerDetailId: res.rows[0].provider_detail_id,
+                    languageId: providerData.languageIds[i],
+                  }).catch((err) => {
+                    throw err;
+                  });
+                }
+              }
+            }
+
+            return res.rows[0];
+          })
           .catch((err) => {
             throw err;
           });
@@ -115,6 +152,7 @@ passport.use(
       const language = req.header("x-language-alpha-2");
 
       try {
+        const country = req.header("x-country-alpha-2");
         const { email, password, userAccessToken, userType } =
           await userLoginSchema(language)
             .noUnknown(true)
@@ -129,13 +167,17 @@ passport.use(
 
         let user;
         if (userType === "client") {
-          user = await getClientUserByEmailOrAccessToken(email, userAccessToken)
+          user = await getClientUserByEmailOrAccessToken(
+            country,
+            email,
+            userAccessToken
+          )
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
             });
         } else if (userType === "provider") {
-          user = await getProviderUserByEmail(email)
+          user = await getProviderUserByEmail(country, email)
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
@@ -143,15 +185,16 @@ passport.use(
         }
 
         if (!user) {
-          return done(incorrectEmail());
+          return done(incorrectEmail(language));
         }
 
         const validatePassword = await bcrypt.compare(password, user.password);
         const ip_address =
           req.header("X-Real-IP") || req.header("x-forwarded-for") || "0.0.0.0";
-        const location = req.header("x-location");
+        const location = req.header("x-location") || "Unknown";
 
         loginAttempt({
+          poolCountry: country,
           user_id: user.user_id,
           ip_address,
           location,
@@ -159,7 +202,7 @@ passport.use(
         });
 
         if (!validatePassword) {
-          return done(incorrectPassword());
+          return done(incorrectPassword(language));
         }
 
         return done(null, user);
@@ -179,11 +222,13 @@ passport.use(
       issuer: "online.usupport.userApi",
       audience: "online.usupport.app",
       algorithms: ["HS256"],
+      passReqToCallback: true,
     },
-    async (jwt_payload, done) => {
+    async (req, jwt_payload, done) => {
       try {
+        const country = req.header("x-country-alpha-2");
         const user_id = jwt_payload.sub;
-        const user = await getUserByID(user_id)
+        const user = await getUserByID(country, user_id)
           .then((res) => res.rows[0])
           .catch((err) => {
             throw err;
@@ -203,8 +248,10 @@ passport.use(
 
 export const authenticateJWT = (isMiddleWare, req, res, next) => {
   passport.authenticate("jwt", { session: false }, async (err, user) => {
+    const language = req.header("x-language-alpha-2");
+
     if (err || !user) {
-      return next(notAuthenticated());
+      return next(notAuthenticated(language));
     }
     req.user = user;
 

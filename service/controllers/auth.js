@@ -14,10 +14,16 @@ import {
   cannotGenerateUserAccessToken,
 } from "#utils/errors";
 
+import { getYearInMilliseconds } from "#utils/helperFunctions";
+
 const JWT_KEY = process.env.JWT_KEY;
 
-export const issueAccessToken = async ({ user_id }) => {
-  const payload = { sub: user_id, iat: Math.floor(Date.now() / 1000) };
+export const issueAccessToken = async ({ user_id, userType }) => {
+  const payload = {
+    sub: user_id,
+    userType,
+    iat: Math.floor(Date.now() / 1000),
+  };
 
   const signedToken = jwt.sign(payload, JWT_KEY, {
     expiresIn: "2h",
@@ -32,18 +38,38 @@ export const issueAccessToken = async ({ user_id }) => {
   };
 };
 
-export const issueRefreshToken = async ({ user_id }) => {
+export const issueTmpAccessToken = async () => {
+  const payload = { sub: "tmp-user", iat: Math.floor(Date.now() / 1000) };
+
+  const signedToken = jwt.sign(payload, JWT_KEY, {
+    expiresIn: "9999 years", // never expires
+    issuer: "online.usupport.userApi",
+    audience: "online.usupport.app",
+    algorithm: "HS256",
+  });
+
+  return {
+    token: signedToken,
+    expiresIn: new Date(new Date().getTime() + 9999 * getYearInMilliseconds()), // 9999 years expiration
+  };
+};
+
+export const issueRefreshToken = async ({ country, user_id }) => {
   const refreshToken = uuidv4();
 
-  storeRefreshToken(user_id, refreshToken).catch((err) => {
+  storeRefreshToken(country, user_id, refreshToken).catch((err) => {
     throw err;
   });
 
   return refreshToken;
 };
 
-export const refreshAccessToken = async ({ refreshToken }) => {
-  const refreshTokenData = await getRefreshToken(refreshToken)
+export const refreshAccessToken = async ({
+  country,
+  language,
+  refreshToken,
+}) => {
+  const refreshTokenData = await getRefreshToken(country, refreshToken)
     .then((res) => res.rows[0])
     .catch((err) => {
       throw err;
@@ -54,20 +80,22 @@ export const refreshAccessToken = async ({ refreshToken }) => {
   // valid for 31 days
 
   if (!refreshTokenData || refreshTokenData.used) {
-    throw invalidRefreshToken();
+    throw invalidRefreshToken(language);
   } else if (expiresIn < now) {
-    await invalidateRefreshToken(refreshToken).catch((err) => {
+    await invalidateRefreshToken(country, refreshToken).catch((err) => {
       throw err;
     });
-    throw invalidRefreshToken();
+    throw invalidRefreshToken(language);
   } else {
-    await invalidateRefreshToken(refreshToken).catch((err) => {
+    await invalidateRefreshToken(country, refreshToken).catch((err) => {
       throw err;
     });
     const newAccessToken = await issueAccessToken({
       user_id: refreshTokenData.user_id,
+      userType: refreshTokenData.user_type,
     });
     const newRefreshToken = await issueRefreshToken({
+      country,
       user_id: refreshTokenData.user_id,
     });
 
@@ -78,10 +106,10 @@ export const refreshAccessToken = async ({ refreshToken }) => {
   }
 };
 
-export const generateAccessToken = async (retryStep = 0) => {
+export const generateAccessToken = async (country, language, retryStep = 0) => {
   if (retryStep === 3) {
     // Retry to generate new token 3 times if newly generated is used
-    throw cannotGenerateUserAccessToken();
+    throw cannotGenerateUserAccessToken(language);
   }
 
   const alphabet =
@@ -90,6 +118,7 @@ export const generateAccessToken = async (retryStep = 0) => {
   const newUserAccessToken = nanoid();
 
   const isAccessTokenAvailableQuery = await getClientUserByEmailOrAccessToken(
+    country,
     null,
     newUserAccessToken
   ).catch((err) => {
@@ -97,7 +126,7 @@ export const generateAccessToken = async (retryStep = 0) => {
   });
 
   if (isAccessTokenAvailableQuery.rowCount > 0) {
-    return generateAccessToken(retryStep + 1);
+    return generateAccessToken(country, language, retryStep + 1);
   } else {
     return { userAccessToken: newUserAccessToken };
   }
