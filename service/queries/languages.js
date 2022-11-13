@@ -1,6 +1,16 @@
 import { getDBPool } from "#utils/dbConfig";
 
-export const getAllActiveLanguages = async () =>
+export const getAllLanguagesQuery = async () =>
+  await getDBPool("masterDb").query(
+    `
+      SELECT * 
+      FROM "language"
+      ORDER BY "name" DESC;
+        
+    `
+  );
+
+export const getAllActiveLanguagesQuery = async () =>
   await getDBPool("masterDb").query(
     `
       SELECT * 
