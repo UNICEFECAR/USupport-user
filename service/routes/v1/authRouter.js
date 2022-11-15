@@ -53,7 +53,6 @@ router.post(
     const country = req.header("x-country-alpha-2");
     const user = req.user;
 
-    console.log(user, "user");
     const accessToken = await issueAccessToken({
       user_id: user.user_id,
       userType: user.type,
