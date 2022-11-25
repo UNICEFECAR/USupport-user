@@ -7,6 +7,7 @@ export default {
   user_not_found_error: "User not found",
   notification_preferences_not_found_error:
     "Notification preferences not found",
+  country_not_found_error: "Country not found",
   email_already_used_error: "This email is already used",
   user_access_token_already_used_error:
     "This user access token is not available",

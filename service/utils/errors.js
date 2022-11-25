@@ -79,3 +79,11 @@ export const notificationPreferencesNotFound = (language) => {
   error.status = 404;
   return error;
 };
+
+export const countryNotFound = (language) => {
+  const error = new Error();
+  error.message = t("country_not_found_error", language);
+  error.name = "COUNTRY NOT FOUND";
+  error.status = 404;
+  return error;
+};
