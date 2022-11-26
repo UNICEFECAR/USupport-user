@@ -1,13 +1,18 @@
 import { getDBPool } from "#utils/dbConfig";
 
-export const storeRefreshToken = async (poolCountry, user_id, refreshToken) =>
+export const storeRefreshToken = async (
+  poolCountry,
+  user_id,
+  refreshToken,
+  expiryInterval
+) =>
   await getDBPool("piiDb", poolCountry).query(
     `
         INSERT INTO refresh_token (user_id, token, expires_at)
-        VALUES ($1, $2, NOW() + INTERVAL '31 DAYS')
+        VALUES ($1, $2, NOW() + $3 * INTERVAL '1 MINUTE')
         RETURNING *;
     `,
-    [user_id, refreshToken]
+    [user_id, refreshToken, expiryInterval]
   );
 
 export const getRefreshToken = async (poolCountry, token) =>
