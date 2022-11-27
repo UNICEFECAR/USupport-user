@@ -31,6 +31,7 @@ router.post(
     const refreshToken = await issueRefreshToken({
       country,
       user_id: user.user_id,
+      userType: user.type,
     });
 
     const result = {
@@ -60,6 +61,7 @@ router.post(
     const refreshToken = await issueRefreshToken({
       country,
       user_id: user.user_id,
+      userType: user.type,
     });
 
     const result = {

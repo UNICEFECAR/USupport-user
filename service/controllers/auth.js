@@ -54,12 +54,21 @@ export const issueTmpAccessToken = async () => {
   };
 };
 
-export const issueRefreshToken = async ({ country, user_id }) => {
+export const issueRefreshToken = async ({ country, user_id, userType }) => {
   const refreshToken = uuidv4();
 
-  storeRefreshToken(country, user_id, refreshToken).catch((err) => {
-    throw err;
-  });
+  let expiryInterval = "";
+  if (userType === "client") {
+    expiryInterval = `${60 * 24 * 31}`; // 31 days
+  } else if (userType === "provider") {
+    expiryInterval = "150"; // 150 minutes
+  }
+
+  storeRefreshToken(country, user_id, refreshToken, expiryInterval).catch(
+    (err) => {
+      throw err;
+    }
+  );
 
   return refreshToken;
 };
@@ -97,6 +106,7 @@ export const refreshAccessToken = async ({
     const newRefreshToken = await issueRefreshToken({
       country,
       user_id: refreshTokenData.user_id,
+      userType: refreshTokenData.user_type,
     });
 
     return {
