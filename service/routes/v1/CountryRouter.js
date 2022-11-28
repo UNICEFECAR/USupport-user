@@ -3,13 +3,9 @@ import express from "express";
 import {
   getAllCountries,
   getCountryByAlpha2Code,
-  updateCountryMinMaxClientAge,
 } from "#controllers/countries";
 
-import {
-  getCountryByAlpha2CodeSchema,
-  updateCountryMinMaxClientAgeSchema,
-} from "#schemas/countrySchemas";
+import { getCountryByAlpha2CodeSchema } from "#schemas/countrySchemas";
 
 const router = express.Router();
 
@@ -38,26 +34,6 @@ router.get("/by-alpha-2-code", async (req, res, next) => {
     .strict(true)
     .validate({ country, language })
     .then(getCountryByAlpha2Code)
-    .then((result) => res.status(200).send(result))
-    .catch(next);
-});
-
-router.put("/min-max-client-age", async (req, res, next) => {
-  /**
-   * #route   PUT /user/v1/countries/min-max-client-age
-   * #desc    Update the country min and max client age
-   */
-
-  const country = req.header("x-country-alpha-2");
-  const language = req.header("x-language-alpha-2");
-
-  const payload = req.body;
-
-  return await updateCountryMinMaxClientAgeSchema
-    .noUnknown(true)
-    .strict(true)
-    .validate({ country, language, ...payload })
-    .then(updateCountryMinMaxClientAge)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
