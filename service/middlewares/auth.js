@@ -132,10 +132,10 @@ passport.use(
           });
 
         produceSendEmail({
-          emailType: "singupWelcome",
+          emailType: "signupWelcome",
           language,
           recipientEmail: newUser.email,
-          emailArgs: { username: newUser.nickname },
+          emailArgs: { username: newUser.nickname, platform: userType },
         }).catch(console.log);
 
         return done(null, newUser);

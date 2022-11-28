@@ -10,14 +10,12 @@ const producer = kafka.producer();
 export const produceSendEmail = async ({
   emailType,
   language,
-  recipientUserId,
   recipientEmail,
   emailArgs,
 }) => {
   const payload = JSON.stringify({
     emailType,
     language,
-    recipientUserId,
     recipientEmail,
     emailArgs,
   });
