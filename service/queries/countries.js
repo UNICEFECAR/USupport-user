@@ -22,18 +22,3 @@ export const getCountryByAlpha2CodeQuery = async ({ country }) =>
     `,
     [country]
   );
-
-export const updateCountryMinMaxClientAgeQuery = async ({
-  country,
-  minClientAge,
-  maxClientAge,
-}) =>
-  await getDBPool("masterDb").query(
-    `
-      UPDATE "country"
-      SET "min_client_age" = $2, "max_client_age" = $3
-      WHERE "alpha2" = $1
-      RETURNING *;
-    `,
-    [country, minClientAge, maxClientAge]
-  );

@@ -17,7 +17,12 @@ const sexTypeSchema = yup
 
 const specializationsTypeSchema = yup
   .array()
-  .of(yup.array(["psychologist", "psychotherapist", "psychiatrist", "coach"]));
+  .of(
+    yup
+      .string()
+      .oneOf(["psychologist", "psychotherapist", "psychiatrist", "coach"])
+  );
+const urbanRuralTypeSchema = yup.string().oneOf(["urban", "rural"]);
 
 const createClientSchema = (language) =>
   yup.object().shape(
@@ -41,6 +46,7 @@ const createClientSchema = (language) =>
       image: yup.string().notRequired(),
       sex: sexTypeSchema.notRequired(),
       yearOfBirth: yup.number().positive().notRequired(),
+      urbanRural: urbanRuralTypeSchema.notRequired(),
     },
     ["userAccessToken", "email"]
   );
