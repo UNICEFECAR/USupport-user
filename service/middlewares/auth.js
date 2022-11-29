@@ -23,6 +23,7 @@ import {
   notAuthenticated,
   userAccessTokenUsed,
 } from "#utils/errors";
+import { produceSendEmail } from "#utils/kafkaProducers";
 
 const localStrategy = passportLocal.Strategy;
 const jwtStrategy = passportJWT.Strategy;
@@ -130,7 +131,12 @@ passport.use(
             throw err;
           });
 
-        // TODO: Send welcome email
+        produceSendEmail({
+          emailType: "signupWelcome",
+          language,
+          recipientEmail: newUser.email,
+          emailArgs: { username: newUser.nickname, platform: userType },
+        }).catch(console.log);
 
         return done(null, newUser);
       } catch (error) {

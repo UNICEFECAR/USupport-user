@@ -11,6 +11,7 @@ import {
 } from "#queries/rescue";
 
 import { updatePassword } from "#utils/helperFunctions";
+import { produceSendEmail } from "#utils/kafkaProducers";
 
 import { userNotFound, invalidResetPasswordToken } from "#utils/errors";
 
@@ -48,17 +49,22 @@ export const sendForgotPasswordEmail = async ({
       });
   }
 
-  const forgotPassToken = nanoid(16);
+  const forgotPasswordToken = nanoid(16);
 
   await storeForgotPasswordTokenQuery({
     poolCountry: country,
     user_id: user.user_id,
-    forgotPassToken,
+    forgotPassToken: forgotPasswordToken,
   });
 
-  //   TODO: Send email with forgot pass token and don't return it in the request
+  produceSendEmail({
+    emailType: "forgotPassword",
+    language,
+    recipientEmail: user.email,
+    emailArgs: { username: user.nickname, forgotPasswordToken, platform: type },
+  }).catch(console.log);
 
-  return { forgotPassToken };
+  return { success: true };
 };
 
 export const resetForgotPassword = async ({
