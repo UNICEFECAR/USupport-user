@@ -7,22 +7,24 @@ const kafka = new Kafka({
 
 const producer = kafka.producer();
 
-export const produceSendEmail = async ({
-  emailType,
-  language,
-  recipientEmail,
+export const produceRaiseNotification = async ({
+  channels,
   emailArgs,
+  inPlatformArgs,
+  pushArgs,
+  language,
 }) => {
   const payload = JSON.stringify({
-    emailType,
-    language,
-    recipientEmail,
+    channels,
     emailArgs,
+    inPlatformArgs,
+    pushArgs,
+    language,
   });
 
   await producer.connect();
   await producer.send({
-    topic: "send-email",
+    topic: "send-notification",
     messages: [{ value: payload }],
   });
 };
