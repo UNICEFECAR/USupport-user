@@ -76,13 +76,13 @@ router.post(
 router.post("/tmp-login", async (req, res) => {
   /**
    * #route   POST /user/v1/auth/tmp-login
-   * #desc    Temporrary login a user
+   * #desc    Temporrary login a client using JWT token
    */
   const tmpAccessToken = await issueTmpAccessToken();
   const refreshToken = "tmp-refresh-token";
 
   const result = {
-    token: { ...tmpAccessToken, refreshToken },
+    token: { ...tmpAccessToken, refreshToken, userType: "client" },
   };
 
   return res.status(200).send(result);

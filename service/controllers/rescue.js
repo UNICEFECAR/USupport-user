@@ -11,7 +11,7 @@ import {
 } from "#queries/rescue";
 
 import { updatePassword } from "#utils/helperFunctions";
-import { produceSendEmail } from "#utils/kafkaProducers";
+import { produceRaiseNotification } from "#utils/kafkaProducers";
 
 import { userNotFound, invalidResetPasswordToken } from "#utils/errors";
 
@@ -57,11 +57,17 @@ export const sendForgotPasswordEmail = async ({
     forgotPassToken: forgotPasswordToken,
   });
 
-  produceSendEmail({
-    emailType: "forgotPassword",
+  produceRaiseNotification({
+    channels: ["email"],
+    emailArgs: {
+      emailType: "forgotPassword",
+      recipientEmail: email,
+      data: {
+        forgotPasswordToken,
+        platform: type,
+      },
+    },
     language,
-    recipientEmail: user.email,
-    emailArgs: { username: user.nickname, forgotPasswordToken, platform: type },
   }).catch(console.log);
 
   return { success: true };

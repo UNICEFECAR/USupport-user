@@ -23,7 +23,7 @@ import {
   notAuthenticated,
   userAccessTokenUsed,
 } from "#utils/errors";
-import { produceSendEmail } from "#utils/kafkaProducers";
+import { produceRaiseNotification } from "#utils/kafkaProducers";
 
 const localStrategy = passportLocal.Strategy;
 const jwtStrategy = passportJWT.Strategy;
@@ -131,12 +131,20 @@ passport.use(
             throw err;
           });
 
-        produceSendEmail({
-          emailType: "signupWelcome",
-          language,
-          recipientEmail: newUser.email,
-          emailArgs: { username: newUser.nickname, platform: userType },
-        }).catch(console.log);
+        if (userType === "client" && newUser.email) {
+          produceRaiseNotification({
+            channels: ["email"],
+            emailArgs: {
+              emailType: "signupWelcome",
+              recipientEmail: newUser.email,
+              data: {
+                username: newUser.nickname,
+                platform: userType,
+              },
+            },
+            language,
+          }).catch(console.log);
+        }
 
         return done(null, newUser);
       } catch (error) {
