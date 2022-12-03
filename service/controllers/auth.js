@@ -78,11 +78,15 @@ export const refreshAccessToken = async ({
   language,
   refreshToken,
 }) => {
-  const refreshTokenData = await getRefreshToken(country, refreshToken)
-    .then((res) => res.rows[0])
-    .catch((err) => {
-      throw err;
-    });
+  const refreshTokenData = await getRefreshToken(country, refreshToken).then(
+    (res) => {
+      if (res.rowCount === 0) {
+        throw invalidRefreshToken(language);
+      } else {
+        return res.rows[0];
+      }
+    }
+  );
 
   const now = new Date().getTime();
   const expiresIn = new Date(refreshTokenData.expires_at).getTime();
