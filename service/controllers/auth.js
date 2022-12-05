@@ -39,7 +39,11 @@ export const issueAccessToken = async ({ user_id, userType }) => {
 };
 
 export const issueTmpAccessToken = async () => {
-  const payload = { sub: "tmp-user", iat: Math.floor(Date.now() / 1000) };
+  const payload = {
+    sub: "tmp-user",
+    userType: "client",
+    iat: Math.floor(Date.now() / 1000),
+  };
 
   const signedToken = jwt.sign(payload, JWT_KEY, {
     expiresIn: "9999 years", // never expires
