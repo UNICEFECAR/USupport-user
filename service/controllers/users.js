@@ -6,9 +6,18 @@ import {
   updateNotificationPreferencesQuery,
 } from "#queries/users";
 import { userNotFound, notificationPreferencesNotFound } from "#utils/errors";
-import { updatePassword } from "#utils/helperFunctions";
+import { updatePassword, videoToken } from "#utils/helperFunctions";
 
 import { incorrectPassword } from "#utils/errors";
+
+const TWILIO_CONFIG = {
+  twilio: {
+    accountSid: process.env.TWILIO_ACCOUNT_SID,
+    apiSid: process.env.TWILIO_API_SID,
+    apiSecret: process.env.TWILIO_API_SECRET,
+    authToken: process.env.TWILIO_AUTH_TOKEN,
+  },
+};
 
 export const getSharedUserData = async ({ country, language, user_id }) => {
   return await getUserByID(country, user_id)
@@ -97,4 +106,12 @@ export const updateNotificationPreferences = async ({
     .catch((err) => {
       throw err;
     });
+};
+
+export const getTwilioToken = async ({ userId, consultationId }) => {
+  return TWILIO_CONFIG;
+
+  // const token = videoToken(userId, consultationId, TWILIO_CONFIG);
+
+  // return { token: token.toJwt() };
 };

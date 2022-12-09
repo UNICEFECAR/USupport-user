@@ -5,6 +5,7 @@ import {
   changeUserPassword,
   getNotificationPreferences,
   updateNotificationPreferences,
+  getTwilioToken,
 } from "#controllers/users";
 
 import { securedRoute } from "#middlewares/auth";
@@ -13,6 +14,7 @@ import {
   changePasswordSchema,
   getNotificationPreferencesSchema,
   updateNotificationPreferencesSchema,
+  getTwilioTokenSchema,
 } from "#schemas/userSchemas";
 
 const router = express.Router();
@@ -91,6 +93,29 @@ router
       .strict(true)
       .validate({ country, language, notification_preference_id, ...payload })
       .then(updateNotificationPreferences)
+      .then((result) => res.status(200).send(result))
+      .catch(next);
+  });
+
+router
+  .route("/consultation/twilio-token")
+  .get(securedRoute, async (req, res, next) => {
+    /**
+     * #route   GET /user/v1/user/consultation/twilio-token
+     * #desc    Get client/provider twilio token
+     */
+    const country = req.header("x-country-alpha-2");
+    const language = req.header("x-language-alpha-2");
+
+    const userId = req.user.user_id;
+
+    const consultationId = req.query.consultationId;
+
+    return await getTwilioTokenSchema
+      .noUnknown(true)
+      .strict(true)
+      .validate({ country, language, userId, consultationId })
+      .then(getTwilioToken)
       .then((result) => res.status(200).send(result))
       .catch(next);
   });
