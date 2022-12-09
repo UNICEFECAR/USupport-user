@@ -109,9 +109,7 @@ export const updateNotificationPreferences = async ({
 };
 
 export const getTwilioToken = async ({ userId, consultationId }) => {
-  return TWILIO_CONFIG;
+  const token = videoToken(userId, consultationId, TWILIO_CONFIG);
 
-  // const token = videoToken(userId, consultationId, TWILIO_CONFIG);
-
-  // return { token: token.toJwt() };
+  return { token: token.toJwt() };
 };
