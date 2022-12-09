@@ -117,3 +117,10 @@ export const updateNotificationPreferencesSchema = yup.object().shape({
   inPlatform: yup.boolean().required(),
   push: yup.boolean().required(),
 });
+
+export const getTwilioTokenSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  consultationId: yup.string().uuid().required(),
+  userId: yup.string().uuid().required(),
+});
