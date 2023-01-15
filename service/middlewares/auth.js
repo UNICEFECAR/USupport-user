@@ -16,6 +16,8 @@ import {
 import { createUserSchema } from "#schemas/userSchemas";
 import { userLoginSchema } from "#schemas/authSchemas";
 
+import { generatePassword } from "#utils/helperFunctions";
+
 import {
   emailUsed,
   incorrectEmail,
@@ -58,7 +60,12 @@ passport.use(
 
         let currentUser;
 
+        const salt = await bcrypt.genSalt(12);
+        let hashedPass, randomlyGeneratedPassword;
+
         if (userType === "client") {
+          hashedPass = await bcrypt.hash(password, salt);
+
           currentUser = await getClientUserByEmailOrAccessToken(
             country,
             clientData.email,
@@ -69,6 +76,8 @@ passport.use(
               throw err;
             });
         } else if (userType === "provider") {
+          randomlyGeneratedPassword = generatePassword(10);
+          hashedPass = await bcrypt.hash(randomlyGeneratedPassword, salt);
           currentUser = await getProviderUserByEmail(
             country,
             providerData.email
@@ -86,9 +95,6 @@ passport.use(
             return done(userAccessTokenUsed(language));
           }
         }
-
-        const salt = await bcrypt.genSalt(12);
-        const hashedPass = await bcrypt.hash(password, salt);
 
         let newUser = await createUser({
           poolCountry: country,
@@ -140,6 +146,20 @@ passport.use(
               data: {
                 username: newUser.nickname,
                 platform: userType,
+              },
+            },
+            language,
+          }).catch(console.log);
+        }
+
+        if (userType === "provider" && newUser.email) {
+          produceRaiseNotification({
+            channels: ["email"],
+            emailArgs: {
+              emailType: "provider-registration",
+              recipientEmail: newUser.email,
+              data: {
+                password: randomlyGeneratedPassword,
               },
             },
             language,
