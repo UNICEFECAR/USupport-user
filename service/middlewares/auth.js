@@ -14,7 +14,10 @@ import {
 } from "#queries/users";
 
 import { createUserSchema } from "#schemas/userSchemas";
-import { userLoginSchema } from "#schemas/authSchemas";
+import {
+  userLoginSchema,
+  provider2FARequestSchema,
+} from "#schemas/authSchemas";
 
 import { generatePassword } from "#utils/helperFunctions";
 
@@ -24,6 +27,7 @@ import {
   incorrectPassword,
   notAuthenticated,
   userAccessTokenUsed,
+  invalidOTP,
 } from "#utils/errors";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
 
@@ -187,7 +191,7 @@ passport.use(
 
       try {
         const country = req.header("x-country-alpha-2");
-        const { email, password, userAccessToken, userType } =
+        const { email, password, userAccessToken, userType, otp } =
           await userLoginSchema(language)
             .noUnknown(true)
             .strict()
@@ -239,7 +243,67 @@ passport.use(
           return done(incorrectPassword(language));
         }
 
+        if (userType === "provider") {
+          // TODO: Validate OTP
+
+          // If invalid
+          return done(invalidOTP(language));
+        }
+
         return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    }
+  )
+);
+
+passport.use(
+  "2fa-request",
+  new localStrategy(
+    {
+      usernameField: "password",
+      passwordField: "password",
+      passReqToCallback: true,
+    },
+    async (req, emailIn, passwordIn, done) => {
+      try {
+        const language = req.header("x-language-alpha-2");
+        const country = req.header("x-country-alpha-2");
+
+        const { email, password } = await provider2FARequestSchema
+          .noUnknown(true)
+          .strict()
+          .validate({
+            ...req.body,
+            password: passwordIn,
+          })
+          .catch((err) => {
+            throw err;
+          });
+
+        const providerUser = await getProviderUserByEmail(country, email)
+          .then((res) => res.rows[0])
+          .catch((err) => {
+            throw err;
+          });
+
+        if (!providerUser) {
+          return done(incorrectEmail(language));
+        }
+
+        const validatePassword = await bcrypt.compare(
+          password,
+          providerUser.password
+        );
+
+        if (!validatePassword) {
+          return done(incorrectPassword(language));
+        }
+
+        //TODO: Generate OTP
+
+        return done(null, { success: true });
       } catch (error) {
         return done(error);
       }

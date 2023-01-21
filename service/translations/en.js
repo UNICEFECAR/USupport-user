@@ -17,4 +17,5 @@ export default {
   invalid_refresh_token_error: "Refresh token invalid or already used",
   cannot_generate_user_access_token_error: `Couldn't generate a new random user access token. Please try again`,
   invalid_reset_password_token_error: "Invalid or expired reset password token",
+  invalid_provider_otp_error: "Invalid OTP",
 };

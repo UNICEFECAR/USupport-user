@@ -40,6 +40,14 @@ export const incorrectPassword = (language) => {
   return error;
 };
 
+export const invalidOTP = (language) => {
+  const error = new Error();
+  error.message = t("invalid_provider_otp_error", language);
+  error.name = "INVALID OTP";
+  error.status = 401;
+  return error;
+};
+
 export const notAuthenticated = (language) => {
   const error = new Error();
   error.message = t("not_authenticated_error", language);
