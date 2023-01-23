@@ -87,8 +87,8 @@ passport.use(
               throw err;
             });
         } else if (userType === "provider") {
-          // randomlyGeneratedPassword = generatePassword(10);
-          hashedPass = await bcrypt.hash(password, salt);
+          randomlyGeneratedPassword = generatePassword(10);
+          hashedPass = await bcrypt.hash(randomlyGeneratedPassword, salt);
           currentUser = await getProviderUserByEmail(
             country,
             providerData.email
