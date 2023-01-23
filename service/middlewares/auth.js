@@ -12,6 +12,12 @@ import {
   createProviderDetailWorkWithLink,
   createProviderDetailLanguageLink,
 } from "#queries/users";
+import {
+  storeAuthOTP,
+  getAuthOTP,
+  getUserLastAuthOTP,
+  changeOTPToUsed,
+} from "#queries/authOTP";
 
 import { createUserSchema } from "#schemas/userSchemas";
 import {
@@ -19,7 +25,7 @@ import {
   provider2FARequestSchema,
 } from "#schemas/authSchemas";
 
-import { generatePassword } from "#utils/helperFunctions";
+import { generate4DigitCode, generatePassword } from "#utils/helperFunctions";
 
 import {
   emailUsed,
@@ -28,6 +34,7 @@ import {
   notAuthenticated,
   userAccessTokenUsed,
   invalidOTP,
+  tooManyOTPRequests,
 } from "#utils/errors";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
 
@@ -195,10 +202,7 @@ passport.use(
           await userLoginSchema(language)
             .noUnknown(true)
             .strict()
-            .validate({
-              password: passwordIn,
-              ...req.body,
-            })
+            .validate({ ...req.body, password: passwordIn })
             .catch((err) => {
               throw err;
             });
@@ -244,10 +248,12 @@ passport.use(
         }
 
         if (userType === "provider") {
-          // TODO: Validate OTP
+          const userOTP = await getAuthOTP(country, otp, user.user_id);
 
-          // If invalid
-          return done(invalidOTP(language));
+          if (userOTP.rowCount === 0) {
+            // OTP not found or already used
+            return done(invalidOTP(language));
+          }
         }
 
         return done(null, user);
@@ -274,10 +280,7 @@ passport.use(
         const { email, password } = await provider2FARequestSchema
           .noUnknown(true)
           .strict()
-          .validate({
-            ...req.body,
-            password: passwordIn,
-          })
+          .validate({ ...req.body, password: passwordIn })
           .catch((err) => {
             throw err;
           });
@@ -301,7 +304,45 @@ passport.use(
           return done(incorrectPassword(language));
         }
 
-        //TODO: Generate OTP
+        const userLastOTP = await getUserLastAuthOTP(
+          country,
+          providerUser.user_id
+        )
+          .then((data) => data.rows[0])
+          .catch((err) => {
+            throw err;
+          });
+
+        if (userLastOTP) {
+          const lastOTPTime = new Date(userLastOTP.created_at).getTime();
+          const now = new Date().getTime();
+
+          if ((lastOTPTime - now) / 1000 < 60) {
+            // Users can request one OTP every 60 seconds
+            throw tooManyOTPRequests();
+          } else {
+            // invalidate last OTP generated before generating a new one
+            await changeOTPToUsed(country, userLastOTP.id).catch((err) => {
+              throw err;
+            });
+          }
+        }
+
+        // TODO: Generate & store OTP
+        const otp = generate4DigitCode();
+        await storeAuthOTP(country, providerUser.user_id, otp).catch((err) => {
+          throw err;
+        });
+
+        produceRaiseNotification({
+          channels: ["email"],
+          emailArgs: {
+            emailType: "login-2fa-request",
+            recipientEmail: email,
+            data: { otp },
+          },
+          language,
+        }).catch(console.log);
 
         return done(null, { success: true });
       } catch (error) {

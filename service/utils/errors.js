@@ -95,3 +95,11 @@ export const countryNotFound = (language) => {
   error.status = 404;
   return error;
 };
+
+export const tooManyOTPRequests = (language) => {
+  const error = new Error();
+  error.message = t("too_many_otp_requests_error", language);
+  error.name = "TOO MANY OTP REQUESTS";
+  error.status = 429;
+  return error;
+};
