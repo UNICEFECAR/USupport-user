@@ -87,8 +87,8 @@ passport.use(
               throw err;
             });
         } else if (userType === "provider") {
-          randomlyGeneratedPassword = generatePassword(10);
-          hashedPass = await bcrypt.hash(randomlyGeneratedPassword, salt);
+          // randomlyGeneratedPassword = generatePassword(10);
+          hashedPass = await bcrypt.hash(password, salt);
           currentUser = await getProviderUserByEmail(
             country,
             providerData.email
@@ -202,7 +202,7 @@ passport.use(
           await userLoginSchema(language)
             .noUnknown(true)
             .strict()
-            .validate({ ...req.body, password: passwordIn })
+            .validate({ password: passwordIn, ...req.body })
             .catch((err) => {
               throw err;
             });
@@ -248,12 +248,27 @@ passport.use(
         }
 
         if (userType === "provider") {
-          const userOTP = await getAuthOTP(country, otp, user.user_id);
+          const userOTP = await getAuthOTP(country, otp, user.user_id).then(
+            (data) => data.rows[0]
+          );
 
-          if (userOTP.rowCount === 0) {
+          if (userOTP === undefined) {
             // OTP not found or already used
             return done(invalidOTP(language));
+          } else {
+            const OTPCreatedAt = new Date(userOTP.created_at).getTime();
+            const now = new Date().getTime();
+
+            if ((OTPCreatedAt - now) / 1000 > 60 * 30) {
+              // OTP is valid for 30 mins
+              return done(invalidOTP(language));
+            }
           }
+
+          // each OTP can be used only once
+          await changeOTPToUsed(country, userOTP.id).catch((err) => {
+            throw err;
+          });
         }
 
         return done(null, user);
@@ -313,7 +328,7 @@ passport.use(
             throw err;
           });
 
-        if (userLastOTP) {
+        if (userLastOTP !== undefined) {
           const lastOTPTime = new Date(userLastOTP.created_at).getTime();
           const now = new Date().getTime();
 
@@ -328,7 +343,6 @@ passport.use(
           }
         }
 
-        // TODO: Generate & store OTP
         const otp = generate4DigitCode();
         await storeAuthOTP(country, providerUser.user_id, otp).catch((err) => {
           throw err;

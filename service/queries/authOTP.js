@@ -13,7 +13,7 @@ export const storeAuthOTP = async (poolCountry, user_id, otp) =>
 export const getAuthOTP = async (poolCountry, otp, user_id) =>
   await getDBPool("piiDb", poolCountry).query(
     `
-        SELECT otp, user_id, user, created_at
+        SELECT *
         FROM auth_otp
         WHERE otp = $1 
           AND user_id = $2
@@ -25,10 +25,9 @@ export const getAuthOTP = async (poolCountry, otp, user_id) =>
 export const getUserLastAuthOTP = async (poolCountry, user_id) =>
   await getDBPool("piiDb", poolCountry).query(
     `
-        SELECT id, otp, user_id, user, created_at
+        SELECT *
         FROM auth_otp
         WHERE user_id = $1
-          AND used = false
         ORDER BY created_at DESC
         LIMIT 1;
     `,
