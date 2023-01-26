@@ -6,6 +6,7 @@ import {
   getNotificationPreferences,
   updateNotificationPreferences,
   getTwilioToken,
+  addContactForm,
 } from "#controllers/users";
 
 import { securedRoute } from "#middlewares/auth";
@@ -15,6 +16,7 @@ import {
   getNotificationPreferencesSchema,
   updateNotificationPreferencesSchema,
   getTwilioTokenSchema,
+  addContactFormSchema,
 } from "#schemas/userSchemas";
 
 const router = express.Router();
@@ -119,5 +121,24 @@ router
       .then((result) => res.status(200).send(result))
       .catch(next);
   });
+
+router.route("/add-contact-form").post(async (req, res, next) => {
+  /**
+   * #route   POST /user/v1/user/add-contact-form
+   * #desc    Add contact form
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  const payload = req.body;
+
+  return await addContactFormSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ country, language, ...payload })
+    .then(addContactForm)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
 
 export { router };
