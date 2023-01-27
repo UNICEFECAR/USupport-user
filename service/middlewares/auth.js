@@ -283,7 +283,7 @@ passport.use(
   "2fa-request",
   new localStrategy(
     {
-      usernameField: "password",
+      usernameField: "email",
       passwordField: "password",
       passReqToCallback: true,
     },
@@ -295,7 +295,7 @@ passport.use(
         const { email, password } = await provider2FARequestSchema
           .noUnknown(true)
           .strict()
-          .validate({ ...req.body, password: passwordIn })
+          .validate({ ...req.body, email: emailIn, password: passwordIn })
           .catch((err) => {
             throw err;
           });
@@ -332,7 +332,7 @@ passport.use(
           const lastOTPTime = new Date(userLastOTP.created_at).getTime();
           const now = new Date().getTime();
 
-          if ((lastOTPTime - now) / 1000 < 60) {
+          if ((now - lastOTPTime) / 1000 < 60) {
             // Users can request one OTP every 60 seconds
             throw tooManyOTPRequests();
           } else {
