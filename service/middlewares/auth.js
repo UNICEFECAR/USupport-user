@@ -12,11 +12,20 @@ import {
   createProviderDetailWorkWithLink,
   createProviderDetailLanguageLink,
 } from "#queries/users";
+import {
+  storeAuthOTP,
+  getAuthOTP,
+  getUserLastAuthOTP,
+  changeOTPToUsed,
+} from "#queries/authOTP";
 
 import { createUserSchema } from "#schemas/userSchemas";
-import { userLoginSchema } from "#schemas/authSchemas";
+import {
+  userLoginSchema,
+  provider2FARequestSchema,
+} from "#schemas/authSchemas";
 
-import { generatePassword } from "#utils/helperFunctions";
+import { generate4DigitCode, generatePassword } from "#utils/helperFunctions";
 
 import {
   emailUsed,
@@ -24,6 +33,8 @@ import {
   incorrectPassword,
   notAuthenticated,
   userAccessTokenUsed,
+  invalidOTP,
+  tooManyOTPRequests,
 } from "#utils/errors";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
 
@@ -187,14 +198,11 @@ passport.use(
 
       try {
         const country = req.header("x-country-alpha-2");
-        const { email, password, userAccessToken, userType } =
+        const { email, password, userAccessToken, userType, otp } =
           await userLoginSchema(language)
             .noUnknown(true)
             .strict()
-            .validate({
-              password: passwordIn,
-              ...req.body,
-            })
+            .validate({ password: passwordIn, ...req.body })
             .catch((err) => {
               throw err;
             });
@@ -239,7 +247,118 @@ passport.use(
           return done(incorrectPassword(language));
         }
 
+        if (userType === "provider") {
+          const userOTP = await getAuthOTP(country, otp, user.user_id).then(
+            (data) => data.rows[0]
+          );
+
+          if (userOTP === undefined) {
+            // OTP not found or already used
+            return done(invalidOTP(language));
+          } else {
+            const OTPCreatedAt = new Date(userOTP.created_at).getTime();
+            const now = new Date().getTime();
+
+            if ((OTPCreatedAt - now) / 1000 > 60 * 30) {
+              // OTP is valid for 30 mins
+              return done(invalidOTP(language));
+            }
+          }
+
+          // each OTP can be used only once
+          await changeOTPToUsed(country, userOTP.id).catch((err) => {
+            throw err;
+          });
+        }
+
         return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    }
+  )
+);
+
+passport.use(
+  "2fa-request",
+  new localStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+      passReqToCallback: true,
+    },
+    async (req, emailIn, passwordIn, done) => {
+      try {
+        const language = req.header("x-language-alpha-2");
+        const country = req.header("x-country-alpha-2");
+
+        const { email, password } = await provider2FARequestSchema
+          .noUnknown(true)
+          .strict()
+          .validate({ ...req.body, email: emailIn, password: passwordIn })
+          .catch((err) => {
+            throw err;
+          });
+
+        const providerUser = await getProviderUserByEmail(country, email)
+          .then((res) => res.rows[0])
+          .catch((err) => {
+            throw err;
+          });
+
+        if (!providerUser) {
+          return done(incorrectEmail(language));
+        }
+
+        const validatePassword = await bcrypt.compare(
+          password,
+          providerUser.password
+        );
+
+        if (!validatePassword) {
+          return done(incorrectPassword(language));
+        }
+
+        const userLastOTP = await getUserLastAuthOTP(
+          country,
+          providerUser.user_id
+        )
+          .then((data) => data.rows[0])
+          .catch((err) => {
+            throw err;
+          });
+
+        if (userLastOTP !== undefined) {
+          const lastOTPTime = new Date(userLastOTP.created_at).getTime();
+          const now = new Date().getTime();
+
+          if ((now - lastOTPTime) / 1000 < 60) {
+            // Users can request one OTP every 60 seconds
+            throw tooManyOTPRequests();
+          } else {
+            // invalidate last OTP generated before generating a new one
+            await changeOTPToUsed(country, userLastOTP.id).catch((err) => {
+              throw err;
+            });
+          }
+        }
+
+        const otp = generate4DigitCode();
+        await storeAuthOTP(country, providerUser.user_id, otp).catch((err) => {
+          throw err;
+        });
+
+        produceRaiseNotification({
+          channels: ["email"],
+          emailArgs: {
+            emailType: "login-2fa-request",
+            recipientEmail: email,
+            data: { otp },
+          },
+          language,
+        }).catch(console.log);
+
+        return done(null, { success: true });
       } catch (error) {
         return done(error);
       }

@@ -40,6 +40,14 @@ export const incorrectPassword = (language) => {
   return error;
 };
 
+export const invalidOTP = (language) => {
+  const error = new Error();
+  error.message = t("invalid_provider_otp_error", language);
+  error.name = "INVALID OTP";
+  error.status = 401;
+  return error;
+};
+
 export const notAuthenticated = (language) => {
   const error = new Error();
   error.message = t("not_authenticated_error", language);
@@ -85,5 +93,13 @@ export const countryNotFound = (language) => {
   error.message = t("country_not_found_error", language);
   error.name = "COUNTRY NOT FOUND";
   error.status = 404;
+  return error;
+};
+
+export const tooManyOTPRequests = (language) => {
+  const error = new Error();
+  error.message = t("too_many_otp_requests_error", language);
+  error.name = "TOO MANY OTP REQUESTS";
+  error.status = 429;
   return error;
 };
