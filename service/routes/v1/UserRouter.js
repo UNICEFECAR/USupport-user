@@ -39,6 +39,24 @@ router.get("/", securedRoute, async (req, res, next) => {
     .catch(next);
 });
 
+router.get("/:id", async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/user/:id
+   * #desc    Get user data by ID (Internal use only)
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const { id } = req.params;
+
+  return await getUserByIdSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ country, language, user_id: id })
+    .then(getSharedUserData)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
 router.patch("/password", securedRoute, async (req, res, next) => {
   /**
    * #route   PATCH /user/v1/user/password
