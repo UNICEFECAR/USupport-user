@@ -76,3 +76,7 @@ export const generatePassword = (length) => {
   if (passwordPattern.test(password)) return password;
   else return generatePassword(length);
 };
+
+export const generate4DigitCode = () => {
+  return Math.floor(Math.random() * 9000 + 1000);
+};

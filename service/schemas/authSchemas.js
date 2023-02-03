@@ -25,6 +25,15 @@ export const userLoginSchema = (language) =>
           .string()
           .required(t("email_or_access_token_required_error", language)),
       }),
+      otp: yup.string().when("userType", {
+        is: "provider",
+        then: yup.string().length(4).required(),
+      }),
     },
-    ["userAccessToken", "email"]
+    ["userAccessToken", "email", "otp"]
   );
+
+export const provider2FARequestSchema = yup.object().shape({
+  password: yup.string().required(),
+  email: yup.string().email().required(),
+});

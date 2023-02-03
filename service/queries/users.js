@@ -277,3 +277,18 @@ export const updateNotificationPreferencesQuery = async ({
       notification_preference_id,
     ]
   );
+
+export const addContactFormQuery = async ({
+  poolCountry,
+  email,
+  subject,
+  message,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+      INSERT INTO contact_form (email, subject, message)
+      VALUES ($1, $2, $3)
+      RETURNING *;
+    `,
+    [email, subject, message]
+  );

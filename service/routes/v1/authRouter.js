@@ -120,4 +120,17 @@ router.post("/refresh-token", async (req, res, next) => {
     .catch(next);
 });
 
+router.post(
+  "/2fa",
+  passport.authenticate("2fa-request", { session: false }),
+  async (req, res) => {
+    /**
+     * #route   POST /user/v1/auth/2fa
+     * #desc    Request 2fa OTP
+     */
+
+    return res.status(200).send(req.user);
+  }
+);
+
 export { router };

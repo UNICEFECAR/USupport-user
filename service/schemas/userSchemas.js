@@ -125,3 +125,11 @@ export const getTwilioTokenSchema = yup.object().shape({
   consultationId: yup.string().uuid().required(),
   userId: yup.string().uuid().required(),
 });
+
+export const addContactFormSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  email: yup.string().email().required(),
+  subject: yup.string().required(),
+  message: yup.string().required(),
+});

@@ -4,6 +4,7 @@ import {
   getUserByID,
   getNotificationPreferencesQuery,
   updateNotificationPreferencesQuery,
+  addContactFormQuery,
 } from "#queries/users";
 import { userNotFound, notificationPreferencesNotFound } from "#utils/errors";
 import { updatePassword, videoToken } from "#utils/helperFunctions";
@@ -112,4 +113,19 @@ export const getTwilioToken = async ({ userId, consultationId }) => {
   const token = videoToken(userId, consultationId, TWILIO_CONFIG);
 
   return { token: token.toJwt() };
+};
+
+export const addContactForm = async ({ country, language, ...payload }) => {
+  return await addContactFormQuery({
+    poolCountry: country,
+    ...payload,
+  })
+    .then((res) => {
+      if (res.rowCount > 0) return { success: true };
+
+      return { success: false };
+    })
+    .catch((err) => {
+      throw err;
+    });
 };
