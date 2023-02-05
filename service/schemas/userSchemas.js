@@ -94,10 +94,7 @@ export const createUserSchema = (language) =>
     ["client", "provider"]
   );
 
-export const changePasswordSchema = yup.object().shape({
-  country: yup.string().required(),
-  language: yup.string().required(),
-  user_id: yup.string().uuid().required(),
+export const changePasswordSchema = getUserByIdSchema.shape({
   oldPassword: yup.string().required(),
   newPassword: yup.string().matches(PASSWORD_REGEX).required(),
 });
@@ -108,22 +105,17 @@ export const getNotificationPreferencesSchema = yup.object().shape({
   notification_preference_id: yup.string().uuid().required(),
 });
 
-export const updateNotificationPreferencesSchema = yup.object().shape({
-  country: yup.string().required(),
-  language: yup.string().required(),
-  notification_preference_id: yup.string().uuid().required(),
-  email: yup.boolean().required(),
-  consultationReminder: yup.boolean().required(),
-  consultationReminderMin: yup.number().positive().max(60).required(),
-  inPlatform: yup.boolean().required(),
-  push: yup.boolean().required(),
-});
+export const updateNotificationPreferencesSchema =
+  getNotificationPreferencesSchema.shape({
+    email: yup.boolean().required(),
+    consultationReminder: yup.boolean().required(),
+    consultationReminderMin: yup.number().positive().max(60).required(),
+    inPlatform: yup.boolean().required(),
+    push: yup.boolean().required(),
+  });
 
-export const getTwilioTokenSchema = yup.object().shape({
-  country: yup.string().required(),
-  language: yup.string().required(),
+export const getTwilioTokenSchema = getUserByIdSchema.shape({
   consultationId: yup.string().uuid().required(),
-  userId: yup.string().uuid().required(),
 });
 
 export const addContactFormSchema = yup.object().shape({
