@@ -114,7 +114,7 @@ router.post("/refresh-token", async (req, res, next) => {
   return await refreshAccessTokenSchema
     .noUnknown(true)
     .strict()
-    .validate({ country, language, ...payload })
+    .validate({ ...payload, country, language })
     .then(refreshAccessToken)
     .then((result) => res.status(200).send(result))
     .catch(next);

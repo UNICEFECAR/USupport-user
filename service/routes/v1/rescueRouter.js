@@ -22,8 +22,7 @@ router
     const country = req.header("x-country-alpha-2");
     const language = req.header("x-language-alpha-2");
 
-    const { email } = req.query;
-    const { type } = req.query;
+    const { email, type } = req.query;
 
     return await initForgotPasswordSchema
       .noUnknown(true)
@@ -46,7 +45,7 @@ router
     return await resetForgotPasswordSchema
       .noUnknown(true)
       .strict(true)
-      .validate({ country, language, ...payload })
+      .validate({ ...payload, country, language })
       .then(resetForgotPassword)
       .then((result) => res.status(200).send(result))
       .catch(next);

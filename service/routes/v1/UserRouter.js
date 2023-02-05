@@ -53,7 +53,7 @@ router.patch("/password", securedRoute, async (req, res, next) => {
   return await changePasswordSchema
     .noUnknown(true)
     .strict(true)
-    .validate({ country, language, user_id, ...payload })
+    .validate({ ...payload, country, language, user_id })
     .then(changeUserPassword)
     .then((result) => res.status(200).send(result))
     .catch(next);
@@ -105,13 +105,12 @@ router
     const language = req.header("x-language-alpha-2");
 
     const notification_preference_id = req.user.notification_preference_id;
-
     const payload = req.body;
 
     return await updateNotificationPreferencesSchema
       .noUnknown(true)
       .strict(true)
-      .validate({ country, language, notification_preference_id, ...payload })
+      .validate({ ...payload, country, language, notification_preference_id })
       .then(updateNotificationPreferences)
       .then((result) => res.status(200).send(result))
       .catch(next);
@@ -152,7 +151,7 @@ router.route("/add-contact-form").post(async (req, res, next) => {
   return await addContactFormSchema
     .noUnknown(true)
     .strict(true)
-    .validate({ country, language, ...payload })
+    .validate({ ...payload, country, language })
     .then(addContactForm)
     .then((result) => res.status(200).send(result))
     .catch(next);
