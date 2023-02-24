@@ -18,7 +18,7 @@ import { getYearInMilliseconds } from "#utils/helperFunctions";
 
 const JWT_KEY = process.env.JWT_KEY;
 
-export const issueAccessToken = async ({ user_id, userType }) => {
+export const issueAccessToken = async ({ user_id, userType, isMobile }) => {
   const payload = {
     sub: user_id,
     userType,
@@ -26,7 +26,7 @@ export const issueAccessToken = async ({ user_id, userType }) => {
   };
 
   const signedToken = jwt.sign(payload, JWT_KEY, {
-    expiresIn: "2h",
+    expiresIn: isMobile ? "9999 years" : "2h",
     issuer: "online.usupport.userApi",
     audience: "online.usupport.app",
     algorithm: "HS256",
@@ -34,7 +34,9 @@ export const issueAccessToken = async ({ user_id, userType }) => {
 
   return {
     token: signedToken,
-    expiresIn: new Date(new Date().getTime() + 120 * 60000), // 2h expiration
+    expiresIn: isMobile
+      ? new Date(new Date().getTime() + 9999 * getYearInMilliseconds())
+      : new Date(new Date().getTime() + 120 * 60000), // 2h expiration
   };
 };
 
