@@ -47,6 +47,7 @@ const createClientSchema = (language) =>
       sex: sexTypeSchema.notRequired(),
       yearOfBirth: yup.number().positive().notRequired(),
       urbanRural: urbanRuralTypeSchema.notRequired(),
+      isMobile: yup.boolean().notRequired(),
     },
     ["userAccessToken", "email"]
   );
@@ -90,6 +91,7 @@ export const createUserSchema = (language) =>
         is: "provider",
         then: createProviderSchema.required(),
       }),
+      isMobile: yup.boolean().notRequired(),
     },
     ["client", "provider"]
   );

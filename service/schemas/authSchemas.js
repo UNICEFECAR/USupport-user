@@ -29,6 +29,7 @@ export const userLoginSchema = (language) =>
         is: "provider",
         then: yup.string().length(4).required(),
       }),
+      isMobile: yup.boolean().notRequired(),
     },
     ["userAccessToken", "email", "otp"]
   );

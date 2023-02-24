@@ -23,10 +23,12 @@ router.post(
      */
     const country = req.header("x-country-alpha-2");
     const user = req.user;
+    const isMobile = req.body.isMobile;
 
     const accessToken = await issueAccessToken({
       user_id: user.user_id,
       userType: user.type,
+      isMobile,
     });
     const refreshToken = await issueRefreshToken({
       country,
@@ -53,10 +55,12 @@ router.post(
      */
     const country = req.header("x-country-alpha-2");
     const user = req.user;
+    const isMobile = req.body.isMobile;
 
     const accessToken = await issueAccessToken({
       user_id: user.user_id,
       userType: user.type,
+      isMobile,
     });
     const refreshToken = await issueRefreshToken({
       country,
