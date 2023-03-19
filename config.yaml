@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-config
+data:
+  NODE_ENV: production
+  PORT: 3010
+  
+  AWS_REGION: eu-central-1
+  KAFKAJS_NO_PARTITIONER_WARNING: 1
+   
