@@ -17,11 +17,11 @@ spec:
     spec:
       containers:
       - name: user
-        image: {TODO: CHANGE}
+        image: 482053628475.dkr.ecr.eu-central-1.amazonaws.com/usupport-user-api
         imagePullPolicy: Always
         envFrom:
         - secretRef:
-          name: user-secrets
+            name: user-secrets
         - configMapRef:
             name: user-config
         ports:
