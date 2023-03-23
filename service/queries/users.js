@@ -286,12 +286,13 @@ export const addContactFormQuery = async ({
   email,
   subject,
   message,
+  sentFrom,
 }) =>
   await getDBPool("piiDb", poolCountry).query(
     `
-      INSERT INTO contact_form (email, subject, message)
-      VALUES ($1, $2, $3)
+      INSERT INTO contact_form (email, subject, message, sent_from)
+      VALUES ($1, $2, $3, $4)
       RETURNING *;
     `,
-    [email, subject, message]
+    [email, subject, message, sentFrom]
   );
