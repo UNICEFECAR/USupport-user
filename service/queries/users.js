@@ -296,3 +296,18 @@ export const addContactFormQuery = async ({
     `,
     [email, subject, message, sentFrom]
   );
+
+export const changeUserLanguageQuery = async ({
+  poolCountry,
+  user_id,
+  language,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        UPDATE "user"
+        SET language = $1
+        WHERE user_id = $2
+        RETURNING *;
+      `,
+    [language, user_id]
+  );
