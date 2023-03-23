@@ -77,6 +77,7 @@ export const createUser = async ({
   hashedPass,
   clientData,
   providerData,
+  language,
 }) => {
   if (clientData) {
     return await getDBPool("piiDb", poolCountry).query(
@@ -94,9 +95,9 @@ export const createUser = async ({
 
         ), newUser AS (
 
-            INSERT INTO "user" (country_id, type, client_detail_id, password, notification_preference_id)
+            INSERT INTO "user" (country_id, type, client_detail_id, password, notification_preference_id, language)
               SELECT $1, 'client', client_detail_id, 
-                      $2, (SELECT notification_preference_id FROM newNotificationPreferences)
+                      $2, (SELECT notification_preference_id FROM newNotificationPreferences), $11
               FROM newClientDetails
             RETURNING * 
 
@@ -119,6 +120,7 @@ export const createUser = async ({
         clientData.sex,
         clientData.yearOfBirth,
         clientData.userAccessToken,
+        language,
       ]
     );
   } else {
@@ -138,9 +140,9 @@ export const createUser = async ({
 
         ), newUser AS (
 
-          INSERT INTO "user" (country_id, type, provider_detail_id, password, notification_preference_id)
+          INSERT INTO "user" (country_id, type, provider_detail_id, password, notification_preference_id, language)
               SELECT $1, 'provider', provider_detail_id, 
-                      $2, (SELECT notification_preference_id FROM newNotificationPreferences)
+                      $2, (SELECT notification_preference_id FROM newNotificationPreferences), $20
               FROM newProviderDetails
             RETURNING * 
 
@@ -171,6 +173,7 @@ export const createUser = async ({
         providerData.consultationPrice,
         providerData.description,
         providerData.videoLink,
+        language,
       ]
     );
   }
@@ -283,12 +286,28 @@ export const addContactFormQuery = async ({
   email,
   subject,
   message,
+  sentFrom,
 }) =>
   await getDBPool("piiDb", poolCountry).query(
     `
-      INSERT INTO contact_form (email, subject, message)
-      VALUES ($1, $2, $3)
+      INSERT INTO contact_form (email, subject, message, sent_from)
+      VALUES ($1, $2, $3, $4)
       RETURNING *;
     `,
-    [email, subject, message]
+    [email, subject, message, sentFrom]
+  );
+
+export const changeUserLanguageQuery = async ({
+  poolCountry,
+  user_id,
+  language,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+        UPDATE "user"
+        SET language = $1
+        WHERE user_id = $2
+        RETURNING *;
+      `,
+    [language, user_id]
   );
