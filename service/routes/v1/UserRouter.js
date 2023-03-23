@@ -7,6 +7,7 @@ import {
   updateNotificationPreferences,
   getTwilioToken,
   addContactForm,
+  changeUserLanguage,
 } from "#controllers/users";
 
 import { securedRoute } from "#middlewares/auth";
@@ -17,6 +18,7 @@ import {
   updateNotificationPreferencesSchema,
   getTwilioTokenSchema,
   addContactFormSchema,
+  changeUserLanguageSchema,
 } from "#schemas/userSchemas";
 
 const router = express.Router();
@@ -137,6 +139,25 @@ router.route("/add-contact-form").post(async (req, res, next) => {
     .strict(true)
     .validate({ country, language, ...payload })
     .then(addContactForm)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.route("/change-language").put(securedRoute, async (req, res, next) => {
+  /**
+   * #route   PUT /user/v1/user/change-language
+   * #desc    Change user's language
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  const user_id = req.user.user_id;
+
+  return await changeUserLanguageSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ country, language, user_id })
+    .then(changeUserLanguage)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });

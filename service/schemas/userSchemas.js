@@ -135,3 +135,9 @@ export const addContactFormSchema = yup.object().shape({
   subject: yup.string().required(),
   message: yup.string().required(),
 });
+
+export const changeUserLanguageSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  user_id: yup.string().uuid().required(),
+});

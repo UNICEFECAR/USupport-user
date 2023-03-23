@@ -5,6 +5,7 @@ import {
   getNotificationPreferencesQuery,
   updateNotificationPreferencesQuery,
   addContactFormQuery,
+  changeUserLanguageQuery,
 } from "#queries/users";
 import { userNotFound, notificationPreferencesNotFound } from "#utils/errors";
 import { updatePassword, videoToken } from "#utils/helperFunctions";
@@ -119,6 +120,22 @@ export const addContactForm = async ({ country, language, ...payload }) => {
   return await addContactFormQuery({
     poolCountry: country,
     ...payload,
+  })
+    .then((res) => {
+      if (res.rowCount > 0) return { success: true };
+
+      return { success: false };
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const changeUserLanguage = async ({ country, language, user_id }) => {
+  return await changeUserLanguageQuery({
+    poolCountry: country,
+    user_id,
+    language,
   })
     .then((res) => {
       if (res.rowCount > 0) return { success: true };
