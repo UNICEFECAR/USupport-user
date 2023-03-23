@@ -113,6 +113,7 @@ passport.use(
           hashedPass,
           clientData,
           providerData,
+          language,
         })
           .then(async (res) => {
             if (userType === "provider") {
