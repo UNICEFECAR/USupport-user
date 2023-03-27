@@ -134,6 +134,7 @@ export const addContactFormSchema = yup.object().shape({
   email: yup.string().email().required(),
   subject: yup.string().required(),
   message: yup.string().required(),
+  sentFrom: yup.string().oneOf(["website", "client", "provider"]).required(),
 });
 
 export const changeUserLanguageSchema = yup.object().shape({
