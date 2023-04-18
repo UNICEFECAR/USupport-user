@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+  namespace: default
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: user
+  template:
+    metadata:
+      labels:
+        app: user
+    spec:
+      containers:
+      - name: user
+        image: 482053628475.dkr.ecr.eu-central-1.amazonaws.com/usupport-user-api:latest
+        imagePullPolicy: Always
+        envFrom:
+        - secretRef:
+            name: user-secrets
+        - configMapRef:
+            name: user-config
+        ports:
+        - containerPort: 3010
+      imagePullSecrets:
+      - name: regcred
