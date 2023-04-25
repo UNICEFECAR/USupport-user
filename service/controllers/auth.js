@@ -26,7 +26,7 @@ export const issueAccessToken = async ({ user_id, userType, isMobile }) => {
   };
 
   const signedToken = jwt.sign(payload, JWT_KEY, {
-    expiresIn: true ? "9999y" : "2h",
+    expiresIn: isMobile ? "9999y" : "2h",
     issuer: "online.usupport.userApi",
     audience: "online.usupport.app",
     algorithm: "HS256",
@@ -34,7 +34,7 @@ export const issueAccessToken = async ({ user_id, userType, isMobile }) => {
 
   return {
     token: signedToken,
-    expiresIn: true
+    expiresIn: isMobile
       ? new Date(new Date().getTime() + 9999 * getYearInMilliseconds())
       : new Date(new Date().getTime() + 1 * 60000), // 2h expiration
   };
