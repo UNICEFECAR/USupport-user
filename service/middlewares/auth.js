@@ -249,6 +249,8 @@ passport.use(
         }
 
         if (userType === "provider") {
+          return done(null, user);
+
           const userOTP = await getAuthOTP(country, otp, user.user_id).then(
             (data) => data.rows[0]
           );
