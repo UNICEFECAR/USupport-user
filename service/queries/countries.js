@@ -8,7 +8,7 @@ export const getAllActiveCountries = async () =>
         INNER JOIN "country_currency_links" ON "country"."country_id" = "country_currency_links".country_id
         INNER JOIN "currency" ON "country_currency_links".currency_id = "currency".currency_id
       WHERE "country"."is_active" = true
-      ORDER BY "country"."name" DESC
+      ORDER BY "country"."name" ASC
     `
   );
 
@@ -18,7 +18,7 @@ export const getCountryByAlpha2CodeQuery = async ({ country }) =>
       SELECT * 
       FROM "country"
       WHERE "alpha2" = $1
-      ORDER BY "name" DESC
+      ORDER BY "name" ASC
       LIMIT 1;
     `,
     [country]
