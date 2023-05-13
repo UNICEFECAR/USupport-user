@@ -58,7 +58,6 @@ const createProviderSchema = yup.object().shape({
   surname: yup.string().required(),
   nickname: yup.string().notRequired(),
   email: yup.string().email().required(),
-  phonePrefix: yup.string().notRequired(),
   phone: yup.string().notRequired(),
   specializations: specializationsTypeSchema.notRequired(),
   street: yup.string().notRequired(),

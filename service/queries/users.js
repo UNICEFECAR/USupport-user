@@ -128,9 +128,9 @@ export const createUser = async ({
       `
         WITH newProviderDetails AS (
 
-            INSERT INTO provider_detail (name, patronym, surname, nickname, email, phone_prefix, 
+            INSERT INTO provider_detail (name, patronym, surname, nickname, email,
                                         phone, image, specializations, street, city, postcode, education, sex, consultation_price, description, video_link)
-            VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19)
+            VALUES ($3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
             RETURNING * 
 
         ), newNotificationPreferences AS (
@@ -142,7 +142,7 @@ export const createUser = async ({
 
           INSERT INTO "user" (country_id, type, provider_detail_id, password, notification_preference_id, language)
               SELECT $1, 'provider', provider_detail_id, 
-                      $2, (SELECT notification_preference_id FROM newNotificationPreferences), $20
+                      $2, (SELECT notification_preference_id FROM newNotificationPreferences), $19
               FROM newProviderDetails
             RETURNING * 
 
@@ -161,7 +161,6 @@ export const createUser = async ({
         providerData.surname,
         providerData.nickname,
         providerData.email,
-        providerData.phonePrefix,
         providerData.phone,
         providerData.image ? providerData.image : "default",
         providerData.specializations,

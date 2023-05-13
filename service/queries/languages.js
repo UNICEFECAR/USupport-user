@@ -5,8 +5,8 @@ export const getAllLanguagesQuery = async () =>
     `
       SELECT * 
       FROM "language"
-      ORDER BY "name" DESC;
-        
+      ORDER BY "name" ASC;
+
     `
   );
 
@@ -16,7 +16,7 @@ export const getAllActiveLanguagesQuery = async () =>
       SELECT * 
       FROM "language"
       WHERE "is_active" = true
-      ORDER BY "name" DESC;
-        
+      ORDER BY "name" ASC; 
+
     `
   );
