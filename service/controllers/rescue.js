@@ -13,7 +13,7 @@ import {
 import { updatePassword } from "#utils/helperFunctions";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
 
-import { userNotFound, invalidResetPasswordToken } from "#utils/errors";
+import { invalidResetPasswordToken } from "#utils/errors";
 
 export const sendForgotPasswordEmail = async ({
   country,
@@ -27,7 +27,7 @@ export const sendForgotPasswordEmail = async ({
     user = await getClientUserByEmailOrAccessToken(country, email)
       .then((raw) => {
         if (raw.rowCount === 0) {
-          throw userNotFound(language);
+          return null;
         } else {
           return raw.rows[0];
         }
@@ -39,7 +39,7 @@ export const sendForgotPasswordEmail = async ({
     user = await getProviderUserByEmail(country, email)
       .then((raw) => {
         if (raw.rowCount === 0) {
-          throw userNotFound(language);
+          return null;
         } else {
           return raw.rows[0];
         }
@@ -48,6 +48,8 @@ export const sendForgotPasswordEmail = async ({
         throw err;
       });
   }
+
+  if (!user) return { success: true };
 
   const forgotPasswordToken = nanoid(16);
 
@@ -89,7 +91,7 @@ export const resetForgotPassword = async ({
     });
 
   const now = new Date().getTime();
-  const tokenExpiresIn = new Date(tokenData.expires_at).getTime();
+  const tokenExpiresIn = new Date(tokenData?.expires_at).getTime();
 
   if (!tokenData || tokenExpiresIn < now || tokenData.used) {
     throw invalidResetPasswordToken(language);
