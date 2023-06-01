@@ -16,7 +16,8 @@ export default {
   not_authenticated_error: "User needs to authenticate to access this resource",
   invalid_refresh_token_error: "Refresh token invalid or already used",
   cannot_generate_user_access_token_error: `Couldn't generate a new random user access token. Please try again`,
-  invalid_reset_password_token_error: "Invalid or expired reset password token",
+  invalid_reset_password_token_error:
+    "Invalid or expired reset password token. Please request a new one at:",
   invalid_provider_otp_error: "Invalid OTP",
   too_many_otp_requests_error:
     "Too many OTP requests made, please try again soon.",
