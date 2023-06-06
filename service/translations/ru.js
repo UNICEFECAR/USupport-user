@@ -19,7 +19,7 @@ export default {
   cannot_generate_user_access_token_error: `Не удалось сгенерировать новый токен доступа случайного пользователя. Пожалуйста, попробуйте еще раз`,
   invalid_reset_password_token_error:
     "Недействительный или просроченный токен сброса пароля",
-  invalid_provider_otp_error: "Invalid OTP",
+  invalid_provider_otp_error: "Недействительный одноразовый пароль (OTP)",
   too_many_otp_requests_error:
-    "Too many OTP requests made, please try again soon.",
+    "Сделано слишком много запросов на одноразовый пароль (OTP), повторите попытку позже.",
 };

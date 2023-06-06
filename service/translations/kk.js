@@ -19,7 +19,7 @@ export default {
   cannot_generate_user_access_token_error: `Жаңа кездейсоқ пайдаланушының кіру токенін жасау мүмкін болмады. Тағы бір көріңіз`,
   invalid_reset_password_token_error:
     "Кілтсөзді өзгерту токені жарамсыз немесе мерзімі өтіп кеткен",
-  invalid_provider_otp_error: "Invalid OTP",
+  invalid_provider_otp_error: "Жарамсыз бір реттік құпия сөз (OTP)",
   too_many_otp_requests_error:
-    "Too many OTP requests made, please try again soon.",
+    "Тым көп бір реттік құпия сөз (OTP) сұраулары жасалды, әрекетті кейінірек қайталаңыз.",
 };
