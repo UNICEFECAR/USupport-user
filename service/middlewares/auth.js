@@ -29,12 +29,11 @@ import { generate4DigitCode, generatePassword } from "#utils/helperFunctions";
 
 import {
   emailUsed,
-  incorrectEmail,
-  incorrectPassword,
   notAuthenticated,
   userAccessTokenUsed,
   invalidOTP,
   tooManyOTPRequests,
+  incorrectCredentials,
 } from "#utils/errors";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
 
@@ -228,7 +227,7 @@ passport.use(
         }
 
         if (!user) {
-          return done(incorrectEmail(language));
+          return done(incorrectCredentials(language));
         }
 
         const validatePassword = await bcrypt.compare(password, user.password);
@@ -245,7 +244,7 @@ passport.use(
         });
 
         if (!validatePassword) {
-          return done(incorrectPassword(language));
+          return done(incorrectCredentials(language));
         }
 
         if (userType === "provider") {
@@ -310,7 +309,7 @@ passport.use(
           });
 
         if (!providerUser) {
-          return done(incorrectEmail(language));
+          return done(incorrectCredentials(language));
         }
 
         const validatePassword = await bcrypt.compare(
@@ -319,7 +318,7 @@ passport.use(
         );
 
         if (!validatePassword) {
-          return done(incorrectPassword(language));
+          return done(incorrectCredentials(language));
         }
 
         const userLastOTP = await getUserLastAuthOTP(

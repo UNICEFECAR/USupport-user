@@ -11,8 +11,8 @@ export default {
   email_already_used_error: "This email is already used",
   user_access_token_already_used_error:
     "This user access token is not available",
-  incorrect_email_error: "Incorrect credentials",
-  incorrect_password_error: "Incorrect credentials",
+  incorrect_password_error: "The provided password is incorrect",
+  incorrect_credentials_error: "Incorrect credentials",
   not_authenticated_error: "User needs to authenticate to access this resource",
   invalid_refresh_token_error: "Refresh token invalid or already used",
   cannot_generate_user_access_token_error: `Couldn't generate a new random user access token. Please try again`,
