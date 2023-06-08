@@ -24,6 +24,14 @@ export const userAccessTokenUsed = (language) => {
   return error;
 };
 
+export const incorrectCredentials = (language) => {
+  const error = new Error();
+  error.message = t("incorrect_credentials_error", language);
+  error.name = "INVALID CREDENTIALS";
+  error.status = 404;
+  return error;
+};
+
 export const incorrectEmail = (language) => {
   const error = new Error();
   error.message = t("incorrect_email_error", language);

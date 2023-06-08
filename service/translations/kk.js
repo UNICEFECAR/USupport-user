@@ -10,8 +10,8 @@ export default {
   email_already_used_error: "Бұл электронды пошта әлдеқашан қолданылып жатыр",
   user_access_token_already_used_error:
     "Бұл пайдаланушының кіру токені қолжетімді емес",
-  incorrect_email_error: "Осындай электронды поштасы бар пайдаланушы жоқ",
   incorrect_password_error: "Енгізілген кілтсөз дұрыс емес",
+  incorrect_credentials_error: "Incorrect credentialsKK",
   not_authenticated_error:
     "Бұл ресурсқа кіру үшін пайдаланушы аутентификациядан өтуі керек",
   invalid_refresh_token_error:

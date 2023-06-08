@@ -10,8 +10,8 @@ export default {
   email_already_used_error: "Эта электронная почта уже используется",
   user_access_token_already_used_error:
     "Этот токен доступа пользователя недоступен",
-  incorrect_email_error: "Нет пользователя с такой электронной почтой",
   incorrect_password_error: "Предоставленный пароль неверен",
+  incorrect_credentials_error: "Incorrect credentialsRU",
   not_authenticated_error:
     "Пользователь должен пройти аутентификацию для доступа к этому ресурсу",
   invalid_refresh_token_error:
