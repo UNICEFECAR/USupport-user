@@ -21,4 +21,6 @@ export default {
   invalid_provider_otp_error: "Invalid OTP",
   too_many_otp_requests_error:
     "Too many OTP requests made, please try again soon.",
+  invalid_email_otp_error: "Invalid verification code",
+  email_otp_expired_error: "Verification code expired",
 };

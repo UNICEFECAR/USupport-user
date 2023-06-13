@@ -111,3 +111,19 @@ export const tooManyOTPRequests = (language) => {
   error.status = 429;
   return error;
 };
+
+export const invalidEmailOTP = (language) => {
+  const error = new Error();
+  error.message = t("invalid_email_otp_error", language);
+  error.name = "INVALID EMAIL OTP";
+  error.status = 404;
+  return error;
+};
+
+export const emailOTPExpired = (language) => {
+  const error = new Error();
+  error.message = t("email_otp_expired_error", language);
+  error.name = "EMAIL OTP EXPIRED";
+  error.status = 404;
+  return error;
+};
