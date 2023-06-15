@@ -12,9 +12,15 @@ import { getClientUserByEmailOrAccessToken } from "#queries/users";
 import {
   invalidRefreshToken,
   cannotGenerateUserAccessToken,
+  emailUsed,
 } from "#utils/errors";
 
-import { getYearInMilliseconds } from "#utils/helperFunctions";
+import {
+  generate4DigitCode,
+  getYearInMilliseconds,
+} from "#utils/helperFunctions";
+import { storeEmailOTP } from "#queries/authOTP";
+import { produceRaiseNotification } from "#utils/kafkaProducers";
 
 const JWT_KEY = process.env.JWT_KEY;
 
@@ -150,4 +156,31 @@ export const generateAccessToken = async (country, language, retryStep = 0) => {
   } else {
     return { userAccessToken: newUserAccessToken };
   }
+};
+
+export const createEmailOTP = async ({ country, language, email }) => {
+  // Check if email is already used
+  await getClientUserByEmailOrAccessToken(country, email, null).then((res) => {
+    if (res.rowCount !== 0) {
+      throw emailUsed(language);
+    }
+  });
+
+  const otp = generate4DigitCode();
+
+  await storeEmailOTP(country, email, otp)
+    .catch((err) => {
+      throw err;
+    })
+    .then(() => {
+      produceRaiseNotification({
+        channels: ["email"],
+        emailArgs: {
+          emailType: "register-2fa-request",
+          recipientEmail: email,
+          data: { otp },
+        },
+      });
+    });
+  return true;
 };

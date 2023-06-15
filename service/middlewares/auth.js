@@ -17,8 +17,9 @@ import {
   getAuthOTP,
   getUserLastAuthOTP,
   changeOTPToUsed,
+  getEmailOTP,
+  changeEmailOTPToUsed,
 } from "#queries/authOTP";
-
 import { createUserSchema } from "#schemas/userSchemas";
 import {
   userLoginSchema,
@@ -34,6 +35,8 @@ import {
   invalidOTP,
   tooManyOTPRequests,
   incorrectCredentials,
+  emailOTPExpired,
+  invalidEmailOTP,
 } from "#utils/errors";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
 
@@ -74,6 +77,29 @@ passport.use(
         let hashedPass, randomlyGeneratedPassword;
 
         if (userType === "client") {
+          if (!clientData.userAccessToken) {
+            const emailOTP = await getEmailOTP({
+              poolCountry: country,
+              email: clientData.email,
+              otp: clientData.code,
+            }).then((res) => {
+              if (res.rowCount === 0) return null;
+              return res.rows[0];
+            });
+
+            if (!emailOTP) return done(invalidEmailOTP(language));
+
+            const now = new Date().getTime();
+            const OTPCreatedAt = new Date(emailOTP.created_at).getTime();
+
+            if ((now - OTPCreatedAt) / 1000 > 60 * 30) {
+              return done(emailOTPExpired(language));
+            }
+
+            await changeEmailOTPToUsed(country, emailOTP.id).catch((err) => {
+              throw err;
+            });
+          }
           hashedPass = await bcrypt.hash(password, salt);
 
           currentUser = await getClientUserByEmailOrAccessToken(

@@ -1,5 +1,6 @@
 import express from "express";
 import passport from "passport";
+import fetch from "node-fetch";
 
 import {
   issueAccessToken,
@@ -7,9 +8,10 @@ import {
   issueRefreshToken,
   refreshAccessToken,
   generateAccessToken,
+  createEmailOTP,
 } from "#controllers/auth";
 
-import { refreshAccessTokenSchema } from "#schemas/authSchemas";
+import { emailOTPSchema, refreshAccessTokenSchema } from "#schemas/authSchemas";
 
 const router = express.Router();
 
@@ -136,5 +138,46 @@ router.post(
     return res.status(200).send(req.user);
   }
 );
+
+router.post("/email-otp", async (req, res, next) => {
+  /**
+   * #route   POST /user/v1/auth/email-otp
+   * #desc    Request email OTP
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  const payload = req.body;
+
+  return await emailOTPSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ country, language, ...payload })
+    .then(createEmailOTP)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.post("/validate-captcha", async (req, res, next) => {
+  // Receive captcha token from client
+  // Make request to google recaptcha api to validate the token
+  // If valid, return 200
+
+  const captchaToken = req.body.token;
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  const verifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captchaToken}`;
+
+  const response = await fetch(verifyUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+  }).then((res) => res.json());
+  if (response.success) {
+    return res.status(200).send(true);
+  } else {
+    return res.status(400).send(false);
+  }
+});
 
 export { router };

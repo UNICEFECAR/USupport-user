@@ -38,3 +38,9 @@ export const provider2FARequestSchema = yup.object().shape({
   password: yup.string().required(),
   email: yup.string().email().required(),
 });
+
+export const emailOTPSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  email: yup.string().email().required(),
+});
