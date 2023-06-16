@@ -11,14 +11,14 @@ export default {
   user_access_token_already_used_error:
     "Этот токен доступа пользователя недоступен",
   incorrect_password_error: "Предоставленный пароль неверен",
-  incorrect_credentials_error: "Incorrect credentialsRU",
+  incorrect_credentials_error: "Неправильные учетные данные",
   not_authenticated_error:
     "Пользователь должен пройти аутентификацию для доступа к этому ресурсу",
   invalid_refresh_token_error:
     "Токен обновления недействителен или уже используется",
   cannot_generate_user_access_token_error: `Не удалось сгенерировать новый токен доступа случайного пользователя. Пожалуйста, попробуйте еще раз`,
   invalid_reset_password_token_error:
-    "Недействительный или просроченный токен сброса пароля",
+    "Недействительный или просроченный токен сброса пароля. Пожалуйста, запросите новый здесь:",
   invalid_provider_otp_error: "Недействительный одноразовый пароль (OTP)",
   too_many_otp_requests_error:
     "Сделано слишком много запросов на одноразовый пароль (OTP), повторите попытку позже.",
