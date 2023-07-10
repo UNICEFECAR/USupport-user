@@ -22,6 +22,6 @@ export default {
   invalid_provider_otp_error: "Жарамсыз бір реттік құпия сөз (OTP)",
   too_many_otp_requests_error:
     "Тым көп бір реттік құпия сөз (OTP) сұраулары жасалды, әрекетті кейінірек қайталаңыз.",
-  invalid_email_otp_error: "Invalid verification codeKK",
-  email_otp_expired_error: "Verification code expiredKK",
+  invalid_email_otp_error: "Жарамсыз растау коды",
+  email_otp_expired_error: "Растау кодының мерзімі аяқталды",
 };
