@@ -22,6 +22,6 @@ export default {
   invalid_provider_otp_error: "Недействительный одноразовый пароль (OTP)",
   too_many_otp_requests_error:
     "Сделано слишком много запросов на одноразовый пароль (OTP), повторите попытку позже.",
-  invalid_email_otp_error: "Invalid verification codeRU",
-  email_otp_expired_error: "Verification code expiredRU",
+  invalid_email_otp_error: "Неверный код подтверждения",
+  email_otp_expired_error: "Срок действия кода подтверждения истек",
 };
