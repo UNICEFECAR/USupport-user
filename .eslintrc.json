@@ -1,0 +1,28 @@
+{
+  "env": {
+    "node": true,
+    "es2021": true
+  },
+  "extends": ["eslint:recommended", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "plugins": ["prettier"],
+  "rules": {
+    "no-undefined": "off",
+    "no-undef": "off",
+    "prefer-regex-literals": "off",
+    "camelcase": "off",
+    "dot-notation": "off",
+    "new-cap": "off",
+    "no-constant-condition": "off",
+    "quotes": [
+      "error",
+      "double",
+      {
+        "allowTemplateLiterals": true
+      }
+    ]
+  }
+}
