@@ -28,7 +28,7 @@ router.route("/").post(async (req, res, next) => {
     const parsedForm = {
       fileName: fields.fileName,
       fileContent: filePath ? fs.readFileSync(filePath) : null,
-      mimeType: mimeType ? mimeType : null,
+      mimeType: mimeType || null,
     };
 
     return await uploadFileSchema

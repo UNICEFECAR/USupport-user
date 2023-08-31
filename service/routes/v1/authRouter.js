@@ -158,6 +158,7 @@ router.post("/email-otp", async (req, res, next) => {
     .catch(next);
 });
 
+// eslint-disable-next-line no-unused-vars
 router.post("/validate-captcha", async (req, res, next) => {
   // Receive captcha token from client
   // Make request to google recaptcha api to validate the token
