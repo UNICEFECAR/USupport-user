@@ -11,14 +11,14 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3010;
 
-/*------------- Security Config -------------*/
+/* ------------- Security Config ------------- */
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(helmet());
 app.use(passport.initialize());
 
-/*------------- User Service Endpoints -------------*/
+/* ------------- User Service Endpoints ------------- */
 
 app.use("/user/v1/user", v1.UserRouter);
 app.use("/user/v1/auth", v1.AuthRouter);
@@ -28,7 +28,7 @@ app.use("/user/v1/languages", v1.LanguageRouter);
 app.use("/user/v1/countries", v1.CountryRouter);
 app.use("/user/v1/work-with", v1.WorkWithRouter);
 
-/*------------- Error middleware -------------*/
+/* ------------- Error middleware ------------- */
 
 app.use(middleware.errorMiddleware.notFound);
 app.use(middleware.errorMiddleware.errorHandler);

@@ -39,8 +39,9 @@ export const getErrorResponse = (error) => {
   };
 };
 
+// eslint-disable-next-line no-unused-vars
 export const errorHandler = (err, req, res, next) => {
-  //all errors pass through here
+  // all errors pass through here
   const { name, message, status } = getErrorResponse(err);
   console.log(err);
 
@@ -56,7 +57,7 @@ export const errorHandler = (err, req, res, next) => {
 };
 
 export const notFound = (req, res, next) => {
-  //501 if endpoint does not exist
+  // 501 if endpoint does not exist
   const error = new Error("Not Implemented");
   error.status = 501;
   next(error);

@@ -7,10 +7,12 @@ import {
   addContactFormQuery,
   changeUserLanguageQuery,
 } from "#queries/users";
-import { userNotFound, notificationPreferencesNotFound } from "#utils/errors";
+import {
+  userNotFound,
+  notificationPreferencesNotFound,
+  incorrectPassword,
+} from "#utils/errors";
 import { updatePassword, videoToken } from "#utils/helperFunctions";
-
-import { incorrectPassword } from "#utils/errors";
 
 const TWILIO_CONFIG = {
   twilio: {
@@ -116,7 +118,7 @@ export const getTwilioToken = async ({ userId, consultationId }) => {
   return { token: token.toJwt() };
 };
 
-export const addContactForm = async ({ country, language, ...payload }) => {
+export const addContactForm = async ({ country, ...payload }) => {
   return await addContactFormQuery({
     poolCountry: country,
     ...payload,

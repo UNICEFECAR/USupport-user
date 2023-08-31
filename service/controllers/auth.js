@@ -24,6 +24,7 @@ import { produceRaiseNotification } from "#utils/kafkaProducers";
 
 const JWT_KEY = process.env.JWT_KEY;
 
+// eslint-disable-next-line no-unused-vars
 export const issueAccessToken = async ({ user_id, userType, isMobile }) => {
   const payload = {
     sub: user_id,

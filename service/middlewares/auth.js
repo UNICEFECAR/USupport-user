@@ -14,7 +14,7 @@ import {
 } from "#queries/users";
 import {
   storeAuthOTP,
-  getAuthOTP,
+  // getAuthOTP,
   getUserLastAuthOTP,
   changeOTPToUsed,
   getEmailOTP,
@@ -32,7 +32,7 @@ import {
   emailUsed,
   notAuthenticated,
   userAccessTokenUsed,
-  invalidOTP,
+  // invalidOTP,
   tooManyOTPRequests,
   incorrectCredentials,
   emailOTPExpired,
@@ -132,7 +132,7 @@ passport.use(
           }
         }
 
-        let newUser = await createUser({
+        const newUser = await createUser({
           poolCountry: country,
           countryID,
           hashedPass,
@@ -219,11 +219,13 @@ passport.use(
       passwordField: "password",
       passReqToCallback: true,
     },
+    // eslint-disable-next-line no-unused-vars
     async (req, emailIn, passwordIn, done) => {
       const language = req.header("x-language-alpha-2");
 
       try {
         const country = req.header("x-country-alpha-2");
+        // eslint-disable-next-line no-unused-vars
         const { email, password, userAccessToken, userType, otp } =
           await userLoginSchema(language)
             .noUnknown(true)
@@ -276,27 +278,29 @@ passport.use(
         if (userType === "provider") {
           return done(null, user);
 
-          const userOTP = await getAuthOTP(country, otp, user.user_id).then(
-            (data) => data.rows[0]
-          );
+          // TODO Uncomment that at some point
 
-          if (userOTP === undefined) {
-            // OTP not found or already used
-            return done(invalidOTP(language));
-          } else {
-            const OTPCreatedAt = new Date(userOTP.created_at).getTime();
-            const now = new Date().getTime();
+          // const userOTP = await getAuthOTP(country, otp, user.user_id).then(
+          //   (data) => data.rows[0]
+          // );
 
-            if ((OTPCreatedAt - now) / 1000 > 60 * 30) {
-              // OTP is valid for 30 mins
-              return done(invalidOTP(language));
-            }
-          }
+          // if (userOTP === undefined) {
+          //   // OTP not found or already used
+          //   return done(invalidOTP(language));
+          // } else {
+          //   const OTPCreatedAt = new Date(userOTP.created_at).getTime();
+          //   const now = new Date().getTime();
 
-          // each OTP can be used only once
-          await changeOTPToUsed(country, userOTP.id).catch((err) => {
-            throw err;
-          });
+          //   if ((OTPCreatedAt - now) / 1000 > 60 * 30) {
+          //     // OTP is valid for 30 mins
+          //     return done(invalidOTP(language));
+          //   }
+          // }
+
+          // // each OTP can be used only once
+          // await changeOTPToUsed(country, userOTP.id).catch((err) => {
+          //   throw err;
+          // });
         }
 
         return done(null, user);

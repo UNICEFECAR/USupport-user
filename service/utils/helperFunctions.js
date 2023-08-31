@@ -60,7 +60,7 @@ export const generatePassword = (length) => {
   };
 
   const tempPassword = () =>
-    Array.apply(null, { length: length })
+    Array.apply(null, { length })
       .map(() => {
         let result;
         while (true) {
@@ -72,7 +72,7 @@ export const generatePassword = (length) => {
       })
       .join("");
 
-  let password = tempPassword();
+  const password = tempPassword();
   if (passwordPattern.test(password)) return password;
   else return generatePassword(length);
 };
