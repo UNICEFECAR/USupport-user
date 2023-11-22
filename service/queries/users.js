@@ -60,7 +60,7 @@ export const getProviderUserByEmail = async (poolCountry, email) =>
 export const getUserByID = async (poolCountry, user_id) =>
   await getDBPool("piiDb", poolCountry).query(
     `
-        SELECT user_id, country_id, type, client_detail_id, notification_preference_id, password
+        SELECT user_id, country_id, type, client_detail_id, provider_detail_id, notification_preference_id, password
         FROM "user"
         WHERE user_id = $1
         AND deleted_at IS NULL
