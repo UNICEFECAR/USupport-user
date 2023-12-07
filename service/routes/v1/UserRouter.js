@@ -71,11 +71,12 @@ router
     const country = req.header("x-country-alpha-2");
     const language = req.header("x-language-alpha-2");
     const notification_preference_id = req.user.notification_preference_id;
+    const userType = req.header("x-user-type");
 
     return await getNotificationPreferencesSchema
       .noUnknown(true)
       .strict(true)
-      .validate({ country, language, notification_preference_id })
+      .validate({ country, language, notification_preference_id, userType })
       .then(getNotificationPreferences)
       .then((result) => res.status(200).send(result))
       .catch(next);
