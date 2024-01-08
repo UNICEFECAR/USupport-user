@@ -107,7 +107,14 @@ export const getNotificationPreferencesSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
   notification_preference_id: yup.string().uuid().required(),
+  userType: yup.string().required(),
 });
+
+const consultationReminderMinValidation = yup.lazy((value) =>
+  Array.isArray(value)
+    ? yup.array().of(yup.number().positive().max(60).required())
+    : yup.number().positive().max(60).required()
+);
 
 export const updateNotificationPreferencesSchema = yup.object().shape({
   country: yup.string().required(),
@@ -115,7 +122,7 @@ export const updateNotificationPreferencesSchema = yup.object().shape({
   notification_preference_id: yup.string().uuid().required(),
   email: yup.boolean().required(),
   consultationReminder: yup.boolean().required(),
-  consultationReminderMin: yup.number().positive().max(60).required(),
+  consultationReminderMin: consultationReminderMinValidation,
   inPlatform: yup.boolean().required(),
   push: yup.boolean().required(),
 });
