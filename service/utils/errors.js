@@ -127,3 +127,19 @@ export const emailOTPExpired = (language) => {
   error.status = 404;
   return error;
 };
+
+export const invalidPlatformPassword = (language) => {
+  const error = new Error();
+  error.message = t("invalid_platform_password_error", language);
+  error.name = "INVALID PLATFORM PASSWORD";
+  error.status = 404;
+  return error;
+};
+
+export const noPlatformPasswordSet = (language) => {
+  const error = new Error();
+  error.message = t("no_platform_password_set_error", language);
+  error.name = "NO PLATFORM PASSWORD SET";
+  error.status = 404;
+  return error;
+};
