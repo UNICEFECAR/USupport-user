@@ -9,9 +9,14 @@ import {
   refreshAccessToken,
   generateAccessToken,
   createEmailOTP,
+  validatePlatformPassword,
 } from "#controllers/auth";
 
-import { emailOTPSchema, refreshAccessTokenSchema } from "#schemas/authSchemas";
+import {
+  emailOTPSchema,
+  refreshAccessTokenSchema,
+  validatePlatformPasswordSchema,
+} from "#schemas/authSchemas";
 
 const router = express.Router();
 
@@ -179,6 +184,23 @@ router.post("/validate-captcha", async (req, res, next) => {
   } else {
     return res.status(400).send(false);
   }
+});
+
+router.post("/validate-platform-password", async (req, res, next) => {
+  /**
+   * #route   POST /user/v1/auth/validate-platform-password
+   * #desc    Validate platform password
+   */
+  const language = req.header("x-language-alpha-2") || "en";
+  const { platformPassword } = req.body;
+
+  return await validatePlatformPasswordSchema
+    .noUnknown(true)
+    .strict()
+    .validate({ platformPassword, language })
+    .then(validatePlatformPassword)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
 });
 
 export { router };
