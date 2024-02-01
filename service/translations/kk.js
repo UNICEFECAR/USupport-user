@@ -24,4 +24,6 @@ export default {
     "Тым көп бір реттік құпия сөз (OTP) сұраулары жасалды, әрекетті кейінірек қайталаңыз.",
   invalid_email_otp_error: "Жарамсыз растау коды",
   email_otp_expired_error: "Растау кодының мерзімі аяқталды",
+  invalid_platform_password_error: "Жарамсыз платформа құпия сөз",
+  no_platform_password_set_error: "Платформа құпия сөз жоқ",
 };

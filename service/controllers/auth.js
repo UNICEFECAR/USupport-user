@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { customAlphabet } from "nanoid";
+import bcrypt from "bcryptjs";
 
 import {
   storeRefreshToken,
@@ -13,6 +14,8 @@ import {
   invalidRefreshToken,
   cannotGenerateUserAccessToken,
   emailUsed,
+  invalidPlatformPassword,
+  noPlatformPasswordSet,
 } from "#utils/errors";
 
 import {
@@ -21,6 +24,7 @@ import {
 } from "#utils/helperFunctions";
 import { storeEmailOTP } from "#queries/authOTP";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
+import { getPlatformPasswordQuery } from "#queries/auth";
 
 const JWT_KEY = process.env.JWT_KEY;
 
@@ -184,4 +188,33 @@ export const createEmailOTP = async ({ country, language, email }) => {
       });
     });
   return true;
+};
+
+export const validatePlatformPassword = async ({
+  language,
+  platformPassword,
+}) => {
+  // Get the hashed password value from the database
+  const currentPlatformPassword = await getPlatformPasswordQuery()
+    .then((res) => {
+      if (res.rowCount === 0) {
+        throw noPlatformPasswordSet(language);
+      }
+      return res.rows[0].value;
+    })
+    .catch((err) => {
+      throw err;
+    });
+
+  // Compare it to the password received from the request
+  const validatePassword = await bcrypt.compare(
+    platformPassword,
+    currentPlatformPassword
+  );
+
+  if (!validatePassword) {
+    throw invalidPlatformPassword(language);
+  }
+
+  return { success: true };
 };

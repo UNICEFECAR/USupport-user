@@ -64,6 +64,7 @@ export const getNotificationPreferences = async ({
   country,
   language,
   notification_preference_id,
+  userType,
 }) => {
   return await getNotificationPreferencesQuery(
     country,
@@ -73,6 +74,12 @@ export const getNotificationPreferences = async ({
       if (res.rowCount === 0) {
         throw notificationPreferencesNotFound(language);
       } else {
+        if (userType !== "provider") {
+          return {
+            ...res.rows[0],
+            consultation_reminder_min: res.rows[0].consultation_reminder_min[0],
+          };
+        }
         return res.rows[0];
       }
     })
@@ -91,12 +98,17 @@ export const updateNotificationPreferences = async ({
   inPlatform,
   push,
 }) => {
+  const consultationReminderMinArray =
+    typeof consultationReminderMin === "number"
+      ? [consultationReminderMin]
+      : consultationReminderMin;
+
   return await updateNotificationPreferencesQuery({
     poolCountry: country,
     notification_preference_id,
     email,
     consultationReminder,
-    consultationReminderMin,
+    consultationReminderMin: consultationReminderMinArray,
     inPlatform,
     push,
   })

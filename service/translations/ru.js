@@ -24,4 +24,6 @@ export default {
     "Сделано слишком много запросов на одноразовый пароль (OTP), повторите попытку позже.",
   invalid_email_otp_error: "Неверный код подтверждения",
   email_otp_expired_error: "Срок действия кода подтверждения истек",
+  invalid_platform_password_error: "Неверный пароль платформы",
+  no_platform_password_set_error: "Пароль платформы не установлен",
 };

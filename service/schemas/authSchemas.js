@@ -44,3 +44,8 @@ export const emailOTPSchema = yup.object().shape({
   language: yup.string().required(),
   email: yup.string().email().required(),
 });
+
+export const validatePlatformPasswordSchema = yup.object().shape({
+  language: yup.string().required(),
+  platformPassword: yup.string().required(),
+});

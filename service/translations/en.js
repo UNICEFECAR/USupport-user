@@ -23,4 +23,6 @@ export default {
     "Too many OTP requests made, please try again soon.",
   invalid_email_otp_error: "Invalid verification code",
   email_otp_expired_error: "Verification code expired",
+  invalid_platform_password_error: "Invalid platform password",
+  no_platform_password_set_error: "No platform password is set",
 };
