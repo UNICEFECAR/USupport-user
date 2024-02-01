@@ -25,4 +25,5 @@ export default {
   email_otp_expired_error: "Verification code expired",
   invalid_platform_password_error: "Invalid platform password",
   no_platform_password_set_error: "No platform password is set",
+  password_is_required_error: "Password is required",
 };
