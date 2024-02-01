@@ -26,4 +26,5 @@ export default {
   email_otp_expired_error: "Растау кодының мерзімі аяқталды",
   invalid_platform_password_error: "Жарамсыз платформа құпия сөз",
   no_platform_password_set_error: "Платформа құпия сөз жоқ",
+  password_is_required_error: "Құпия сөз қажет",
 };

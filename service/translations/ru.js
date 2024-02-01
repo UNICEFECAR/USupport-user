@@ -26,4 +26,5 @@ export default {
   email_otp_expired_error: "Срок действия кода подтверждения истек",
   invalid_platform_password_error: "Неверный пароль платформы",
   no_platform_password_set_error: "Пароль платформы не установлен",
+  password_is_required_error: "Требуется пароль",
 };
