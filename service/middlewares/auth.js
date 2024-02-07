@@ -203,6 +203,9 @@ passport.use(
           }).catch(console.log);
         }
 
+        // Don't send the password back to the client
+        delete newUser.password;
+
         return done(null, newUser);
       } catch (error) {
         done(error);
