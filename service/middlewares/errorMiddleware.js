@@ -32,17 +32,24 @@ export const getErrorResponse = (error) => {
     }
   };
 
+  const getErrorCustomData = () => {
+    if ("customData" in error) {
+      return error.customData;
+    }
+  };
+
   return {
     status: getErrorStatus(),
     name: getErrorName(),
     message: getErrorMessage(),
+    customData: getErrorCustomData(),
   };
 };
 
 // eslint-disable-next-line no-unused-vars
 export const errorHandler = (err, req, res, next) => {
   // all errors pass through here
-  const { name, message, status } = getErrorResponse(err);
+  const { name, message, status, customData } = getErrorResponse(err);
   console.log(err);
 
   const errorObj = {
@@ -50,6 +57,7 @@ export const errorHandler = (err, req, res, next) => {
       status,
       name,
       message,
+      customData,
     },
   };
 

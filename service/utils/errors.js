@@ -143,3 +143,21 @@ export const noPlatformPasswordSet = (language) => {
   error.status = 404;
   return error;
 };
+
+class CustomError extends Error {
+  constructor(message, name, status, customData) {
+    super(message);
+    this.name = name;
+    this.status = status;
+    this.customData = customData;
+  }
+}
+
+export const tooManyLoginRequests = (language, remainingCooldownInSeconds) => {
+  const error = new CustomError();
+  error.message = t("too_many_login_requests_error", language);
+  error.name = "TOO MANY LOGIN REQUESTS";
+  error.customData = { remainingCooldownInSeconds };
+  error.status = 429;
+  return error;
+};
