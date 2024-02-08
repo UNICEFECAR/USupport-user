@@ -10,13 +10,16 @@ import {
   generateAccessToken,
   createEmailOTP,
   validatePlatformPassword,
+  logoutUser,
 } from "#controllers/auth";
 
 import {
   emailOTPSchema,
   refreshAccessTokenSchema,
   validatePlatformPasswordSchema,
+  logoutUserSchema,
 } from "#schemas/authSchemas";
+import { securedRoute } from "#middlewares/auth";
 
 const router = express.Router();
 
@@ -60,6 +63,7 @@ router.post(
      * #route   POST /user/v1/auth/login
      * #desc    Login a user using JWT token
      */
+
     const country = req.header("x-country-alpha-2");
     const user = req.user;
     const isMobile = req.body.isMobile;
@@ -199,6 +203,25 @@ router.post("/validate-platform-password", async (req, res, next) => {
     .strict()
     .validate({ platformPassword, language })
     .then(validatePlatformPassword)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.route("/logout").post(securedRoute, async (req, res, next) => {
+  /**
+   * #route   POST /user/v1/user/logout
+   * #desc    Logout user
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const user_id = req.user.user_id;
+  const jwt = req.header("authorization").split(" ")[1];
+
+  return await logoutUserSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ country, language, user_id, jwt })
+    .then(logoutUser)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
