@@ -37,8 +37,10 @@ import {
   incorrectCredentials,
   emailOTPExpired,
   invalidEmailOTP,
+  tooManyLoginRequests,
 } from "#utils/errors";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
+import { getFailedLoginAttempts, isJwtBlacklisted } from "#queries/auth";
 
 const localStrategy = passportLocal.Strategy;
 const jwtStrategy = passportJWT.Strategy;
@@ -203,6 +205,9 @@ passport.use(
           }).catch(console.log);
         }
 
+        // Don't send the password back to the client
+        delete newUser.password;
+
         return done(null, newUser);
       } catch (error) {
         done(error);
@@ -259,16 +264,45 @@ passport.use(
         }
 
         const validatePassword = await bcrypt.compare(password, user.password);
+
         const ip_address =
           req.header("X-Real-IP") || req.header("x-forwarded-for") || "0.0.0.0";
         const location = req.header("x-location") || "Unknown";
 
-        loginAttempt({
+        const failedLoginAttempts = await getFailedLoginAttempts({
+          poolCountry: country,
+          userId: user.user_id,
+        }).then((res) => {
+          return res.rows || [];
+        });
+
+        const tenMinutesAgo = new Date(new Date() - 10 * 60000);
+
+        const isInCooldown = failedLoginAttempts.find((x) => {
+          return new Date(x.created_at) > tenMinutesAgo && x.start_cooldown;
+        });
+
+        // Get the difference in seconds between isInCooldown and tenMinutesAgo
+        const remainingCooldownInSeconds = isInCooldown
+          ? Math.floor(
+              (new Date(isInCooldown.created_at) - tenMinutesAgo) / 1000
+            )
+          : 0;
+
+        // If the user has failed to login 10 times in the last 10 minutes, or is in cooldown, return an error
+        if (failedLoginAttempts.length >= 10 || isInCooldown) {
+          return done(
+            tooManyLoginRequests(language, remainingCooldownInSeconds)
+          );
+        }
+
+        await loginAttempt({
           poolCountry: country,
           user_id: user.user_id,
           ip_address,
           location,
           status: !validatePassword ? "failed" : "successful",
+          startCooldown: failedLoginAttempts.length === 9 && !validatePassword,
         });
 
         if (!validatePassword) {
@@ -413,6 +447,27 @@ passport.use(
       try {
         const country = req.header("x-country-alpha-2");
         const user_id = jwt_payload.sub;
+
+        const rawJWT = req.headers.authorization.split(" ")[1];
+
+        const isBlacklisted = await isJwtBlacklisted({
+          token: rawJWT,
+          poolCountry: country,
+        })
+          .then((res) => {
+            if (res.rows.length > 0) return true;
+            return false;
+          })
+          .catch((err) => {
+            console.log("Error checking blacklisted token", err);
+            throw err;
+          });
+
+        // If the jwt is blacklisted revoke access
+        if (isBlacklisted) {
+          done(null, false);
+        }
+
         const user = await getUserByID(country, user_id)
           .then((res) => res.rows[0])
           .catch((err) => {

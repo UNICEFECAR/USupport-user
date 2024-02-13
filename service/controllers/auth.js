@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import jwtLib from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { customAlphabet } from "nanoid";
 import bcrypt from "bcryptjs";
@@ -16,6 +16,7 @@ import {
   emailUsed,
   invalidPlatformPassword,
   noPlatformPasswordSet,
+  incorrectCredentials,
 } from "#utils/errors";
 
 import {
@@ -24,7 +25,7 @@ import {
 } from "#utils/helperFunctions";
 import { storeEmailOTP } from "#queries/authOTP";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
-import { getPlatformPasswordQuery } from "#queries/auth";
+import { getPlatformPasswordQuery, logoutUserQuery } from "#queries/auth";
 
 const JWT_KEY = process.env.JWT_KEY;
 
@@ -34,9 +35,10 @@ export const issueAccessToken = async ({ user_id, userType, isMobile }) => {
     sub: user_id,
     userType,
     iat: Math.floor(Date.now() / 1000),
+    jti: uuidv4(),
   };
 
-  const signedToken = jwt.sign(payload, JWT_KEY, {
+  const signedToken = jwtLib.sign(payload, JWT_KEY, {
     expiresIn: true ? "9999y" : "2h",
     issuer: "online.usupport.userApi",
     audience: "online.usupport.app",
@@ -58,7 +60,7 @@ export const issueTmpAccessToken = async () => {
     iat: Math.floor(Date.now() / 1000),
   };
 
-  const signedToken = jwt.sign(payload, JWT_KEY, {
+  const signedToken = jwtLib.sign(payload, JWT_KEY, {
     expiresIn: "9999 years", // never expires
     issuer: "online.usupport.userApi",
     audience: "online.usupport.app",
@@ -215,6 +217,24 @@ export const validatePlatformPassword = async ({
   if (!validatePassword) {
     throw invalidPlatformPassword(language);
   }
+
+  return { success: true };
+};
+
+export const logoutUser = async ({ country, language, user_id, jwt }) => {
+  const decoded = jwtLib.decode(jwt);
+
+  const isSameID = decoded.sub === user_id;
+
+  if (!isSameID) throw incorrectCredentials(language);
+
+  await logoutUserQuery({
+    poolCountry: country,
+    token: jwt,
+  }).catch((err) => {
+    console.log("Error logging out user", err);
+    throw err;
+  });
 
   return { success: true };
 };

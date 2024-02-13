@@ -49,3 +49,10 @@ export const validatePlatformPasswordSchema = yup.object().shape({
   language: yup.string().required(),
   platformPassword: yup.string().required(t("password_is_required_error")),
 });
+
+export const logoutUserSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  user_id: yup.string().uuid().required(),
+  jwt: yup.string().required(),
+});

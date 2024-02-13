@@ -212,14 +212,15 @@ export const loginAttempt = async ({
   ip_address,
   location,
   status,
+  startCooldown = false,
 }) =>
   await getDBPool("piiDb", poolCountry).query(
     `
-      INSERT INTO login_attempt (user_id, ip_address, location, status)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO login_attempt (user_id, ip_address, location, status, start_cooldown)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *;
     `,
-    [user_id, ip_address, location, status]
+    [user_id, ip_address, location, status, startCooldown]
   );
 
 export const updateUserPassword = async ({ poolCountry, password, user_id }) =>

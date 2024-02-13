@@ -27,4 +27,6 @@ export default {
   invalid_platform_password_error: "Неверный пароль платформы",
   no_platform_password_set_error: "Пароль платформы не установлен",
   password_is_required_error: "Требуется пароль",
+  too_many_login_requests_error:
+    "Слишком много запросов на вход, пожалуйста, попробуйте снова через некоторое время.",
 };
