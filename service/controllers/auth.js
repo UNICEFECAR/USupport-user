@@ -35,6 +35,7 @@ export const issueAccessToken = async ({ user_id, userType, isMobile }) => {
     sub: user_id,
     userType,
     iat: Math.floor(Date.now() / 1000),
+    jti: uuidv4(),
   };
 
   const signedToken = jwtLib.sign(payload, JWT_KEY, {
