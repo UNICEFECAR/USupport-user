@@ -209,7 +209,7 @@ router.post("/validate-platform-password", async (req, res, next) => {
 
 router.route("/logout").post(securedRoute, async (req, res, next) => {
   /**
-   * #route   POST /user/v1/user/logout
+   * #route   POST /user/v1/auth/logout
    * #desc    Logout user
    */
   const country = req.header("x-country-alpha-2");
