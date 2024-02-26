@@ -276,17 +276,15 @@ passport.use(
           return res.rows || [];
         });
 
-        const tenMinutesAgo = new Date(new Date() - 10 * 60000);
+        const hourAgo = new Date(new Date() - 60 * 60000);
 
         const isInCooldown = failedLoginAttempts.find((x) => {
-          return new Date(x.created_at) > tenMinutesAgo && x.start_cooldown;
+          return new Date(x.created_at) > hourAgo && x.start_cooldown;
         });
 
         // Get the difference in seconds between isInCooldown and tenMinutesAgo
         const remainingCooldownInSeconds = isInCooldown
-          ? Math.floor(
-              (new Date(isInCooldown.created_at) - tenMinutesAgo) / 1000
-            )
+          ? Math.floor((new Date(isInCooldown.created_at) - hourAgo) / 1000)
           : 0;
 
         // If the user has failed to login 10 times in the last 10 minutes, or is in cooldown, return an error
