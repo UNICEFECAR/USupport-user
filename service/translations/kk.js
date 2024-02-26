@@ -28,5 +28,5 @@ export default {
   no_platform_password_set_error: "Платформа құпия сөз жоқ",
   password_is_required_error: "Құпия сөз қажет",
   too_many_login_requests_error:
-    "Көптеген кіру талаптары жасалды, көп ұзамай қайтадан байқап көріңіз.",
+    "Тым көп кіру өтініштері жасалды, {1} минуттан кейін қайталап көріңіз.",
 };
