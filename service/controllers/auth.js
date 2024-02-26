@@ -167,11 +167,27 @@ export const generateAccessToken = async (country, language, retryStep = 0) => {
 
 export const createEmailOTP = async ({ country, language, email }) => {
   // Check if email is already used
-  await getClientUserByEmailOrAccessToken(country, email, null).then((res) => {
+  const isEmailUsed = await getClientUserByEmailOrAccessToken(
+    country,
+    email,
+    null
+  ).then((res) => {
     if (res.rowCount !== 0) {
-      throw emailUsed(language);
+      return true;
     }
+    return false;
   });
+
+  if (isEmailUsed) {
+    produceRaiseNotification({
+      channels: ["email"],
+      emailArgs: {
+        emailType: "email-used",
+        recipientEmail: email,
+      },
+    });
+    return { success: true };
+  }
 
   const otp = generate4DigitCode();
 
@@ -189,7 +205,7 @@ export const createEmailOTP = async ({ country, language, email }) => {
         },
       });
     });
-  return true;
+  return { success: true };
 };
 
 export const validatePlatformPassword = async ({
