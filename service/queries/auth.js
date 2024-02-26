@@ -36,7 +36,7 @@ export const getFailedLoginAttempts = async ({ poolCountry, userId }) => {
     `
             SELECT *
             FROM login_attempt
-            WHERE user_id = $1 AND status = 'failed' AND created_at > NOW() - INTERVAL '10 minutes'
+            WHERE user_id = $1 AND status = 'failed' AND created_at > NOW() - INTERVAL '1 hour'
             ORDER BY created_at DESC;
         `,
     [userId]
