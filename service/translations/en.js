@@ -27,5 +27,5 @@ export default {
   no_platform_password_set_error: "No platform password is set",
   password_is_required_error: "Password is required",
   too_many_login_requests_error:
-    "Too many login requests made, please try again soon.",
+    "Too many login requests made, please try again in {1} minutes.",
 };

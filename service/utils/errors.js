@@ -155,7 +155,9 @@ class CustomError extends Error {
 
 export const tooManyLoginRequests = (language, remainingCooldownInSeconds) => {
   const error = new CustomError();
-  error.message = t("too_many_login_requests_error", language);
+  error.message = t("too_many_login_requests_error", language, [
+    remainingCooldownInSeconds / 60,
+  ]);
   error.name = "TOO MANY LOGIN REQUESTS";
   error.customData = { remainingCooldownInSeconds };
   error.status = 429;
