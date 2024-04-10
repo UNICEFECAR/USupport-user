@@ -8,6 +8,7 @@ import {
   getTwilioToken,
   addContactForm,
   changeUserLanguage,
+  addPlatformAccess,
 } from "#controllers/users";
 
 import { securedRoute } from "#middlewares/auth";
@@ -19,6 +20,7 @@ import {
   getTwilioTokenSchema,
   addContactFormSchema,
   changeUserLanguageSchema,
+  addPlatformAccessSchema,
 } from "#schemas/userSchemas";
 
 const router = express.Router();
@@ -159,6 +161,31 @@ router.route("/change-language").put(securedRoute, async (req, res, next) => {
     .strict(true)
     .validate({ country, language, user_id })
     .then(changeUserLanguage)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/access-platform", async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/user/access-platform
+   * #desc    Access platform
+   */
+
+  const country = req.header("x-country-alpha-2");
+  const { platform } = req.query;
+  const userId = req.header("x-user-id");
+
+  const ipAddress =
+    req.header("X-Real-IP") ||
+    req.header("x-forwarded-for") ||
+    req.connection.remoteAddress ||
+    "0.0.0.0";
+
+  return await addPlatformAccessSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ country, platform, userId, ipAddress })
+    .then(addPlatformAccess)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
