@@ -40,7 +40,11 @@ import {
   tooManyLoginRequests,
 } from "#utils/errors";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
-import { getFailedLoginAttempts, isJwtBlacklisted } from "#queries/auth";
+import {
+  getFailedLoginAttempts,
+  isJwtBlacklisted,
+  updateLastLoginQuery,
+} from "#queries/auth";
 
 const localStrategy = passportLocal.Strategy;
 const jwtStrategy = passportJWT.Strategy;
@@ -306,6 +310,13 @@ passport.use(
         if (!validatePassword) {
           return done(incorrectCredentials(language));
         }
+
+        await updateLastLoginQuery({
+          poolCountry: country,
+          userId: user.user_id,
+        }).catch((err) => {
+          console.log("Error updating last login", err);
+        });
 
         if (userType === "provider") {
           return done(null, user);

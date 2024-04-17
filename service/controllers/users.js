@@ -6,6 +6,7 @@ import {
   updateNotificationPreferencesQuery,
   addContactFormQuery,
   changeUserLanguageQuery,
+  addPlatformAccessQuery,
 } from "#queries/users";
 import {
   userNotFound,
@@ -150,6 +151,28 @@ export const changeUserLanguage = async ({ country, language, user_id }) => {
     poolCountry: country,
     user_id,
     language,
+  })
+    .then((res) => {
+      if (res.rowCount > 0) return { success: true };
+
+      return { success: false };
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const addPlatformAccess = async ({
+  country,
+  userId,
+  platform,
+  ipAddress,
+}) => {
+  return await addPlatformAccessQuery({
+    poolCountry: country,
+    userId,
+    platform,
+    ipAddress,
   })
     .then((res) => {
       if (res.rowCount > 0) return { success: true };
