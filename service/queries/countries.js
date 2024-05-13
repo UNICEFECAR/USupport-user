@@ -3,7 +3,7 @@ import { getDBPool } from "#utils/dbConfig";
 export const getAllActiveCountries = async () =>
   await getDBPool("masterDb").query(
     `
-      SELECT "country"."country_id",
+      SELECT DISTINCT("country"."country_id"),
               "country"."name",
               "country"."alpha2",
               "country"."alpha3",
