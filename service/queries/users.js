@@ -311,3 +311,18 @@ export const changeUserLanguageQuery = async ({
       `,
     [language, user_id]
   );
+
+export const addPlatformAccessQuery = async ({
+  poolCountry,
+  userId,
+  platform,
+  ipAddress,
+}) =>
+  await getDBPool("piiDb", poolCountry).query(
+    `
+          INSERT INTO platform_access (user_id, platform, ip_address)
+          VALUES ($1, $2, $3)
+          RETURNING *;
+        `,
+    [userId ? userId : null, platform, ipAddress]
+  );

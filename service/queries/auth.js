@@ -42,3 +42,15 @@ export const getFailedLoginAttempts = async ({ poolCountry, userId }) => {
     [userId]
   );
 };
+
+export const updateLastLoginQuery = async ({ poolCountry, userId }) => {
+  return await getDBPool("piiDb", poolCountry).query(
+    `
+            UPDATE "user"
+            SET last_login = NOW()
+            WHERE user_id = $1
+            RETURNING *;
+        `,
+    [userId]
+  );
+};
