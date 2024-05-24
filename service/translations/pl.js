@@ -26,9 +26,9 @@ export default {
     "Wykonano zbyt wiele żądań OTP, spróbuj ponownie wkrótce.",
   invalid_email_otp_error: "Nieprawidłowy kod weryfikacyjny",
   email_otp_expired_error: "Kod weryfikacyjny wygasł",
-  invalid_platform_password_error: "Invalid platform password",
-  no_platform_password_set_error: "No platform password is set",
+  invalid_platform_password_error: "Nieprawidłowe hasło platformy",
+  no_platform_password_set_error: "Hasło platformy nie zostało ustawione",
   password_is_required_error: "Hasło jest wymagane",
   too_many_login_requests_error:
-    "Too many login requests made, please try again in {1} minutes.",
+    "Zbyt wiele prób logowania, spróbuj ponownie za {1} minut.",
 };
