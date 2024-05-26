@@ -1,11 +1,15 @@
 import en from "./en.js";
 import kk from "./kk.js";
 import ru from "./ru.js";
+import pl from "./pl.js";
+import uk from "./uk.js";
 
 const translations = {
   en,
   kk,
   ru,
+  pl,
+  uk,
 };
 
 /**
