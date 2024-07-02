@@ -10,7 +10,13 @@ router.get("/", async (req, res, next) => {
    * #desc    Get all active languages
    */
 
-  return await getAllActiveLanguages()
+  const country = req.headers["x-country-alpha-2"];
+  const forGlobal = req.query.forGlobal;
+
+  return await getAllActiveLanguages({
+    country,
+    forGlobal,
+  })
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
