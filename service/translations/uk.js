@@ -25,8 +25,8 @@ export default {
   invalid_email_otp_error: "Неправильний код підтвердження",
   email_otp_expired_error: "Термін дії верифікаційного коду закінчився",
   invalid_platform_password_error: "Невірний пароль",
-  no_platform_password_set_error: "Пароль ще не було встановлено",
+  no_platform_password_set_error: "Пароль не був встановлений",
   password_is_required_error: "Потрібен пароль",
   too_many_login_requests_error:
-    "Зроблено забагато спроб входу, будь ласка, спробуйте знову за {1} хвилину",
+    "Забагато спроб авторизації. Будь ласка, спробуйте знову за {1} хвилину",
 };
