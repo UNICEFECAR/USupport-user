@@ -175,9 +175,13 @@ router.get("/access-platform", async (req, res, next) => {
   const { platform } = req.query;
   const userId = req.header("x-user-id");
 
+  console.log("x-real-ip", req.header("x-real-ip"));
+  console.log("x-forwarded-for", req.header("x-forwarded-for"));
+  console.log("remoteAddress", req.connection.remoteAddress);
+
   const ipAddress =
+    req.header("x-real-ip") ||
     req.header("x-forwarded-for") ||
-    req.header("X-Real-IP") ||
     req.connection.remoteAddress ||
     "0.0.0.0";
 
