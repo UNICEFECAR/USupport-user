@@ -11,6 +11,7 @@ import {
   loginAttempt,
   createProviderDetailWorkWithLink,
   createProviderDetailLanguageLink,
+  assignOrganizationsToProviderQuery,
 } from "#queries/users";
 import {
   storeAuthOTP,
@@ -148,12 +149,13 @@ passport.use(
         })
           .then(async (res) => {
             if (userType === "provider") {
+              const providerDetailId = res.rows[0].provider_detail_id;
               if (providerData.workWithIds?.length > 0) {
                 // loop through workWithIds and create a new row in the provider_detail_work_with_links table
                 for (let i = 0; i < providerData.workWithIds.length; i++) {
                   await createProviderDetailWorkWithLink({
                     poolCountry: country,
-                    providerDetailId: res.rows[0].provider_detail_id,
+                    providerDetailId,
                     workWithId: providerData.workWithIds[i],
                   }).catch((err) => {
                     throw err;
@@ -165,12 +167,22 @@ passport.use(
                 for (let i = 0; i < providerData.languageIds.length; i++) {
                   await createProviderDetailLanguageLink({
                     poolCountry: country,
-                    providerDetailId: res.rows[0].provider_detail_id,
+                    providerDetailId,
                     languageId: providerData.languageIds[i],
                   }).catch((err) => {
                     throw err;
                   });
                 }
+              }
+
+              if (providerData.organizationIds?.length > 0) {
+                await assignOrganizationsToProviderQuery({
+                  poolCountry: country,
+                  providerDetailId,
+                  organizationIds: providerData.organizationIds,
+                }).catch((err) => {
+                  throw err;
+                });
               }
             }
 
