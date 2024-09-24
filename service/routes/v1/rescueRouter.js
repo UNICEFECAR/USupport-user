@@ -31,7 +31,7 @@ router.route("/forgot-password-link").post(async (req, res, next) => {
     .catch(next);
 });
 
-router.route("forgot-password").post(async (req, res, next) => {
+router.route("/forgot-password").post(async (req, res, next) => {
   /**
    * #route   POST /user/v1/rescue/forgot-password
    * #desc    Reset forgot password with token
