@@ -12,6 +12,7 @@ import {
   createProviderDetailWorkWithLink,
   createProviderDetailLanguageLink,
   assignOrganizationsToProviderQuery,
+  getProviderPasswordByEmailQuery,
 } from "#queries/users";
 import {
   storeAuthOTP,
@@ -268,7 +269,7 @@ passport.use(
               throw err;
             });
         } else if (userType === "provider") {
-          user = await getProviderUserByEmail(country, email)
+          user = await getProviderPasswordByEmailQuery(country, email)
             .then((res) => res.rows[0])
             .catch((err) => {
               throw err;
@@ -285,45 +286,51 @@ passport.use(
           req.header("X-Real-IP") || req.header("x-forwarded-for") || "0.0.0.0";
         const location = req.header("x-location") || "Unknown";
 
-        const failedLoginAttempts = await getFailedLoginAttempts({
-          poolCountry: country,
-          userId: user.user_id,
-        }).then((res) => {
-          return res.rows || [];
-        });
+        let failedLoginAttempts = [];
 
-        const hourAgo = new Date(new Date() - 60 * 60000);
+        if (!validatePassword) {
+          failedLoginAttempts = await getFailedLoginAttempts({
+            poolCountry: country,
+            userId: user.user_id,
+          }).then((res) => {
+            return res.rows || [];
+          });
 
-        const isInCooldown = failedLoginAttempts.find((x) => {
-          return new Date(x.created_at) > hourAgo && x.start_cooldown;
-        });
+          const hourAgo = new Date(new Date() - 60 * 60000);
 
-        // Get the difference in seconds between isInCooldown and tenMinutesAgo
-        const remainingCooldownInSeconds = isInCooldown
-          ? Math.floor((new Date(isInCooldown.created_at) - hourAgo) / 1000)
-          : 0;
+          const isInCooldown = failedLoginAttempts.find((x) => {
+            return new Date(x.created_at) > hourAgo && x.start_cooldown;
+          });
 
-        // If the user has failed to login 10 times in the last 10 minutes, or is in cooldown, return an error
-        if (failedLoginAttempts.length >= 10 || isInCooldown) {
-          return done(
-            tooManyLoginRequests(language, remainingCooldownInSeconds)
-          );
+          // Get the difference in seconds between isInCooldown and tenMinutesAgo
+          const remainingCooldownInSeconds = isInCooldown
+            ? Math.floor((new Date(isInCooldown.created_at) - hourAgo) / 1000)
+            : 0;
+
+          // If the user has failed to login 10 times in the last 10 minutes, or is in cooldown, return an error
+          if (failedLoginAttempts.length >= 10 || isInCooldown) {
+            return done(
+              tooManyLoginRequests(language, remainingCooldownInSeconds)
+            );
+          }
         }
 
-        await loginAttempt({
+        loginAttempt({
           poolCountry: country,
           user_id: user.user_id,
           ip_address,
           location,
           status: !validatePassword ? "failed" : "successful",
           startCooldown: failedLoginAttempts.length === 9 && !validatePassword,
+        }).catch((err) => {
+          console.log("Error adding login attempt", err);
         });
 
         if (!validatePassword) {
           return done(incorrectCredentials(language));
         }
 
-        await updateLastLoginQuery({
+        updateLastLoginQuery({
           poolCountry: country,
           userId: user.user_id,
         }).catch((err) => {
