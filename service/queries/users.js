@@ -1,5 +1,19 @@
 import { getDBPool } from "#utils/dbConfig";
 
+export const getProviderPasswordByEmailQuery = async (poolcountry, email) => {
+  return await getDBPool("piiDb", poolcountry).query(
+    `
+        SELECT password, "user".user_id, type
+        FROM "user"
+          JOIN provider_detail ON provider_detail.provider_detail_id = "user".provider_detail_id
+        WHERE email = $1
+        AND deleted_at IS NULL
+        LIMIT 1;
+        `,
+    [email]
+  );
+};
+
 export const getClientUserByEmailOrAccessToken = async (
   poolCountry,
   email,
