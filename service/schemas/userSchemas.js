@@ -34,7 +34,7 @@ const createClientSchema = (language) =>
         is: undefined,
         then: yup
           .string()
-          .email()
+          .email({ tlds: { allow: false } })
           .required(t("email_or_access_token_required_error", language)),
       }),
       userAccessToken: yup.string().when("email", {
@@ -57,7 +57,12 @@ const createProviderSchema = yup.object().shape({
   patronym: yup.string().notRequired(),
   surname: yup.string().required(),
   nickname: yup.string().notRequired(),
-  email: yup.string().email().required(),
+  email: yup
+    .string()
+    .email({
+      tlds: { allow: false },
+    })
+    .required(),
   phone: yup.string().notRequired(),
   specializations: specializationsTypeSchema.notRequired(),
   street: yup.string().notRequired(),
