@@ -29,4 +29,5 @@ export default {
   password_is_required_error: "Потрібен пароль",
   too_many_login_requests_error:
     "Забагато спроб авторизації. Будь ласка, спробуйте знову за {1} хвилину",
+  valid_email: "Будь ласка, вкажіть дійсну електронну адресу",
 };

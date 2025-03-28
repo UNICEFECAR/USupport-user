@@ -28,4 +28,5 @@ export default {
   password_is_required_error: "Password is required",
   too_many_login_requests_error:
     "Too many login requests made, please try again in {1} minutes.",
+  valid_email: "Please provide a valid email",
 };
