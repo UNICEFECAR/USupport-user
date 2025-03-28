@@ -34,7 +34,7 @@ const createClientSchema = (language) =>
         is: undefined,
         then: yup
           .string()
-          .email({ tlds: { allow: false } })
+          .email(t("valid_email", language))
           .required(t("email_or_access_token_required_error", language)),
       }),
       userAccessToken: yup.string().when("email", {

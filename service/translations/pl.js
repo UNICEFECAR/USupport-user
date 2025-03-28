@@ -32,4 +32,5 @@ export default {
   password_is_required_error: "Hasło jest wymagane",
   too_many_login_requests_error:
     "Zbyt wiele żądań logowania, spróbuj ponownie za {1} minut.",
+  valid_email: "Podaj prawidłowy adres email",
 };

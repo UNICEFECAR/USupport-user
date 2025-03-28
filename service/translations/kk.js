@@ -29,4 +29,5 @@ export default {
   password_is_required_error: "Құпия сөз қажет",
   too_many_login_requests_error:
     "Тым көп кіру өтініштері жасалды, {1} минуттан кейін қайталап көріңіз.",
+  valid_email: "Дұрыс электронды поштаға ие болуыңызды рахмет",
 };

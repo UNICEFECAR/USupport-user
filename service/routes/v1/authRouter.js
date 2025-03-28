@@ -158,7 +158,7 @@ router.post("/email-otp", async (req, res, next) => {
 
   const payload = req.body;
 
-  return await emailOTPSchema
+  return await emailOTPSchema(language)
     .noUnknown(true)
     .strict()
     .validate({ country, language, ...payload })
