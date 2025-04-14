@@ -1,6 +1,7 @@
 import express from "express";
 
 import {
+  getActiveCountriesWithLanguages,
   getAllCountries,
   getCountryByAlpha2Code,
 } from "#controllers/countries";
@@ -34,6 +35,17 @@ router.get("/by-alpha-2-code", async (req, res, next) => {
     .strict(true)
     .validate({ country, language })
     .then(getCountryByAlpha2Code)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/countries-with-languages", async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/countries/countries-with-languages
+   * #desc    Get all active countries with languages
+   */
+
+  return await getActiveCountriesWithLanguages()
     .then((result) => res.status(200).send(result))
     .catch(next);
 });

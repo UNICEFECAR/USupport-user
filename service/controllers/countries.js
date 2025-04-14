@@ -1,5 +1,6 @@
 import {
   getAllActiveCountries,
+  getCountriesWithLanguagesQuery,
   getCountryByAlpha2CodeQuery,
 } from "#queries/countries";
 
@@ -23,6 +24,20 @@ export const getCountryByAlpha2Code = async ({ country, language }) => {
       } else {
         return res.rows[0];
       }
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const getActiveCountriesWithLanguages = async () => {
+  return await getCountriesWithLanguagesQuery()
+    .then((res) => {
+      return (
+        res.rows?.map((x) => ({
+          ...x,
+        })) || []
+      );
     })
     .catch((err) => {
       throw err;

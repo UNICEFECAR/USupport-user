@@ -8,7 +8,7 @@ export default {
   notification_preferences_not_found_error:
     "Nie znaleziono preferencji powiadomień",
   country_not_found_error: "Nie znaleziono kraju",
-  email_already_used_error: "Ten adres email jest już wykorzystany",
+  email_already_used_error: "Ten adres email jest już zajęty",
   user_access_token_already_used_error:
     "Ten token dostępu użytkownika nie jest dostępny",
   incorrect_password_error: "Podane hasło jest nieprawidłowe",
