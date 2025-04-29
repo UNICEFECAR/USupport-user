@@ -161,3 +161,21 @@ export const addPlatformAccessSchema = yup.object().shape({
   userId: yup.string().uuid().nullable(),
   platform: yup.string().required(),
 });
+
+export const getContentRatingsSchema = yup.object().shape({
+  language: yup.string().required(),
+  userId: yup.string().uuid().required(),
+});
+
+export const addContentRatingSchema = getContentRatingsSchema.shape({
+  contentId: yup.number().required(),
+  contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
+  positive: yup.boolean().nullable(),
+});
+
+export const getRatingsForContentSchema = yup.object().shape({
+  // make userId nullable
+  userId: yup.string().nullable(),
+  contentId: yup.number().required(),
+  contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
+});
