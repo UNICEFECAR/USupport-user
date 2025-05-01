@@ -7,6 +7,10 @@ import {
   addContactFormQuery,
   changeUserLanguageQuery,
   addPlatformAccessQuery,
+  addContentRatingQuery,
+  getContentRatingsQuery,
+  getRatingsForContentQuery,
+  removeContentRatingQuery,
 } from "#queries/users";
 import {
   userNotFound,
@@ -182,4 +186,93 @@ export const addPlatformAccess = async ({
     .catch((err) => {
       throw err;
     });
+};
+
+export const getContentRatings = async ({ language, userId }) => {
+  return await getContentRatingsQuery(userId).then((res) => {
+    if (res.rowCount > 0) {
+      return res.rows;
+    }
+    return [];
+  });
+};
+
+export const addContentRating = async ({
+  userId,
+  contentId,
+  contentType,
+  positive,
+}) => {
+  if (positive === null) {
+    return await removeContentRatingQuery({ userId, contentId, contentType })
+      .then(() => {
+        return { success: true };
+      })
+      .catch((err) => {
+        throw err;
+      });
+  }
+  return await addContentRatingQuery({
+    userId,
+    contentId,
+    contentType,
+    positive,
+  })
+    .then((res) => {
+      if (res.rowCount > 0) return { success: true };
+
+      return { success: false };
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const getRatingsForContent = async ({
+  userId,
+  contentId,
+  contentType,
+}) => {
+  return await getRatingsForContentQuery({
+    contentId,
+    contentType,
+  }).then((res) => {
+    if (res.rowCount > 0) {
+      const { likes, dislikes, isLikedByUser, isDislikedByUser } =
+        res.rows.reduce(
+          (acc, row) => {
+            if (row.positive) {
+              acc.likes += 1;
+            } else if (row.positive === false) {
+              acc.dislikes += 1;
+            }
+            if (row.user_id === userId) {
+              if (row.positive !== null) {
+                acc.isLikedByUser = row.positive;
+                acc.isDislikedByUser = !row.positive;
+              }
+            }
+            return acc;
+          },
+          {
+            likes: 0,
+            dislikes: 0,
+            isLikedByUser: false,
+            isDislikedByUser: false,
+          }
+        );
+      return {
+        likes,
+        dislikes,
+        isLikedByUser,
+        isDislikedByUser,
+      };
+    }
+    return {
+      likes: 0,
+      dislikes: 0,
+      isLikedByUser: false,
+      isDislikedByUser: false,
+    };
+  });
 };

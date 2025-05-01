@@ -9,6 +9,9 @@ import {
   addContactForm,
   changeUserLanguage,
   addPlatformAccess,
+  getContentRatings,
+  addContentRating,
+  getRatingsForContent,
 } from "#controllers/users";
 
 import { securedRoute } from "#middlewares/auth";
@@ -21,6 +24,9 @@ import {
   addContactFormSchema,
   changeUserLanguageSchema,
   addPlatformAccessSchema,
+  addContentRatingSchema,
+  getContentRatingsSchema,
+  getRatingsForContentSchema,
 } from "#schemas/userSchemas";
 
 const router = express.Router();
@@ -190,6 +196,61 @@ router.get("/access-platform", async (req, res, next) => {
     .strict(true)
     .validate({ country, platform, userId, ipAddress })
     .then(addPlatformAccess)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/content-ratings", async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/user/content-ratings
+   * #desc    Get content ratings
+   */
+  const language = req.header("x-language-alpha-2");
+  const userId = req.header("x-user-id");
+
+  return await getContentRatingsSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ language, userId })
+    .then(getContentRatings)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/ratings-for-content", async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/user/rating-for-content
+   * #desc    Get rating for content
+   */
+  const userId = req.header("x-user-id") || null;
+  const contentType = req.query.contentType;
+  const contentId = Number(req.query.contentId);
+
+  return await getRatingsForContentSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ contentType, userId, contentId })
+    .then(getRatingsForContent)
+    .then((result) => {
+      return res.status(200).send(result);
+    })
+    .catch(next);
+});
+
+router.post("/content-rating", async (req, res, next) => {
+  /**
+   * #route   POST /user/v1/user/content-rating
+   * #desc    Add content rating
+   */
+  const language = req.header("x-language-alpha-2");
+  const userId = req.header("x-user-id");
+  const payload = req.body;
+
+  return await addContentRatingSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ ...payload, language, userId })
+    .then(addContentRating)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });

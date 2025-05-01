@@ -367,3 +367,56 @@ export const assignOrganizationsToProviderQuery = async ({
     [organizationIds, providerDetailId]
   );
 };
+
+export const getContentRatingsQuery = async (userId) => {
+  return await getDBPool("masterDb").query(
+    `
+      SELECT content_type, content_id, positive
+      FROM content_rating
+      WHERE user_id = $1
+    `,
+    [userId]
+  );
+};
+
+export const addContentRatingQuery = async ({
+  userId,
+  contentId,
+  contentType,
+  positive,
+}) => {
+  return await getDBPool("masterDb").query(
+    `
+      INSERT INTO content_rating (user_id, content_type, content_id, positive)
+      VALUES ($1, $2, $3, $4)
+      ON CONFLICT (user_id, content_type, content_id)
+      DO UPDATE SET positive = EXCLUDED.positive, created_at = now();
+    `,
+    [userId, contentType, contentId, positive]
+  );
+};
+
+export const getRatingsForContentQuery = async ({ contentId, contentType }) => {
+  return await getDBPool("masterDb").query(
+    `
+      SELECT *
+      FROM content_rating
+      WHERE content_id = $1 AND content_type = $2
+    `,
+    [contentId, contentType]
+  );
+};
+
+export const removeContentRatingQuery = async ({
+  userId,
+  contentId,
+  contentType,
+}) => {
+  return await getDBPool("masterDb").query(
+    `
+      DELETE FROM content_rating
+      WHERE user_id = $1 AND content_id = $2 AND content_type = $3
+    `,
+    [userId, contentId, contentType]
+  );
+};
