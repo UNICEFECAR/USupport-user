@@ -45,6 +45,8 @@ router.get("/countries-with-languages", async (req, res, next) => {
    * #desc    Get all active countries with languages
    */
 
+  console.log("Fetching all active countries with languages");
+
   return await getActiveCountriesWithLanguages()
     .then((result) => res.status(200).send(result))
     .catch(next);
