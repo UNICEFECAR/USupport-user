@@ -40,7 +40,7 @@ jobs:
 
       - name: Generate secrets.yaml
         run: |
-          cat <<EOF > kube-config/staging/secrets.yaml
+          cat > kube-config/staging/secrets.yaml <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
