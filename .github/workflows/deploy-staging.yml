@@ -21,8 +21,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_GITHUB }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_GITHUB }}
           aws-region: eu-central-1
           
       - name: Log in to Amazon ECR
@@ -37,6 +37,36 @@ jobs:
         run: |
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBECONFIG_STAGING }}" | base64 -d > $HOME/.kube/config
+
+      - name: Generate secrets.yaml
+        run: |
+          cat <<EOF > kube-config/staging/secrets.yaml
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: user-secrets
+          type: Opaque
+          data:
+            PII_DB_URL_KZ: $(echo -n "${{ secrets.PII_DB_URL_KZ }}" | base64)
+            CLINICAL_DB_URL_KZ: $(echo -n "${{ secrets.CLINICAL_DB_URL_KZ }}" | base64)
+            PII_DB_URL_PL: $(echo -n "${{ secrets.PII_DB_URL_PL }}" | base64)
+            CLINICAL_DB_URL_PL: $(echo -n "${{ secrets.CLINICAL_DB_URL_PL }}" | base64)
+            MASTER_DB_URL: $(echo -n "${{ secrets.MASTER_DB_URL }}" | base64)
+
+            JWT_KEY: $(echo -n "${{ secrets.JWT_KEY }}" | base64)
+
+            AWS_ACCESS_KEY_ID: $(echo -n "${{ secrets.AWS_ACCESS_KEY_ID }}" | base64)
+            AWS_SECRET_ACCESS_KEY: $(echo -n "${{ secrets.AWS_SECRET_ACCESS_KEY }}" | base64)
+            AWS_REGION: $(echo -n "${{ secrets.AWS_REGION }}" | base64)
+            AWS_BUCKET_NAME: $(echo -n "${{ secrets.AWS_BUCKET_NAME }}" | base64)
+
+            TWILIO_ACCOUNT_SID: $(echo -n "${{ secrets.TWILIO_ACCOUNT_SID }}" | base64)
+            TWILIO_AUTH_TOKEN: $(echo -n "${{ secrets.TWILIO_AUTH_TOKEN }}" | base64)
+            TWILIO_API_SID: $(echo -n "${{ secrets.TWILIO_API_SID }}" | base64)
+            TWILIO_API_SECRET: $(echo -n "${{ secrets.TWILIO_API_SECRET }}" | base64)
+
+            RECAPTCHA_SECRET_KEY: $(echo -n "${{ secrets.RECAPTCHA_SECRET_KEY }}" | base64)
+          EOF
 
       - name: Deploy to Kubernetes
         run: |
