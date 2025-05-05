@@ -68,4 +68,4 @@ jobs:
       - name: Deploy to Kubernetes
         run: |
           chmod +x ./deploy.sh
-          ./deploy.sh staging deploy
+          ./deploy.sh staging redeploy
