@@ -35,6 +35,7 @@ jobs:
 
       - name: Decode kubeconfig
         run: |
+          mkdir -p $HOME/.kube
           echo "${{ secrets.KUBECONFIG_STAGING }}" | base64 -d > $HOME/.kube/config
 
       - name: Deploy to Kubernetes
