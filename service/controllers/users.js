@@ -1,4 +1,8 @@
 import bcrypt from "bcryptjs";
+import fetch from "node-fetch";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { marked } from "marked";
+import { JSDOM } from "jsdom";
 
 import {
   getUserByID,
@@ -228,11 +232,7 @@ export const addContentRating = async ({
     });
 };
 
-export const getRatingsForContent = async ({
-  userId,
-  contentId,
-  contentType,
-}) => {
+export const getRatingsForContent = async ({ contentId, contentType }) => {
   return await getRatingsForContentQuery({
     contentId,
     contentType,
@@ -275,4 +275,453 @@ export const getRatingsForContent = async ({
       isDislikedByUser: false,
     };
   });
+};
+
+export const generatePdf = async ({
+  contentUrl,
+  contentType,
+  title,
+  imageUrl,
+}) => {
+  try {
+    const response = await fetch(contentUrl);
+    const contentData = await response.json();
+
+    if (!contentData || !contentData.data) {
+      throw new Error("Failed to fetch content data");
+    }
+
+    const data = contentData.data;
+    const attributes = data.attributes;
+
+    // Create a new PDF document
+    const pdfDoc = await PDFDocument.create();
+    let page = pdfDoc.addPage([595.28, 841.89]); // A4 size
+    const { width, height } = page.getSize();
+
+    // Load fonts
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+    const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+
+    // Set document title
+    const contentTitle = title || attributes.title || `${contentType} content`;
+    pdfDoc.setTitle(contentTitle);
+
+    // Margins and positions
+    const margin = 50;
+    let currentY = height - margin;
+    const maxWidth = width - 2 * margin;
+
+    // Helper function to safely draw text (handle encoding issues)
+    const safeDrawText = (text, options) => {
+      try {
+        // Replace problematic characters
+        const sanitizedText = text
+          .replace(/[\n\r]/g, " ") // Replace newlines with spaces
+          .replace(/[^\x00-\x7F]/g, (char) => {
+            // Replace non-ASCII characters with their closest ASCII equivalents or remove them
+            try {
+              return char.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+            } catch (e) {
+              return "";
+            }
+          });
+
+        page.drawText(sanitizedText, options);
+        return true;
+      } catch (error) {
+        console.warn(`Could not draw text: ${error.message}`);
+        return false;
+      }
+    };
+
+    // Write title
+    safeDrawText(contentTitle, {
+      x: margin,
+      y: currentY,
+      size: 20,
+      font: boldFont,
+      color: rgb(0, 0, 0),
+    });
+    currentY -= 30;
+
+    // Add creator if available
+    const creator = attributes.author || attributes.creator;
+    if (creator) {
+      safeDrawText(`By: ${creator}`, {
+        x: margin,
+        y: currentY,
+        size: 12,
+        font: italicFont,
+        color: rgb(0.3, 0.3, 0.3),
+      });
+      currentY -= 20;
+    }
+
+    // Add metadata like reading time, category
+    const readingTime = attributes.reading_time || attributes.readingTime;
+    if (readingTime) {
+      safeDrawText(`Reading time: ${readingTime} min read`, {
+        x: margin,
+        y: currentY,
+        size: 12,
+        font: font,
+        color: rgb(0.3, 0.3, 0.3),
+      });
+      currentY -= 20;
+    }
+
+    if (attributes.category && attributes.category.data) {
+      const categoryName = attributes.category.data.attributes.name;
+      safeDrawText(`Category: ${categoryName}`, {
+        x: margin,
+        y: currentY,
+        size: 12,
+        font: font,
+        color: rgb(0.3, 0.3, 0.3),
+      });
+      currentY -= 20;
+    }
+
+    // Add labels if available
+    if (
+      attributes.labels &&
+      attributes.labels.data &&
+      attributes.labels.data.length > 0
+    ) {
+      // Draw "Labels:" text
+      safeDrawText("Labels:", {
+        x: margin,
+        y: currentY,
+        size: 12,
+        font: boldFont,
+        color: rgb(0.3, 0.3, 0.3),
+      });
+
+      currentY -= 20;
+
+      // Format labels as individual tags rather than a comma-separated list
+      const labels = attributes.labels.data;
+      let xPosition = margin;
+
+      for (let i = 0; i < labels.length; i++) {
+        const label = labels[i];
+        const labelName = label.attributes
+          ? label.attributes.Name || label.attributes.name
+          : "";
+
+        if (!labelName) continue;
+
+        // Calculate label width to determine if we need to move to next line
+        let labelWidth;
+        try {
+          labelWidth = font.widthOfTextAtSize(labelName, 12) + 20; // Add padding
+        } catch (e) {
+          labelWidth = 150; // Default width if can't calculate
+        }
+
+        // If this label would go beyond page width, move to next line
+        if (xPosition + labelWidth > width - margin) {
+          xPosition = margin;
+          currentY -= 25;
+        }
+
+        // Draw label background
+        page.drawRectangle({
+          x: xPosition,
+          y: currentY - 12,
+          width: labelWidth,
+          height: 20,
+          borderColor: rgb(32 / 255, 128 / 255, 158 / 255),
+          borderWidth: 1,
+          borderRadius: 20,
+        });
+
+        // Draw label text
+        safeDrawText(labelName, {
+          x: xPosition + 10,
+          y: currentY - 5,
+          size: 10,
+          font: font,
+          color: rgb(102 / 255, 118 / 255, 141 / 255),
+        });
+
+        // Update x position for next label
+        xPosition += labelWidth + 10;
+      }
+
+      // Update y position after all labels
+      currentY -= 30;
+    }
+
+    // Add horizontal line as separator
+    page.drawLine({
+      start: { x: margin, y: currentY },
+      end: { x: width - margin, y: currentY },
+      thickness: 1,
+      color: rgb(0.8, 0.8, 0.8),
+    });
+    currentY -= 20;
+
+    // Add image if available - check all possible image locations
+    const getImageData = () => {
+      // First, try to use provided imageUrl if available
+      if (imageUrl) {
+        return { url: imageUrl };
+      }
+
+      // Check in thumbnail field
+      if (attributes.thumbnail && attributes.thumbnail.data) {
+        return attributes.thumbnail.data.attributes;
+      }
+
+      // Check in image field
+      if (attributes.image && attributes.image.data) {
+        return attributes.image.data.attributes;
+      }
+
+      // Check in formats if available
+      if (
+        attributes.thumbnail &&
+        attributes.thumbnail.data &&
+        attributes.thumbnail.data.attributes &&
+        attributes.thumbnail.data.attributes.formats
+      ) {
+        const formats = attributes.thumbnail.data.attributes.formats;
+
+        // Try to get medium size first
+        if (formats.medium) {
+          return formats.medium;
+        }
+
+        // Then small
+        if (formats.small) {
+          return formats.small;
+        }
+
+        // Then thumbnail
+        if (formats.thumbnail) {
+          return formats.thumbnail;
+        }
+      }
+
+      return null;
+    };
+
+    const imageData = getImageData();
+    if (imageData) {
+      try {
+        // Get the complete image URL, ensuring it's absolute
+        let imageUrl = imageData.url;
+
+        // Make sure the URL is absolute
+        if (imageUrl.startsWith("/")) {
+          // If URL is relative, extract domain from contentUrl
+          try {
+            const contentUrlObj = new URL(contentUrl);
+            imageUrl = `${contentUrlObj.origin}${imageUrl}`;
+          } catch (error) {
+            console.warn(
+              "Could not parse content URL to fix relative image path"
+            );
+          }
+        }
+
+        // Add headers to avoid CORS issues
+        const imageResponse = await fetch(imageUrl, {
+          headers: {
+            Accept: "image/*, */*",
+            "User-Agent": "PDF Generator",
+            Origin: "https://usupportme-api",
+          },
+        });
+
+        if (!imageResponse.ok) {
+          throw new Error(
+            `Failed to fetch image: ${imageResponse.status} ${imageResponse.statusText}`
+          );
+        }
+
+        const imageArrayBuffer = await imageResponse.arrayBuffer();
+
+        if (!imageArrayBuffer || imageArrayBuffer.byteLength === 0) {
+          throw new Error("Empty image data received");
+        }
+
+        // Determine image format based on content type or URL extension
+        const contentType = imageResponse.headers.get("content-type") || "";
+        const isJpeg =
+          contentType.includes("jpeg") ||
+          contentType.includes("jpg") ||
+          imageUrl.endsWith(".jpg") ||
+          imageUrl.endsWith(".jpeg");
+        const isPng = contentType.includes("png") || imageUrl.endsWith(".png");
+
+        let image;
+        try {
+          if (isJpeg) {
+            image = await pdfDoc.embedJpg(imageArrayBuffer);
+          } else if (isPng) {
+            image = await pdfDoc.embedPng(imageArrayBuffer);
+          } else {
+            // Try PNG as default if format couldn't be determined
+            try {
+              image = await pdfDoc.embedPng(imageArrayBuffer);
+            } catch (e) {
+              // Fallback to JPEG if PNG embedding fails
+              image = await pdfDoc.embedJpg(imageArrayBuffer);
+            }
+          }
+
+          if (image) {
+            // Calculate dimensions to fit within page width while preserving aspect ratio
+            const imgWidth = Math.min(maxWidth, image.width);
+            const imgHeight = (imgWidth / image.width) * image.height;
+
+            // Add new page if image doesn't fit on current page
+            if (currentY - imgHeight < margin) {
+              page = pdfDoc.addPage([595.28, 841.89]);
+              currentY = height - margin;
+            }
+
+            page.drawImage(image, {
+              x: margin,
+              y: currentY - imgHeight,
+              width: imgWidth,
+              height: imgHeight,
+            });
+
+            currentY -= imgHeight + 20;
+          }
+        } catch (error) {
+          console.error("Error embedding image in PDF:", error.message);
+          // Continue without the image
+        }
+      } catch (error) {
+        console.error("Error processing image for PDF:", error.message);
+        // Continue without the image
+      }
+    }
+
+    // Convert markdown body to text for PDF
+    if (attributes.body) {
+      // Parse markdown to HTML
+      const html = marked.parse(attributes.body);
+
+      // Create a DOM to extract text content
+      const dom = new JSDOM(html);
+      const paragraphs = dom.window.document.querySelectorAll(
+        "p, h1, h2, h3, h4, h5, h6, ul, ol"
+      );
+
+      for (const paragraph of paragraphs) {
+        const originalText = paragraph.textContent.trim();
+        if (!originalText) continue;
+
+        let fontSize = 12;
+        let fontToUse = font;
+
+        // Detect headers and apply different styling
+        if (paragraph.tagName.startsWith("H")) {
+          const level = parseInt(paragraph.tagName.substring(1));
+          fontSize = 20 - level * 2; // H1: 18, H2: 16, etc.
+          fontToUse = boldFont;
+        }
+
+        // Process text to handle potential encoding issues
+        const text = originalText
+          .replace(/[\n\r]/g, " ") // Replace newlines with spaces
+          .replace(/[^\x00-\x7F]/g, (char) => {
+            // Replace non-ASCII characters with their closest ASCII equivalents or remove them
+            try {
+              return char.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+            } catch (e) {
+              return "";
+            }
+          });
+
+        // Split text into lines that fit in the page width
+        const words = text.split(" ");
+        let line = "";
+
+        for (const word of words) {
+          try {
+            const testLine = line + (line ? " " : "") + word;
+
+            let testWidth;
+            try {
+              testWidth = fontToUse.widthOfTextAtSize(testLine, fontSize);
+            } catch (error) {
+              // If we can't calculate width, assume it's too wide
+              testWidth = maxWidth + 1;
+            }
+
+            if (testWidth > maxWidth) {
+              // Add new page if line doesn't fit on current page
+              if (currentY - fontSize < margin) {
+                page = pdfDoc.addPage([595.28, 841.89]);
+                currentY = height - margin;
+              }
+
+              if (line) {
+                try {
+                  safeDrawText(line, {
+                    x: margin,
+                    y: currentY,
+                    size: fontSize,
+                    font: fontToUse,
+                    color: rgb(0, 0, 0),
+                  });
+                } catch (error) {
+                  console.warn(`Error drawing text: ${error.message}`);
+                }
+              }
+
+              currentY -= fontSize + 5;
+              line = word;
+            } else {
+              line = testLine;
+            }
+          } catch (error) {
+            console.warn(`Error processing word "${word}": ${error.message}`);
+            continue;
+          }
+        }
+
+        // Draw remaining text
+        if (line) {
+          // Add new page if line doesn't fit on current page
+          if (currentY - fontSize < margin) {
+            page = pdfDoc.addPage([595.28, 841.89]);
+            currentY = height - margin;
+          }
+
+          try {
+            safeDrawText(line, {
+              x: margin,
+              y: currentY,
+              size: fontSize,
+              font: fontToUse,
+              color: rgb(0, 0, 0),
+            });
+          } catch (error) {
+            console.warn(`Error drawing text: ${error.message}`);
+          }
+
+          currentY -= fontSize + 5;
+        }
+
+        // Add extra space after paragraphs
+        currentY -= 10;
+      }
+    }
+
+    // Serialize PDF to bytes
+    const pdfBytes = await pdfDoc.save();
+    return Buffer.from(pdfBytes);
+  } catch (error) {
+    console.error("Error generating PDF:", error);
+    throw error;
+  }
 };
