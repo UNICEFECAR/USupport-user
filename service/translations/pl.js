@@ -33,4 +33,9 @@ export default {
   too_many_login_requests_error:
     "Zbyt wiele żądań logowania, spróbuj ponownie za {1} minut.",
   valid_email: "Podaj prawidłowy adres email",
+
+  by: "Autor: {1}",
+  reading_time: "Czas czytania: {1} min",
+  category: "Kategoria: {1}",
+  labels: "Etykiety:",
 };
