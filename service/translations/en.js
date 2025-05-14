@@ -29,4 +29,9 @@ export default {
   too_many_login_requests_error:
     "Too many login requests made, please try again in {1} minutes.",
   valid_email: "Please provide a valid email",
+
+  by: "By: {1}",
+  reading_time: "Reading time: {1} min read",
+  category: "Category: {1}",
+  labels: "Labels:",
 };

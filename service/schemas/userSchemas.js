@@ -179,3 +179,11 @@ export const getRatingsForContentSchema = yup.object().shape({
   contentId: yup.number().required(),
   contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
 });
+
+export const generatePdfSchema = yup.object().shape({
+  language: yup.string().required(),
+  contentUrl: yup.string().required(),
+  contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
+  title: yup.string().notRequired(),
+  imageUrl: yup.string().notRequired(),
+});
