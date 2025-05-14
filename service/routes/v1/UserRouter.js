@@ -12,6 +12,7 @@ import {
   getContentRatings,
   addContentRating,
   getRatingsForContent,
+  generatePdf,
 } from "#controllers/users";
 
 import { securedRoute } from "#middlewares/auth";
@@ -27,6 +28,7 @@ import {
   addContentRatingSchema,
   getContentRatingsSchema,
   getRatingsForContentSchema,
+  generatePdfSchema,
 } from "#schemas/userSchemas";
 
 const router = express.Router();
@@ -252,6 +254,36 @@ router.post("/content-rating", async (req, res, next) => {
     .validate({ ...payload, language, userId })
     .then(addContentRating)
     .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.post("/generate-pdf", async (req, res, next) => {
+  /**
+   * #route   POST /user/v1/user/generate-pdf
+   * #desc    Generate PDF from content URL
+   */
+  const language = req.header("x-language-alpha-2") || "en";
+  const payload = req.body;
+
+  return await generatePdfSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ ...payload, language })
+    .then(async (validData) => {
+      // Generate PDF and pipe directly to response
+      const pdfBuffer = await generatePdf(validData);
+
+      // Set headers for PDF file download
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${validData.contentType}-${Date.now()}.pdf"`
+      );
+      res.setHeader("Content-Length", pdfBuffer.length);
+
+      // Send PDF buffer
+      res.send(pdfBuffer);
+    })
     .catch(next);
 });
 
