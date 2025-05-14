@@ -3,6 +3,10 @@ import fetch from "node-fetch";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { marked } from "marked";
 import { JSDOM } from "jsdom";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import * as fontkit from "fontkit";
 
 import {
   getUserByID,
@@ -22,6 +26,7 @@ import {
   incorrectPassword,
 } from "#utils/errors";
 import { updatePassword, videoToken } from "#utils/helperFunctions";
+import { t } from "#translations/index";
 
 const TWILIO_CONFIG = {
   twilio: {
@@ -282,6 +287,7 @@ export const generatePdf = async ({
   contentType,
   title,
   imageUrl,
+  language,
 }) => {
   try {
     const response = await fetch(contentUrl);
@@ -296,13 +302,28 @@ export const generatePdf = async ({
 
     // Create a new PDF document
     const pdfDoc = await PDFDocument.create();
-    let page = pdfDoc.addPage([595.28, 841.89]); // A4 size
-    const { width, height } = page.getSize();
+    pdfDoc.registerFontkit(fontkit);
+
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+
+    const regularFontBytes = fs.readFileSync(
+      path.join(__dirname, "fonts", "NotoSans-Regular.ttf")
+    );
+    const boldFontBytes = fs.readFileSync(
+      path.join(__dirname, "fonts", "NotoSans-Bold.ttf")
+    );
+    const italicFontBytes = fs.readFileSync(
+      path.join(__dirname, "fonts", "NotoSans-Italic.ttf")
+    );
 
     // Load fonts
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-    const italicFont = await pdfDoc.embedFont(StandardFonts.HelveticaOblique);
+    const font = await pdfDoc.embedFont(regularFontBytes);
+    const boldFont = await pdfDoc.embedFont(boldFontBytes);
+    const italicFont = await pdfDoc.embedFont(italicFontBytes);
+
+    let page = pdfDoc.addPage([595.28, 841.89]); // A4 size
+    const { width, height } = page.getSize();
 
     // Set document title
     const contentTitle = title || attributes.title || `${contentType} content`;
@@ -337,7 +358,7 @@ export const generatePdf = async ({
     };
 
     // Write title
-    safeDrawText(contentTitle, {
+    page.drawText(contentTitle, {
       x: margin,
       y: currentY,
       size: 20,
@@ -349,7 +370,7 @@ export const generatePdf = async ({
     // Add creator if available
     const creator = attributes.author || attributes.creator;
     if (creator) {
-      safeDrawText(`By: ${creator}`, {
+      page.drawText(t("by", language, [creator]), {
         x: margin,
         y: currentY,
         size: 12,
@@ -362,7 +383,7 @@ export const generatePdf = async ({
     // Add metadata like reading time, category
     const readingTime = attributes.reading_time || attributes.readingTime;
     if (readingTime) {
-      safeDrawText(`Reading time: ${readingTime} min read`, {
+      page.drawText(t("reading_time", language, [readingTime]), {
         x: margin,
         y: currentY,
         size: 12,
@@ -374,7 +395,7 @@ export const generatePdf = async ({
 
     if (attributes.category && attributes.category.data) {
       const categoryName = attributes.category.data.attributes.name;
-      safeDrawText(`Category: ${categoryName}`, {
+      page.drawText(t("category", language, [categoryName]), {
         x: margin,
         y: currentY,
         size: 12,
@@ -391,7 +412,7 @@ export const generatePdf = async ({
       attributes.labels.data.length > 0
     ) {
       // Draw "Labels:" text
-      safeDrawText("Labels:", {
+      page.drawText(t("labels", language), {
         x: margin,
         y: currentY,
         size: 12,
@@ -439,7 +460,7 @@ export const generatePdf = async ({
         });
 
         // Draw label text
-        safeDrawText(labelName, {
+        page.drawText(labelName, {
           x: xPosition + 10,
           y: currentY - 5,
           size: 10,
@@ -666,7 +687,7 @@ export const generatePdf = async ({
 
               if (line) {
                 try {
-                  safeDrawText(line, {
+                  page.drawText(line, {
                     x: margin,
                     y: currentY,
                     size: fontSize,
@@ -698,7 +719,7 @@ export const generatePdf = async ({
           }
 
           try {
-            safeDrawText(line, {
+            page.drawText(line, {
               x: margin,
               y: currentY,
               size: fontSize,
