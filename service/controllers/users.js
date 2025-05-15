@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import fetch from "node-fetch";
-import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
+import { PDFDocument, rgb } from "pdf-lib";
 import { marked } from "marked";
 import { JSDOM } from "jsdom";
 import fs from "fs";
@@ -197,7 +197,7 @@ export const addPlatformAccess = async ({
     });
 };
 
-export const getContentRatings = async ({ language, userId }) => {
+export const getContentRatings = async ({ userId }) => {
   return await getContentRatingsQuery(userId).then((res) => {
     if (res.rowCount > 0) {
       return res.rows;
@@ -237,7 +237,11 @@ export const addContentRating = async ({
     });
 };
 
-export const getRatingsForContent = async ({ contentId, contentType }) => {
+export const getRatingsForContent = async ({
+  contentId,
+  contentType,
+  userId,
+}) => {
   return await getRatingsForContentQuery({
     contentId,
     contentType,
@@ -333,29 +337,6 @@ export const generatePdf = async ({
     const margin = 50;
     let currentY = height - margin;
     const maxWidth = width - 2 * margin;
-
-    // Helper function to safely draw text (handle encoding issues)
-    const safeDrawText = (text, options) => {
-      try {
-        // Replace problematic characters
-        const sanitizedText = text
-          .replace(/[\n\r]/g, " ") // Replace newlines with spaces
-          .replace(/[^\x00-\x7F]/g, (char) => {
-            // Replace non-ASCII characters with their closest ASCII equivalents or remove them
-            try {
-              return char.normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
-            } catch (e) {
-              return "";
-            }
-          });
-
-        page.drawText(sanitizedText, options);
-        return true;
-      } catch (error) {
-        console.warn(`Could not draw text: ${error.message}`);
-        return false;
-      }
-    };
 
     // Write title
     page.drawText(contentTitle, {
