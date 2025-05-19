@@ -10,7 +10,10 @@ import {
   invalidatePasswordResetTokenQuery,
 } from "#queries/rescue";
 
-import { updatePassword } from "#utils/helperFunctions";
+import {
+  updatePassword,
+  getCountryLabelFromAlpha2,
+} from "#utils/helperFunctions";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
 
 import { invalidResetPasswordToken } from "#utils/errors";
@@ -22,6 +25,8 @@ export const sendForgotPasswordEmail = async ({
   type,
 }) => {
   let user = null;
+
+  const countryLabel = getCountryLabelFromAlpha2(country);
 
   if (type === "client") {
     user = await getClientUserByEmailOrAccessToken(country, email)
@@ -67,6 +72,7 @@ export const sendForgotPasswordEmail = async ({
       data: {
         forgotPasswordToken,
         platform: type,
+        countryLabel,
       },
     },
     language,

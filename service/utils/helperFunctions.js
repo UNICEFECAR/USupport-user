@@ -80,3 +80,13 @@ export const generatePassword = (length) => {
 export const generate4DigitCode = () => {
   return Math.floor(Math.random() * 9000 + 1000);
 };
+
+const countriesMap = {
+  kz: "kazakhstan",
+  pl: "poland",
+  ro: "romania",
+};
+
+export const getCountryLabelFromAlpha2 = (alpha2) => {
+  return countriesMap[alpha2.toLocaleLowerCase()];
+};
