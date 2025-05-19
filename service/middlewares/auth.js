@@ -28,7 +28,11 @@ import {
   provider2FARequestSchema,
 } from "#schemas/authSchemas";
 
-import { generate4DigitCode, generatePassword } from "#utils/helperFunctions";
+import {
+  generate4DigitCode,
+  generatePassword,
+  getCountryLabelFromAlpha2,
+} from "#utils/helperFunctions";
 
 import {
   emailUsed,
@@ -194,6 +198,7 @@ passport.use(
           });
 
         if (userType === "client" && newUser.email) {
+          const countryLabel = getCountryLabelFromAlpha2(country);
           produceRaiseNotification({
             channels: ["email"],
             emailArgs: {
@@ -202,6 +207,7 @@ passport.use(
               data: {
                 username: newUser.nickname,
                 platform: userType,
+                countryLabel,
               },
             },
             language,
