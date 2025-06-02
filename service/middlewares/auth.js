@@ -197,8 +197,8 @@ passport.use(
             throw err;
           });
 
+        const countryLabel = getCountryLabelFromAlpha2(country);
         if (userType === "client" && newUser.email) {
-          const countryLabel = getCountryLabelFromAlpha2(country);
           produceRaiseNotification({
             channels: ["email"],
             emailArgs: {
@@ -222,6 +222,7 @@ passport.use(
               recipientEmail: newUser.email,
               data: {
                 password: randomlyGeneratedPassword,
+                countryLabel,
               },
             },
             language,
