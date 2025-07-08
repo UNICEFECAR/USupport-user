@@ -15,7 +15,9 @@ export const getAllActiveCountries = async () =>
               "currency"."code", 
               "currency"."symbol", 
               "currency"."min_price", 
-              "country"."local_name" AS local_name
+              "country"."local_name" AS local_name,
+              "country"."videos_active" AS videos_active,
+              "country"."podcasts_active" AS podcasts_active
       FROM "country"
         INNER JOIN "country_currency_links" ON "country"."country_id" = "country_currency_links".country_id
         INNER JOIN "currency" ON "country_currency_links".currency_id = "currency".currency_id
@@ -53,6 +55,8 @@ export const getCountriesWithLanguagesQuery = async () => {
               currency.symbol, 
               currency.min_price, 
               country.local_name AS local_name,
+              country.podcasts_active AS podcasts_active,
+              country.videos_active AS videos_active,
               JSON_AGG(DISTINCT 
                   JSONB_BUILD_OBJECT(
                       'language_id', l.language_id,
