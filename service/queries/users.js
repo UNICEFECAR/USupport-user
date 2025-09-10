@@ -35,6 +35,7 @@ export const getClientUserByEmailOrAccessToken = async (
         SELECT * 
         FROM "user"
           JOIN clientData ON clientData.client_detail_id = "user".client_detail_id
+        WHERE deleted_at IS NULL
         ORDER BY "user".created_at DESC
         LIMIT 1
 
