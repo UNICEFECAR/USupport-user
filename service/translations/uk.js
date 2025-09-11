@@ -1,35 +1,34 @@
 export default {
   email_or_access_token_required_error:
-    "Для реєстрації потрібно надати електронну пошту або дійсний токен доступу користувача",
+    "Щоб заруєструватися, потрібно надати електронну пошту або дійсний токен доступу користувача",
   nickname_required_error: "Потрібно вказати нікнейм",
   password_validation_error:
     "Пароль має містити щонайменше 8 символів, 1 велику літеру, 1 малу літеру і 1 цифру",
-  user_not_found_error: "Користувача(ку) не знайдено",
-  notification_preferences_not_found_error:
-    "Налаштування сповіщень не знайдено",
-  country_not_found_error: "Країну не знайдено",
+  user_not_found_error: "Користувача/ки не знайдено",
+  notification_preferences_not_found_error: "Налаштувань сповіщень не знайдено",
+  country_not_found_error: "Країни не знайдено",
   email_already_used_error: "Ця електронна адреса вже використовується",
   user_access_token_already_used_error:
-    "Цей токен доступу користувача(ки) недоступний",
+    "Цей токен доступу користувача/ки є недійсним",
   incorrect_password_error: "Наданий пароль є невірним",
   incorrect_credentials_error: "Неправильні облікові дані",
   not_authenticated_error:
-    "Щоб отримати доступ до цього ресурсу, користувачеві(ці) треба пройти аутентифікацію",
+    "Щоб отримати доступ до цього ресурсу, користувач/ка має пройти процес автентифікації",
   invalid_refresh_token_error: "Оновлений токен недійсний або вже використаний",
   cannot_generate_user_access_token_error: `Не вдалося згенерувати новий токен доступу випадкового користувача. Будь ласка, спробуйте ще раз`,
   invalid_reset_password_token_error:
-    "Недійсний або прострочений токен скидання пароля. Будь ласка, запросіть новий за адресою: ",
-  invalid_provider_otp_error: "Недійсний одноразовий пароль (OTP)",
-  too_many_otp_requests_error:
+    "Не вдалося згенерувати нового випадкового токену доступу користувача. Спробуй ще раз",
+  invalid_provider_otp_error:
+    "Неправильний або прострочений токен для скидання пароля. Запитай новий за адресою:",
+  too_many_otp_requests_error: "Недійсний одноразовий пароль (OTP)",
+  invalid_email_otp_error:
     "Занадто багато OTP-запитів, спробуйте знову найближчим часом.",
-  invalid_email_otp_error: "Неправильний код підтвердження",
-  email_otp_expired_error: "Термін дії верифікаційного коду закінчився",
-  invalid_platform_password_error: "Невірний пароль",
-  no_platform_password_set_error: "Пароль не був встановлений",
-  password_is_required_error: "Потрібен пароль",
-  too_many_login_requests_error:
-    "Забагато спроб авторизації. Будь ласка, спробуйте знову за {1} хвилину",
-  valid_email: "Будь ласка, вкажіть дійсну електронну адресу",
+  email_otp_expired_error: "Неправильний код верифікації",
+  invalid_platform_password_error: "Термін дії верифікаційного коду закінчився",
+  no_platform_password_set_error: "Неправильний пароль від платформи",
+  password_is_required_error: "Пароль від платформи ще не був встановлений",
+  too_many_login_requests_error: "Пароль є обов'язковим",
+  valid_email: "Забагато спроб авторизації. Спробуй знову за {1} хвилину",
 
   by: "Автор: {1}",
   reading_time: "Час читання: {1} хв",
