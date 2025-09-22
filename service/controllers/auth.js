@@ -192,7 +192,9 @@ export const createEmailOTP = async ({
       emailArgs: {
         emailType: "email-used",
         recipientEmail: email,
-        countryLabel,
+        data: {
+          countryLabel,
+        },
       },
     });
     return { success: true };
