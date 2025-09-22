@@ -634,6 +634,7 @@ export const generatePdf = async ({
         // Process text to handle potential encoding issues
         const text = originalText
           .replace(/[\n\r]/g, " ") // Replace newlines with spaces
+          // eslint-disable-next-line no-control-regex
           .replace(/[^\x00-\x7F]/g, (char) => {
             // Replace non-ASCII characters with their closest ASCII equivalents or remove them
             try {
