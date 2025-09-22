@@ -191,8 +191,8 @@ export const createEmailOTP = async ({ country, language, email }) => {
         data: {
           countryLabel,
         },
-        language,
       },
+      language,
     });
     return { success: true };
   }
