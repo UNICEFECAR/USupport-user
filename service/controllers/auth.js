@@ -22,6 +22,7 @@ import {
 import {
   generate4DigitCode,
   getYearInMilliseconds,
+  getCountryLabelFromAlpha2,
 } from "#utils/helperFunctions";
 import { storeEmailOTP } from "#queries/authOTP";
 import { produceRaiseNotification } from "#utils/kafkaProducers";
@@ -39,6 +40,7 @@ export const issueAccessToken = async ({ user_id, userType, isMobile }) => {
   };
 
   const signedToken = jwtLib.sign(payload, JWT_KEY, {
+    // eslint-disable-next-line no-constant-condition
     expiresIn: true ? "9999y" : "2h",
     issuer: "online.usupport.userApi",
     audience: "online.usupport.app",
@@ -47,6 +49,7 @@ export const issueAccessToken = async ({ user_id, userType, isMobile }) => {
 
   return {
     token: signedToken,
+    // eslint-disable-next-line no-constant-condition
     expiresIn: true
       ? new Date(new Date().getTime() + 9999 * getYearInMilliseconds())
       : new Date(new Date().getTime() + 1 * 60000), // 2h expiration
@@ -170,6 +173,7 @@ export const createEmailOTP = async ({
   //  language,
   email,
 }) => {
+  const countryLabel = getCountryLabelFromAlpha2(country);
   // Check if email is already used
   const isEmailUsed = await getClientUserByEmailOrAccessToken(
     country,
@@ -188,6 +192,7 @@ export const createEmailOTP = async ({
       emailArgs: {
         emailType: "email-used",
         recipientEmail: email,
+        countryLabel,
       },
     });
     return { success: true };
