@@ -168,11 +168,7 @@ export const generateAccessToken = async (country, language, retryStep = 0) => {
   }
 };
 
-export const createEmailOTP = async ({
-  country,
-  //  language,
-  email,
-}) => {
+export const createEmailOTP = async ({ country, language, email }) => {
   const countryLabel = getCountryLabelFromAlpha2(country);
   // Check if email is already used
   const isEmailUsed = await getClientUserByEmailOrAccessToken(
@@ -195,6 +191,7 @@ export const createEmailOTP = async ({
         data: {
           countryLabel,
         },
+        language,
       },
     });
     return { success: true };
