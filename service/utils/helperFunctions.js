@@ -63,6 +63,7 @@ export const generatePassword = (length) => {
     Array.apply(null, { length })
       .map(() => {
         let result;
+        // eslint-disable-next-line no-constant-condition
         while (true) {
           result = String.fromCharCode(getRandomByte());
           if (letterPattern.test(result)) {
