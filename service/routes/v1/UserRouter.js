@@ -15,6 +15,8 @@ import {
   generatePdf,
 } from "#controllers/users";
 
+import { addCountryEvent } from "#controllers/countries";
+
 import { securedRoute } from "#middlewares/auth";
 import {
   getUserByIdSchema,
@@ -30,6 +32,8 @@ import {
   getRatingsForContentSchema,
   generatePdfSchema,
 } from "#schemas/userSchemas";
+
+import { addCountryEventSchema } from "#schemas/countrySchemas";
 
 const router = express.Router();
 
@@ -179,24 +183,15 @@ router.get("/access-platform", async (req, res, next) => {
    * #desc    Access platform
    */
 
-  const country = req.header("x-country-alpha-2");
   const { platform } = req.query;
-  const userId = req.header("x-user-id");
-
-  console.log("x-real-ip", req.header("x-real-ip"));
-  console.log("x-forwarded-for", req.header("x-forwarded-for"));
-  console.log("remoteAddress", req.connection.remoteAddress);
-
-  const ipAddress =
-    req.header("x-real-ip") ||
-    req.header("x-forwarded-for") ||
-    req.connection.remoteAddress ||
-    "0.0.0.0";
+  const country = req.header("x-country-alpha-2");
+  const userId = req.header("x-user-id") || null;
+  const visitorId = req.header("x-visitor-id") || null;
 
   return await addPlatformAccessSchema
     .noUnknown(true)
     .strict(true)
-    .validate({ country, platform, userId, ipAddress })
+    .validate({ country, platform, userId, visitorId })
     .then(addPlatformAccess)
     .then((result) => res.status(200).send(result))
     .catch(next);
@@ -284,6 +279,25 @@ router.post("/generate-pdf", async (req, res, next) => {
       // Send PDF buffer
       res.send(pdfBuffer);
     })
+    .catch(next);
+});
+
+router.post("/country-event", async (req, res, next) => {
+  /**
+   * #route   POST /user/v1/user/country-event
+   * #desc    Track country event (registration clicks, consultation actions, etc.)
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const clientDetailId = req.header("x-client-detail-id");
+  const eventType = req.body.eventType;
+
+  return await addCountryEventSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ eventType, country, language, clientDetailId })
+    .then(addCountryEvent)
+    .then((result) => res.status(200).send(result))
     .catch(next);
 });
 

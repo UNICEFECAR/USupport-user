@@ -157,8 +157,8 @@ export const changeUserLanguageSchema = yup.object().shape({
 
 export const addPlatformAccessSchema = yup.object().shape({
   country: yup.string().required(),
-  ipAddress: yup.string().required(),
   userId: yup.string().uuid().nullable(),
+  visitorId: yup.string().uuid().nullable(),
   platform: yup.string().required(),
 });
 
