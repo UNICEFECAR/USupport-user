@@ -76,3 +76,17 @@ export const getCountriesWithLanguagesQuery = async () => {
       `
   );
 };
+
+export const addCountryEventQuery = async ({
+  countryId,
+  eventType,
+  clientDetailId,
+}) =>
+  await getDBPool("masterDb").query(
+    `
+      INSERT INTO country_event (country_id, event_type, client_detail_id)
+      VALUES ($1, $2::event_type, $3)
+      RETURNING *;
+    `,
+    [countryId, eventType, clientDetailId || null]
+  );

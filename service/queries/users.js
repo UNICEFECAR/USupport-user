@@ -331,15 +331,15 @@ export const addPlatformAccessQuery = async ({
   poolCountry,
   userId,
   platform,
-  ipAddress,
+  visitorId,
 }) =>
   await getDBPool("piiDb", poolCountry).query(
     `
-          INSERT INTO platform_access (user_id, platform, ip_address)
+          INSERT INTO platform_access (user_id, platform, visitor_id)
           VALUES ($1, $2, $3)
           RETURNING *;
         `,
-    [userId ? userId : null, platform, ipAddress]
+    [userId ? userId : null, platform, visitorId]
   );
 
 export const assignOrganizationsToProviderQuery = async ({

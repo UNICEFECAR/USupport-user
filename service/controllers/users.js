@@ -179,13 +179,13 @@ export const addPlatformAccess = async ({
   country,
   userId,
   platform,
-  ipAddress,
+  visitorId,
 }) => {
   return await addPlatformAccessQuery({
     poolCountry: country,
     userId,
     platform,
-    ipAddress,
+    visitorId: visitorId || userId, // If no visitorId provided, use the userId
   })
     .then((res) => {
       if (res.rowCount > 0) return { success: true };
