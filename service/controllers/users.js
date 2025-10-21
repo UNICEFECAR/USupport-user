@@ -28,16 +28,6 @@ import {
 import { updatePassword, videoToken } from "#utils/helperFunctions";
 import { t } from "#translations/index";
 
-const ORGANIZATIONS_KEY = process.env.ORGANIZATIONS_KEY;
-const ORGANIZATIONS_KEY_IOS = process.env.ORGANIZATIONS_KEY_IOS;
-const ORGANIZATIONS_KEY_ANDROID = process.env.ORGANIZATIONS_KEY_ANDROID;
-
-const ORGANIZATIONS_KEYS = {
-  ios: ORGANIZATIONS_KEY_IOS,
-  android: ORGANIZATIONS_KEY_ANDROID,
-  web: ORGANIZATIONS_KEY,
-};
-
 const TWILIO_CONFIG = {
   twilio: {
     accountSid: process.env.TWILIO_ACCOUNT_SID,
@@ -740,8 +730,18 @@ export const generatePdf = async ({
 };
 
 export const getOrganizationKey = async ({ platform }) => {
+  const ORGANIZATIONS_KEY = process.env.ORGANIZATIONS_KEY;
+  const ORGANIZATIONS_KEY_IOS = process.env.ORGANIZATIONS_KEY_IOS;
+  const ORGANIZATIONS_KEY_ANDROID = process.env.ORGANIZATIONS_KEY_ANDROID;
+
+  const ORGANIZATIONS_KEYS = {
+    ios: ORGANIZATIONS_KEY_IOS,
+    android: ORGANIZATIONS_KEY_ANDROID,
+    web: ORGANIZATIONS_KEY,
+  };
+  console.log("TWILIO_ACCOUNT_SID", process.env.TWILIO_ACCOUNT_SID);
   console.log(ORGANIZATIONS_KEYS);
-  console.log(platform);
+
   const organizationsKey = ORGANIZATIONS_KEYS[platform];
 
   if (!organizationsKey) {
