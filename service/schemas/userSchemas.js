@@ -187,3 +187,9 @@ export const generatePdfSchema = yup.object().shape({
   title: yup.string().notRequired(),
   imageUrl: yup.string().notRequired(),
 });
+
+export const getOrganizationKeySchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  platform: yup.string().oneOf(["ios", "android", "web"]).required(),
+});

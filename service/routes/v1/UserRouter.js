@@ -13,6 +13,7 @@ import {
   addContentRating,
   getRatingsForContent,
   generatePdf,
+  getOrganizationKey,
 } from "#controllers/users";
 
 import { addCountryEvent } from "#controllers/countries";
@@ -31,6 +32,7 @@ import {
   getContentRatingsSchema,
   getRatingsForContentSchema,
   generatePdfSchema,
+  getOrganizationKeySchema,
 } from "#schemas/userSchemas";
 
 import { addCountryEventSchema } from "#schemas/countrySchemas";
@@ -298,6 +300,24 @@ router.post("/country-event", async (req, res, next) => {
     .strict(true)
     .validate({ eventType, country, language, clientDetailId, visitorId })
     .then(addCountryEvent)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/organizations-key", async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/user/organizations-key
+   * #desc    Get organization key
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const { platform } = req.query;
+
+  return await getOrganizationKeySchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ country, language, platform })
+    .then(getOrganizationKey)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
