@@ -287,15 +287,16 @@ router.post("/country-event", async (req, res, next) => {
    * #route   POST /user/v1/user/country-event
    * #desc    Track country event (registration clicks, consultation actions, etc.)
    */
-  const country = req.header("x-country-alpha-2");
+  const country = req.header("x-country-alpha-2") || null;
   const language = req.header("x-language-alpha-2");
   const clientDetailId = req.header("x-client-detail-id");
   const eventType = req.body.eventType;
+  const visitorId = req.header("x-visitor-id") || null;
 
   return await addCountryEventSchema
     .noUnknown(true)
     .strict(true)
-    .validate({ eventType, country, language, clientDetailId })
+    .validate({ eventType, country, language, clientDetailId, visitorId })
     .then(addCountryEvent)
     .then((result) => res.status(200).send(result))
     .catch(next);

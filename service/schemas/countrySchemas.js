@@ -6,7 +6,7 @@ export const getCountryByAlpha2CodeSchema = yup.object().shape({
 });
 
 export const addCountryEventSchema = yup.object().shape({
-  country: yup.string().required(),
+  country: yup.string().nullable(),
   language: yup.string().required(),
   eventType: yup
     .string()
@@ -23,7 +23,9 @@ export const addCountryEventSchema = yup.object().shape({
       "mobile_join_consultation_click",
       "web_consultation_scheduled",
       "mobile_consultation_scheduled",
+      "global_visit",
     ])
     .required(),
   clientDetailId: yup.string().uuid().nullable(),
+  visitorId: yup.string().uuid().nullable(),
 });
