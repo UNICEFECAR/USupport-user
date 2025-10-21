@@ -740,6 +740,8 @@ export const generatePdf = async ({
 };
 
 export const getOrganizationKey = async ({ platform }) => {
+  console.log(ORGANIZATIONS_KEYS);
+  console.log(platform);
   const organizationsKey = ORGANIZATIONS_KEYS[platform];
 
   if (!organizationsKey) {
