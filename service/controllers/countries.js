@@ -50,20 +50,25 @@ export const addCountryEvent = async ({
   language,
   eventType,
   clientDetailId,
+  visitorId,
 }) => {
-  const countryId = await getCountryByAlpha2CodeQuery({
-    country: country,
-  }).then((res) => {
-    if (res.rowCount === 0) {
-      throw countryNotFound(language);
-    }
-    return res.rows[0].country_id;
-  });
+  const countryId =
+    eventType === "global_visit"
+      ? null
+      : await getCountryByAlpha2CodeQuery({
+          country: country,
+        }).then((res) => {
+          if (res.rowCount === 0) {
+            throw countryNotFound(language);
+          }
+          return res.rows[0].country_id;
+        });
 
   return await addCountryEventQuery({
     countryId,
     eventType,
     clientDetailId,
+    visitorId,
   })
     .then((res) => {
       if (res.rowCount > 0) return { success: true };

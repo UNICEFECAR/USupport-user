@@ -81,12 +81,13 @@ export const addCountryEventQuery = async ({
   countryId,
   eventType,
   clientDetailId,
+  visitorId,
 }) =>
   await getDBPool("masterDb").query(
     `
-      INSERT INTO country_event (country_id, event_type, client_detail_id)
-      VALUES ($1, $2::event_type, $3)
+      INSERT INTO country_event (country_id, event_type, client_detail_id, visitor_id)
+      VALUES ($1, $2::event_type, $3, $4)
       RETURNING *;
     `,
-    [countryId, eventType, clientDetailId || null]
+    [countryId, eventType, clientDetailId || null, visitorId || null]
   );
