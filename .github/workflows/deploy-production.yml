@@ -24,7 +24,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_GITHUB }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_GITHUB }}
           aws-region: eu-central-1
-          
+
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
@@ -65,6 +65,7 @@ jobs:
             echo "  TWILIO_API_SID: '${{ secrets.TWILIO_API_SID }}'"
             echo "  TWILIO_API_SECRET: '${{ secrets.TWILIO_API_SECRET }}'"
             echo "  RECAPTCHA_SECRET_KEY: '${{ secrets.RECAPTCHA_SECRET_KEY }}'"
+            echo "  ORGANIZATIONS_KEY: '${{ secrets.ORGANIZATIONS_KEY }}'"
           } > kube-config/prod/secrets.yaml
 
       - name: Deploy to Kubernetes
