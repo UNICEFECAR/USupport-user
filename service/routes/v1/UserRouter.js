@@ -324,7 +324,7 @@ router.get("/organizations-key", async (req, res, next) => {
     .catch(next);
 });
 
-router.get("/mobile-map", async (req, res, next) => {
+router.get("/mobile-map", securedRoute, async (req, res, next) => {
   /**
    * #route   GET /user/v1/user/mobile-map
    * #desc    Get mobile map HTML page
