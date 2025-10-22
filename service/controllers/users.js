@@ -955,8 +955,25 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
             // Listen for messages from React Native
             window.addEventListener('message', function(event) {
                 try {
-                    const data = JSON.parse(event.data);
-                    console.log('Received message:', data.type);
+
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'MESSAGE_RECEIVED',
+                        data: event.data
+                    }));
+                    // If the data is an object, don’t parse it — it’s already an object
+                    if (typeof data === 'string') {
+                      try {
+                        data = JSON.parse(data);
+                      } catch (e) {
+                        console.warn('Non-JSON message received:', data);
+                        return;
+                      }
+                    }
+
+                    if (!data || !data.type) {
+                      console.warn('Unknown message format:', data);
+                      return;
+                    }
 
                     switch (data.type) {
                         case 'SET_ORGANIZATIONS':
