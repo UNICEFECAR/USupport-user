@@ -822,6 +822,10 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
             let userLocationMarker;
 
             async function initMap() {
+            // post message
+            window.ReactNativeWebView.postMessage(JSON.stringify({
+                type: 'MAP_INITIALIZING'
+            }));
                 try {
                     console.log('Starting map initialization...');
 
@@ -981,6 +985,7 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
 
             // Initialize map when Google Maps API is loaded
             console.log('Script loaded, waiting for Google Maps API...');
+            window.initMap = initMap;
         </script>
 
         <script async defer
