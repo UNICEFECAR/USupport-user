@@ -750,3 +750,249 @@ export const getOrganizationKey = async ({ platform }) => {
     organizationsKey,
   };
 };
+
+export const getMobileMapHtml = async ({ lat, lng }) => {
+  try {
+    if (!ORGANIZATIONS_KEY) {
+      throw new Error("Organizations key not configured");
+    }
+
+    const bucharestCenter = {
+      lat: 44.4268,
+      lng: 26.1025,
+    };
+
+    const initialCenter = {
+      lat: Number(lat),
+      lng: Number(lng),
+    };
+
+    const userLocation =
+      bucharestCenter.lat !== initialCenter.lat &&
+      bucharestCenter.lng !== initialCenter.lng;
+
+    // Return HTML with embedded JavaScript
+    const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            }
+            #map {
+                height: 100vh;
+                width: 100%;
+            }
+            .loading {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 1000;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="loading" class="loading">Loading map...</div>
+        <div id="map"></div>
+
+        <script>
+            // Error handling
+            window.onerror = function(msg, url, lineNo, columnNo, error) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                    type: 'ERROR',
+                    message: msg,
+                    line: lineNo,
+                    column: columnNo
+                }));
+                return false;
+            };
+
+            let map;
+            let markers = [];
+            let userLocationMarker;
+
+            async function initMap() {
+                try {
+                    console.log('Starting map initialization...');
+
+                    const { Map } = await google.maps.importLibrary("maps");
+                    const { Marker } = await google.maps.importLibrary("marker");
+
+                    map = new Map(document.getElementById("map"), {
+                        zoom: ${userLocation ? 8 : 6},
+                        center: { lat: ${initialCenter.lat}, lng: ${
+      initialCenter.lng
+    } },
+                        disableDefaultUI: true,
+                        gestureHandling: 'greedy',
+                        clickableIcons: false,
+                        mapTypeControl: false,
+                        streetViewControl: false,
+                        fullscreenControl: false,
+                    });
+
+                    // Hide loading indicator
+                    const loading = document.getElementById('loading');
+                    if (loading) {
+                        loading.style.display = 'none';
+                    }
+
+                    // Add click listener to close backdrop (like web version)
+                    map.addListener("click", () => {
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
+                            type: 'MAP_CLICKED'
+                        }));
+                    });
+
+                    console.log('Map initialized successfully');
+
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'MAP_READY'
+                    }));
+
+                } catch (error) {
+                    console.error('Map initialization error:', error);
+                    window.ReactNativeWebView.postMessage(JSON.stringify({
+                        type: 'ERROR',
+                        message: 'Map initialization failed: ' + error.message
+                    }));
+                }
+            }
+
+            function createOrganizationMarkers(organizations) {
+                console.log('Creating markers for', organizations.length, 'organizations');
+
+                // Clear existing markers
+                markers.forEach(marker => marker.setMap(null));
+                markers = [];
+
+                organizations.forEach((organization) => {
+                    // Validate organization has valid location data
+                    if (!organization.location ||
+                        typeof organization.location.latitude !== 'number' ||
+                        typeof organization.location.longitude !== 'number') {
+                        console.warn('Skipping organization with invalid location:', organization.name);
+                        return;
+                    }
+
+                    const position = {
+                        lat: organization.location.latitude,
+                        lng: organization.location.longitude,
+                    };
+
+                    const marker = new google.maps.Marker({
+                        position: position,
+                        map: map,
+                        title: organization.name,
+                        icon: {
+                            url: 'data:image/svg+xml;base64,' + btoa(\`
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" fill="#9749fa"/>
+                                    <circle cx="12" cy="9" r="2.5" fill="white"/>
+                                </svg>
+                            \`),
+                            scaledSize: new google.maps.Size(32, 32),
+                            anchor: new google.maps.Point(16, 32),
+                        },
+                    });
+
+                    // Add click listener for each marker (like web version)
+                    marker.addListener("click", () => {
+                        console.log('Marker clicked for organization:', organization.name);
+                        window.ReactNativeWebView.postMessage(JSON.stringify({
+                            type: 'MARKER_SELECTED',
+                            organization: organization
+                        }));
+                    });
+
+                    markers.push(marker);
+                });
+
+                console.log('Created', markers.length, 'markers');
+            }
+
+            function setUserLocation(location) {
+                console.log('Setting user location:', location);
+
+                if (userLocationMarker) {
+                    userLocationMarker.setMap(null);
+                }
+
+                userLocationMarker = new google.maps.Marker({
+                    position: location,
+                    map: map,
+                    title: "Your Location",
+                    icon: {
+                        url: 'data:image/svg+xml;base64,' + btoa(\`
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="8" fill="#9749fa" stroke="white" stroke-width="3"/>
+                                <circle cx="12" cy="12" r="3" fill="white"/>
+                            </svg>
+                        \`),
+                        scaledSize: new google.maps.Size(24, 24),
+                        anchor: new google.maps.Point(12, 12),
+                    },
+                });
+
+                map.panTo(location);
+                map.setZoom(8);
+            }
+
+            // Listen for messages from React Native
+            window.addEventListener('message', function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log('Received message:', data.type);
+
+                    switch (data.type) {
+                        case 'SET_ORGANIZATIONS':
+                            if (map && data.organizations) {
+                                createOrganizationMarkers(data.organizations);
+                            }
+                            break;
+
+                        case 'SET_USER_LOCATION':
+                            if (map && data.location) {
+                                setUserLocation(data.location);
+                            }
+                            break;
+
+                        case 'ZOOM_TO_LOCATION':
+                            if (map) {
+                                map.setCenter({ lat: data.lat, lng: data.lng });
+                                map.setZoom(data.zoom);
+                            }
+                            break;
+                    }
+                } catch (error) {
+                    console.error('Error processing message:', error);
+                }
+            });
+
+            // Initialize map when Google Maps API is loaded
+            console.log('Script loaded, waiting for Google Maps API...');
+        </script>
+
+        <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=${ORGANIZATIONS_KEY}&callback=initMap&libraries=marker">
+        </script>
+    </body>
+    </html>
+  `;
+
+    return html;
+  } catch (error) {
+    console.error("Error generating mobile map HTML:", error);
+    throw error;
+  }
+};

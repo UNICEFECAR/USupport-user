@@ -14,6 +14,7 @@ import {
   getRatingsForContent,
   generatePdf,
   getOrganizationKey,
+  getMobileMapHtml,
 } from "#controllers/users";
 
 import { addCountryEvent } from "#controllers/countries";
@@ -33,6 +34,7 @@ import {
   getRatingsForContentSchema,
   generatePdfSchema,
   getOrganizationKeySchema,
+  getMobileMapHtmlSchema,
 } from "#schemas/userSchemas";
 
 import { addCountryEventSchema } from "#schemas/countrySchemas";
@@ -319,6 +321,27 @@ router.get("/organizations-key", async (req, res, next) => {
     .validate({ country, language, platform })
     .then(getOrganizationKey)
     .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/mobile-map", securedRoute, async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/user/mobile-map
+   * #desc    Get mobile map HTML page
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const { lat, lng } = req.query;
+
+  return await getMobileMapHtmlSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ country, language, lat, lng })
+    .then(getMobileMapHtml)
+    .then((html) => {
+      res.setHeader("Content-Type", "text/html");
+      res.status(200).send(html);
+    })
     .catch(next);
 });
 
