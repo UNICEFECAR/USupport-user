@@ -15,8 +15,9 @@ router.get("/", async (req, res, next) => {
    * #route   GET /user/v1/countries
    * #desc    Get all active countries
    */
+  const platform = req.header("x-platform");
 
-  return await getAllCountries()
+  return await getAllCountries({ platform })
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
@@ -45,7 +46,9 @@ router.get("/countries-with-languages", async (req, res, next) => {
    * #desc    Get all active countries with languages
    */
 
-  return await getActiveCountriesWithLanguages()
+  const platform = req.header("x-platform");
+
+  return await getActiveCountriesWithLanguages({ platform })
     .then((result) => res.status(200).send(result))
     .catch(next);
 });

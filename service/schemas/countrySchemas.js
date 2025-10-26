@@ -24,6 +24,8 @@ export const addCountryEventSchema = yup.object().shape({
       "web_consultation_scheduled",
       "mobile_consultation_scheduled",
       "global_visit",
+      "playandheal_visit",
+      "playandheal_visit_qr",
     ])
     .required(),
   clientDetailId: yup.string().uuid().nullable(),
