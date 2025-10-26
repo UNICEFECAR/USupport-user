@@ -11,7 +11,7 @@ export const getAllCountries = async ({ platform }) => {
   return await getAllActiveCountries()
     .then((res) => {
       let countries = res.rows;
-      if (platform !== "country-admin") {
+      if (platform !== "country-admin" && platform !== "website") {
         countries = countries.filter((x) => x.alpha2 !== "PS");
       }
       return countries;
