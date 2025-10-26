@@ -19,8 +19,8 @@ export const getAllActiveCountries = async () =>
               "country"."videos_active" AS videos_active,
               "country"."podcasts_active" AS podcasts_active
       FROM "country"
-        INNER JOIN "country_currency_links" ON "country"."country_id" = "country_currency_links".country_id
-        INNER JOIN "currency" ON "country_currency_links".currency_id = "currency".currency_id
+        LEFT JOIN "country_currency_links" ON "country"."country_id" = "country_currency_links".country_id
+        LEFT JOIN "currency" ON "country_currency_links".currency_id = "currency".currency_id
       WHERE "country"."is_active" = true
       ORDER BY "country"."name" ASC
     `
@@ -66,8 +66,8 @@ export const getCountriesWithLanguagesQuery = async () => {
                   )
               ) FILTER (WHERE l.is_active) AS languages
           FROM country
-          INNER JOIN country_currency_links ON country.country_id = country_currency_links.country_id
-          INNER JOIN currency ON country_currency_links.currency_id = currency.currency_id
+          LEFT JOIN country_currency_links ON country.country_id = country_currency_links.country_id
+          LEFT JOIN currency ON country_currency_links.currency_id = currency.currency_id
           LEFT JOIN country_language_links cl ON cl.country_id = country.country_id
           LEFT JOIN language l ON cl.language_id = l.language_id
           WHERE country.is_active = true

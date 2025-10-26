@@ -7,10 +7,14 @@ import {
 
 import { countryNotFound } from "#utils/errors";
 
-export const getAllCountries = async () => {
+export const getAllCountries = async ({ platform }) => {
   return await getAllActiveCountries()
     .then((res) => {
-      return res.rows;
+      let countries = res.rows;
+      if (platform !== "country-admin") {
+        countries = countries.filter((x) => x.alpha2 !== "PS");
+      }
+      return countries;
     })
     .catch((err) => {
       throw err;
@@ -31,14 +35,16 @@ export const getCountryByAlpha2Code = async ({ country, language }) => {
     });
 };
 
-export const getActiveCountriesWithLanguages = async () => {
+export const getActiveCountriesWithLanguages = async ({ platform }) => {
   return await getCountriesWithLanguagesQuery()
     .then((res) => {
-      return (
-        res.rows?.map((x) => ({
-          ...x,
-        })) || []
-      );
+      if (!res.rows?.length) return [];
+
+      let countries = res.rows;
+      if (platform !== "country-admin") {
+        countries = countries.filter((x) => x.alpha2 !== "PS");
+      }
+      return countries;
     })
     .catch((err) => {
       throw err;
