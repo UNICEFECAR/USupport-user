@@ -776,14 +776,6 @@ export const getMobileMapHtml = async ({
     bucharestCenter.lat !== initialCenter.lat &&
     bucharestCenter.lng !== initialCenter.lng;
 
-  // ✅ Store auth headers as variables in the HTML for API calls
-  const authHeaders = {
-    authorization: token ? `Bearer ${token}` : "",
-    "x-country-alpha-2": country || "",
-    "x-language-alpha-2": language || "",
-  };
-
-  // Return HTML with embedded JavaScript
   const html = `
     <!DOCTYPE html>
     <html>
@@ -818,7 +810,6 @@ export const getMobileMapHtml = async ({
         <div id="map"></div>
 
         <script>
-            window.authHeaders = ${JSON.stringify(authHeaders)};
 
             window.onerror = function(msg, url, lineNo, columnNo, error) {
                 console.error('❌ Global error:', msg, 'at line', lineNo);
