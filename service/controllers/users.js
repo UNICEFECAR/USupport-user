@@ -28,7 +28,7 @@ import {
 import { updatePassword, videoToken } from "#utils/helperFunctions";
 import { t } from "#translations/index";
 
-const ORGANIZATIONS_KEY = "AIzaSyBVE8DR3V5mhfNIZ33Pu2TQG8WxRSXdZbs";
+const ORGANIZATIONS_KEY = process.env.ORGANIZATIONS_KEY;
 const ORGANIZATIONS_KEY_IOS = process.env.ORGANIZATIONS_KEY_IOS;
 const ORGANIZATIONS_KEY_ANDROID = process.env.ORGANIZATIONS_KEY_ANDROID;
 
