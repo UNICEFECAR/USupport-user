@@ -28,7 +28,7 @@ import {
 import { updatePassword, videoToken } from "#utils/helperFunctions";
 import { t } from "#translations/index";
 
-const ORGANIZATIONS_KEY = process.env.ORGANIZATIONS_KEY;
+const ORGANIZATIONS_KEY = "AIzaSyBVE8DR3V5mhfNIZ33Pu2TQG8WxRSXdZbs";
 const ORGANIZATIONS_KEY_IOS = process.env.ORGANIZATIONS_KEY_IOS;
 const ORGANIZATIONS_KEY_ANDROID = process.env.ORGANIZATIONS_KEY_ANDROID;
 
@@ -751,28 +751,32 @@ export const getOrganizationKey = async ({ platform }) => {
   };
 };
 
-export const getMobileMapHtml = async ({ lat, lng }) => {
-  try {
-    if (!ORGANIZATIONS_KEY) {
-      throw new Error("Organizations key not configured");
-    }
+export const getMobileMapHtml = async ({
+  lat,
+  lng,
+  token,
+  country,
+  language,
+}) => {
+  if (!ORGANIZATIONS_KEY) {
+    throw new Error("Organizations key not configured");
+  }
 
-    const bucharestCenter = {
-      lat: 44.4268,
-      lng: 26.1025,
-    };
+  const bucharestCenter = {
+    lat: 44.4268,
+    lng: 26.1025,
+  };
 
-    const initialCenter = {
-      lat: Number(lat),
-      lng: Number(lng),
-    };
+  const initialCenter = {
+    lat: Number(lat),
+    lng: Number(lng),
+  };
 
-    const userLocation =
-      bucharestCenter.lat !== initialCenter.lat &&
-      bucharestCenter.lng !== initialCenter.lng;
+  const userLocation =
+    bucharestCenter.lat !== initialCenter.lat &&
+    bucharestCenter.lng !== initialCenter.lng;
 
-    // Return HTML with embedded JavaScript
-    const html = `
+  const html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -806,8 +810,9 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
         <div id="map"></div>
 
         <script>
-            // Error handling
+
             window.onerror = function(msg, url, lineNo, columnNo, error) {
+                console.error('❌ Global error:', msg, 'at line', lineNo);
                 window.ReactNativeWebView.postMessage(JSON.stringify({
                     type: 'ERROR',
                     message: msg,
@@ -822,21 +827,19 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
             let userLocationMarker;
 
             async function initMap() {
-            // post message
-            window.ReactNativeWebView.postMessage(JSON.stringify({
-                type: 'MAP_INITIALIZING'
-            }));
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                    type: 'MAP_INITIALIZING'
+                }));
+                
                 try {
-                    console.log('Starting map initialization...');
-
                     const { Map } = await google.maps.importLibrary("maps");
                     const { Marker } = await google.maps.importLibrary("marker");
 
                     map = new Map(document.getElementById("map"), {
                         zoom: ${userLocation ? 8 : 6},
                         center: { lat: ${initialCenter.lat}, lng: ${
-      initialCenter.lng
-    } },
+    initialCenter.lng
+  } },
                         disableDefaultUI: true,
                         gestureHandling: 'greedy',
                         clickableIcons: false,
@@ -851,21 +854,18 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
                         loading.style.display = 'none';
                     }
 
-                    // Add click listener to close backdrop (like web version)
+                    // Add click listener to close backdrop
                     map.addListener("click", () => {
                         window.ReactNativeWebView.postMessage(JSON.stringify({
                             type: 'MAP_CLICKED'
                         }));
                     });
 
-                    console.log('Map initialized successfully');
-
                     window.ReactNativeWebView.postMessage(JSON.stringify({
                         type: 'MAP_READY'
                     }));
 
                 } catch (error) {
-                    console.error('Map initialization error:', error);
                     window.ReactNativeWebView.postMessage(JSON.stringify({
                         type: 'ERROR',
                         message: 'Map initialization failed: ' + error.message
@@ -874,18 +874,23 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
             }
 
             function createOrganizationMarkers(organizations) {
-                console.log('Creating markers for', organizations.length, 'organizations');
-
                 // Clear existing markers
-                markers.forEach(marker => marker.setMap(null));
+                if (markers.length > 0) {
+                    markers.forEach(marker => marker.setMap(null));
+                }
                 markers = [];
 
-                organizations.forEach((organization) => {
+                organizations.forEach((organization, index) => {
                     // Validate organization has valid location data
-                    if (!organization.location ||
-                        typeof organization.location.latitude !== 'number' ||
-                        typeof organization.location.longitude !== 'number') {
-                        console.warn('Skipping organization with invalid location:', organization.name);
+                    if (!organization.location) {
+                        return;
+                    }
+
+                    if (typeof organization.location.latitude !== 'number') {
+                        return;
+                    }
+
+                    if (typeof organization.location.longitude !== 'number') {
                         return;
                     }
 
@@ -910,9 +915,8 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
                         },
                     });
 
-                    // Add click listener for each marker (like web version)
+                    // Add click listener for each marker
                     marker.addListener("click", () => {
-                        console.log('Marker clicked for organization:', organization.name);
                         window.ReactNativeWebView.postMessage(JSON.stringify({
                             type: 'MARKER_SELECTED',
                             organization: organization
@@ -921,13 +925,9 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
 
                     markers.push(marker);
                 });
-
-                console.log('Created', markers.length, 'markers');
             }
 
             function setUserLocation(location) {
-                console.log('Setting user location:', location);
-
                 if (userLocationMarker) {
                     userLocationMarker.setMap(null);
                 }
@@ -955,24 +955,19 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
             // Listen for messages from React Native
             window.addEventListener('message', function(event) {
                 try {
+                    let data = event.data;
 
-                    window.ReactNativeWebView.postMessage(JSON.stringify({
-                        type: 'MESSAGE_RECEIVED',
-                        data: event.data
-                    }));
-                    // If the data is an object, don’t parse it — it’s already an object
+                    // If the data is a string, parse it
                     if (typeof data === 'string') {
-                      try {
-                        data = JSON.parse(data);
-                      } catch (e) {
-                        console.warn('Non-JSON message received:', data);
-                        return;
-                      }
+                        try {
+                            data = JSON.parse(data);
+                        } catch (e) {
+                            return;
+                        }
                     }
 
                     if (!data || !data.type) {
-                      console.warn('Unknown message format:', data);
-                      return;
+                        return;
                     }
 
                     switch (data.type) {
@@ -994,14 +989,16 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
                                 map.setZoom(data.zoom);
                             }
                             break;
+
+                        default:
+                            break;
                     }
                 } catch (error) {
-                    console.error('Error processing message:', error);
+                    // Silent error handling
                 }
             });
 
             // Initialize map when Google Maps API is loaded
-            console.log('Script loaded, waiting for Google Maps API...');
             window.initMap = initMap;
         </script>
 
@@ -1012,9 +1009,5 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
     </html>
   `;
 
-    return html;
-  } catch (error) {
-    console.error("Error generating mobile map HTML:", error);
-    throw error;
-  }
+  return html;
 };
