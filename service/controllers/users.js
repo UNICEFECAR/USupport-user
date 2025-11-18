@@ -19,12 +19,23 @@ import {
   getContentRatingsQuery,
   getRatingsForContentQuery,
   removeContentRatingQuery,
+  addContentEngagementQuery,
+  removeContentEngagementQuery,
+  getContentEngagementsQuery,
+  getContentEngagementsByIdQuery,
+  getCountryContentEngagementsQuery,
+  getClientDetailIdsByDemographicsQuery,
 } from "#queries/users";
+
+import { getCountryByAlpha2CodeQuery } from "#queries/countries";
+
 import {
   userNotFound,
   notificationPreferencesNotFound,
   incorrectPassword,
+  countryNotFound,
 } from "#utils/errors";
+
 import { updatePassword, videoToken } from "#utils/helperFunctions";
 import { t } from "#translations/index";
 
@@ -1010,4 +1021,177 @@ export const getMobileMapHtml = async ({
   `;
 
   return html;
+};
+
+export const addContentEngagement = async ({
+  clientDetailId,
+  contentId,
+  contentType,
+  action,
+  country,
+  language,
+}) => {
+  const countryId = await getCountryByAlpha2CodeQuery({ country })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        throw countryNotFound(language);
+      }
+      return res.rows[0].country_id;
+    })
+    .catch((err) => {
+      console.log("Error getting country id", err);
+    });
+
+  return await addContentEngagementQuery({
+    clientDetailId,
+    contentId,
+    contentType,
+    action,
+    countryId,
+  })
+    .then((res) => {
+      if (res.rowCount > 0) return { success: true };
+
+      return { success: false };
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const removeContentEngagement = async ({
+  clientDetailId,
+  contentId,
+  contentType,
+}) => {
+  return await removeContentEngagementQuery({
+    clientDetailId,
+    contentId,
+    contentType,
+  })
+    .then((res) => {
+      return { success: true };
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const getContentEngagements = async ({
+  clientDetailId,
+  country,
+  language,
+}) => {
+  const countryId = await getCountryByAlpha2CodeQuery({ country })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        throw countryNotFound(language);
+      }
+      return res.rows[0].country_id;
+    })
+    .catch((err) => {
+      console.log("Error getting country id", err);
+    });
+
+  return await getContentEngagementsQuery({ clientDetailId, countryId }).then(
+    (res) => {
+      if (res.rowCount > 0) {
+        return res.rows;
+      }
+      return [];
+    }
+  );
+};
+
+export const getContentEngagementsById = async ({
+  country,
+  language,
+  contentType,
+  ids,
+}) => {
+  const countryId = await getCountryByAlpha2CodeQuery({ country })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        throw countryNotFound(language);
+      }
+      return res.rows[0].country_id;
+    })
+    .catch((err) => {
+      console.log("Error getting country id", err);
+    });
+
+  return await getContentEngagementsByIdQuery({
+    countryId,
+    contentType,
+    ids,
+  }).then((res) => {
+    if (res.rowCount > 0) {
+      return res.rows;
+    }
+    return [];
+  });
+};
+
+export const getCountryContentEngagements = async ({
+  country,
+  language,
+  contentType,
+  sex,
+  yearOfBirth,
+  urbanRural,
+}) => {
+  const countryId = await getCountryByAlpha2CodeQuery({ country })
+    .then((res) => {
+      if (res.rowCount === 0) {
+        throw countryNotFound(language);
+      }
+      return res.rows[0].country_id;
+    })
+    .catch((err) => {
+      console.log("Error getting country id", err);
+    });
+
+  let engagements = await getCountryContentEngagementsQuery({
+    countryId,
+    contentType: contentType === "all" ? null : contentType,
+    sex,
+    yearOfBirth,
+    urbanRural,
+  }).then((res) => {
+    if (res.rowCount > 0) {
+      return res.rows;
+    }
+    return [];
+  });
+
+  console.log(countryId);
+  if (sex || yearOfBirth || urbanRural) {
+    const clientDetailIds = engagements.map(
+      (engagement) => engagement.client_detail_id
+    );
+    const clientDetailIdsByDemographics =
+      await getClientDetailIdsByDemographicsQuery({
+        country,
+        clientDetailIds,
+        sex,
+        yearOfBirth,
+        urbanRural,
+      })
+        .then((res) => {
+          if (res.rowCount > 0) {
+            return res.rows.map((row) => row.client_detail_id);
+          }
+          return [];
+        })
+        .catch((err) => {
+          console.log("Error getting client detail ids by demographics", err);
+          return [];
+        });
+
+    engagements = engagements.filter((engagement) =>
+      clientDetailIdsByDemographics.includes(engagement.client_detail_id)
+    );
+  }
+
+  return engagements;
 };
