@@ -44,9 +44,9 @@ const createClientSchema = (language) =>
           .required(t("email_or_access_token_required_error", language)),
       }),
       image: yup.string().notRequired(),
-      sex: sexTypeSchema.notRequired(),
+      sex: sexTypeSchema,
       yearOfBirth: yup.number().positive().notRequired(),
-      urbanRural: urbanRuralTypeSchema.notRequired(),
+      urbanRural: urbanRuralTypeSchema,
       isMobile: yup.boolean().notRequired(),
     },
     ["userAccessToken", "email"]
@@ -174,7 +174,6 @@ export const addContentRatingSchema = getContentRatingsSchema.shape({
 });
 
 export const getRatingsForContentSchema = yup.object().shape({
-  // make userId nullable
   userId: yup.string().nullable(),
   contentId: yup.number().required(),
   contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
@@ -199,4 +198,50 @@ export const getMobileMapHtmlSchema = yup.object().shape({
   language: yup.string().required(),
   lat: yup.string().required(),
   lng: yup.string().required(),
+});
+
+export const addContentEngagementSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+  contentId: yup.number().required(),
+  contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
+  action: yup
+    .string()
+    .oneOf(["like", "dislike", "view", "share", "download"])
+    .required(),
+});
+
+export const removeContentEngagementSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  contentId: yup.number().required(),
+  contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
+});
+
+export const getContentEngagementsSchema = yup.object().shape({
+  clientDetailId: yup.string().uuid().required(),
+  country: yup.string().required(),
+  language: yup.string().required(),
+});
+
+export const getContentEngagementsByIdSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
+  ids: yup.array().of(yup.number()).min(1).required(),
+});
+
+export const getCountryContentEngagementsSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().required(),
+  contentType: yup
+    .string()
+    .oneOf(["article", "video", "podcast", "all"])
+    .nullable(),
+  sex: yup
+    .mixed()
+    .oneOf(["male", "female", "unspecified", "notMentioned", null])
+    .nullable(),
+  yearOfBirth: yup.mixed().oneOf([null, "parent", Number.isInteger]).nullable(),
+  urbanRural: yup.mixed().oneOf(["urban", "rural", null]).nullable(),
 });
