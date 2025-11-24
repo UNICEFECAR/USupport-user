@@ -1109,16 +1109,19 @@ export const getContentEngagementsById = async ({
   contentType,
   ids,
 }) => {
-  const countryId = await getCountryByAlpha2CodeQuery({ country })
-    .then((res) => {
-      if (res.rowCount === 0) {
-        throw countryNotFound(language);
-      }
-      return res.rows[0].country_id;
-    })
-    .catch((err) => {
-      console.log("Error getting country id", err);
-    });
+  const countryId =
+    country === "global"
+      ? null
+      : await getCountryByAlpha2CodeQuery({ country })
+          .then((res) => {
+            if (res.rowCount === 0) {
+              throw countryNotFound(language);
+            }
+            return res.rows[0].country_id;
+          })
+          .catch((err) => {
+            console.log("Error getting country id", err);
+          });
 
   return await getContentEngagementsByIdQuery({
     countryId,
