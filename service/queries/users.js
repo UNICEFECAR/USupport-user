@@ -522,7 +522,10 @@ export const getContentEngagementsByIdQuery = async ({
       content_type,
       action
     FROM content_engagement_event
-    WHERE country_id = $1 AND content_type = $2 AND content_id = ANY($3)
+    WHERE 1=1 
+        AND ($1::uuid IS NULL OR country_id = $1::uuid)
+        AND content_type = $2 
+        AND content_id = ANY($3)
     ORDER BY created_at DESC; 
     `,
     [countryId, contentType, ids]
@@ -544,7 +547,7 @@ export const getCountryContentEngagementsQuery = async ({
       client_detail_id
     FROM content_engagement_event
     WHERE 1=1 
-      AND country_id = $1 
+      AND country_id = $1
       AND ($2::content_type IS NULL OR content_type = $2)
     ORDER BY created_at DESC;
     `,
