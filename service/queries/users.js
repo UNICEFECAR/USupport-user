@@ -421,3 +421,156 @@ export const removeContentRatingQuery = async ({
     [userId, contentId, contentType]
   );
 };
+
+export const addContentEngagementQuery = async ({
+  clientDetailId,
+  countryId,
+  contentId,
+  contentType,
+  action, // 'like' | 'dislike' | 'view' | 'share' | 'download'
+}) => {
+  const pool = getDBPool("masterDb");
+
+  if (action === "like" || action === "dislike") {
+    // Enforce one reaction per user/content, update if already exists
+    return await pool.query(
+      `
+      WITH existing AS (
+        SELECT id
+        FROM content_engagement_event
+        WHERE content_type = $3
+          AND content_id = $4
+          AND client_detail_id = $1
+          AND action IN ('like', 'dislike')
+        LIMIT 1
+      ),
+      updated AS (
+        UPDATE content_engagement_event
+        SET action = $5::action_type,
+            created_at = now()
+        WHERE id IN (SELECT id FROM existing)
+        RETURNING id
+      )
+      INSERT INTO content_engagement_event (client_detail_id, country_id, content_type, content_id, action)
+      SELECT $1, $2, $3, $4, $5::action_type
+      WHERE NOT EXISTS (SELECT 1 FROM updated);
+      `,
+      [clientDetailId, countryId, contentType, contentId, action]
+    );
+  } else {
+    // Append-only for views, shares, downloads
+    return await pool.query(
+      `
+      INSERT INTO content_engagement_event (client_detail_id, country_id, content_type, content_id, action)
+      VALUES ($1, $2, $3, $4, $5::action_type);
+      `,
+      [clientDetailId, countryId, contentType, contentId, action]
+    );
+  }
+};
+
+export const removeContentEngagementQuery = async ({
+  clientDetailId,
+  contentId,
+  contentType,
+}) => {
+  const pool = getDBPool("masterDb");
+
+  // Delete the engagement event (used for removing likes/dislikes)
+  return await pool.query(
+    `
+    DELETE FROM content_engagement_event
+    WHERE client_detail_id = $1 AND content_type = $2 AND content_id = $3
+      AND action IN ('like', 'dislike');
+    `,
+    [clientDetailId, contentType, contentId]
+  );
+};
+
+export const getContentEngagementsQuery = async ({
+  clientDetailId,
+  countryId,
+}) => {
+  const pool = getDBPool("masterDb");
+
+  return await pool.query(
+    `
+    SELECT 
+      content_id,
+      content_type,
+      action,
+      created_at
+    FROM content_engagement_event
+    WHERE client_detail_id = $1 AND country_id = $2
+    ORDER BY created_at DESC;
+    `,
+    [clientDetailId, countryId]
+  );
+};
+
+export const getContentEngagementsByIdQuery = async ({
+  countryId,
+  contentType,
+  ids,
+}) => {
+  const pool = getDBPool("masterDb");
+
+  return await pool.query(
+    `
+    SELECT 
+      content_id,
+      content_type,
+      action
+    FROM content_engagement_event
+    WHERE 1=1 
+        AND ($1::uuid IS NULL OR country_id = $1::uuid)
+        AND content_type = $2 
+        AND content_id = ANY($3)
+    ORDER BY created_at DESC; 
+    `,
+    [countryId, contentType, ids]
+  );
+};
+
+export const getCountryContentEngagementsQuery = async ({
+  countryId,
+  contentType,
+}) => {
+  const pool = getDBPool("masterDb");
+
+  return await pool.query(
+    `
+    SELECT
+      content_id,
+      content_type,
+      action,
+      client_detail_id
+    FROM content_engagement_event
+    WHERE 1=1 
+      AND country_id = $1
+      AND ($2::content_type IS NULL OR content_type = $2)
+    ORDER BY created_at DESC;
+    `,
+    [countryId, contentType]
+  );
+};
+
+export const getClientDetailIdsByDemographicsQuery = async ({
+  country,
+  clientDetailIds,
+  sex,
+  yearOfBirth,
+  urbanRural,
+}) => {
+  return await getDBPool("piiDb", country).query(
+    `
+    SELECT client_detail_id
+    FROM client_detail
+    WHERE client_detail_id = ANY($1)
+    AND ($2::sex_type IS NULL OR sex = $2)
+    AND ($3::character varying IS NULL OR year_of_birth = $3)
+    AND ($4::urban_rural_type IS NULL OR urban_rural = $4)
+  `,
+    [clientDetailIds, sex, yearOfBirth, urbanRural]
+  );
+};
