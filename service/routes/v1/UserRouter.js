@@ -11,10 +11,15 @@ import {
   addPlatformAccess,
   getContentRatings,
   addContentRating,
+  addContentEngagement,
+  removeContentEngagement,
+  getContentEngagements,
   getRatingsForContent,
   generatePdf,
   getOrganizationKey,
   getMobileMapHtml,
+  getContentEngagementsById,
+  getCountryContentEngagements,
 } from "#controllers/users";
 
 import { addCountryEvent } from "#controllers/countries";
@@ -35,6 +40,11 @@ import {
   generatePdfSchema,
   getOrganizationKeySchema,
   getMobileMapHtmlSchema,
+  addContentEngagementSchema,
+  removeContentEngagementSchema,
+  getContentEngagementsSchema,
+  getContentEngagementsByIdSchema,
+  getCountryContentEngagementsSchema,
 } from "#schemas/userSchemas";
 
 import { addCountryEventSchema } from "#schemas/countrySchemas";
@@ -342,6 +352,105 @@ router.get("/mobile-map", securedRoute, async (req, res, next) => {
       res.setHeader("Content-Type", "text/html");
       res.status(200).send(html);
     })
+    .catch(next);
+});
+
+router.post("/content-engagement", async (req, res, next) => {
+  /**
+   * #route   POST /user/v1/user/content-engagement
+   * #desc    Add content engagement
+   */
+  const clientDetailId = req.header("x-client-detail-id");
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const payload = req.body;
+
+  return await addContentEngagementSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ clientDetailId, country, language, ...payload })
+    .then(addContentEngagement)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.delete("/content-engagement", async (req, res, next) => {
+  /**
+   * #route   DELETE /user/v1/user/content-engagement
+   * #desc    Remove content engagement
+   */
+  const clientDetailId = req.header("x-client-detail-id");
+  const { contentId, contentType } = req.query;
+
+  return await removeContentEngagementSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ clientDetailId, contentId: Number(contentId), contentType })
+    .then(removeContentEngagement)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/content-engagements", async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/user/content-engagements
+   * #desc    Get content engagements
+   */
+  const clientDetailId = req.header("x-client-detail-id");
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  return await getContentEngagementsSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ clientDetailId, country, language })
+    .then(getContentEngagements)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/content-engagements-by-id", async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/user/content-engagements-by-id
+   * #desc    Get content engagements by id and content type
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+  const contentType = req.query.contentType;
+  const ids = req.query.ids?.split(",").map(Number);
+
+  return await getContentEngagementsByIdSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({ country, language, contentType, ids })
+    .then(getContentEngagementsById)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/country-content-engagements", async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/user/country-content-engagements
+   * #desc    Get content engagements by country
+   */
+  const country = req.header("x-country-alpha-2");
+  const language = req.header("x-language-alpha-2");
+
+  const { contentType, sex, yearOfBirth, urbanRural } = req.query;
+
+  return await getCountryContentEngagementsSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({
+      country,
+      language,
+      contentType: contentType || null,
+      sex: sex || null,
+      yearOfBirth: yearOfBirth || null,
+      urbanRural: urbanRural || null,
+    })
+    .then(getCountryContentEngagements)
+    .then((result) => res.status(200).send(result))
     .catch(next);
 });
 
