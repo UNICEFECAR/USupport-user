@@ -346,7 +346,7 @@ router.get("/mobile-map", securedRoute, async (req, res, next) => {
   return await getMobileMapHtmlSchema
     .noUnknown(true)
     .strict(true)
-    .validate({ country, language, lat, lng })
+    .validate({ country, language, lat: lat || null, lng: lng || null })
     .then(getMobileMapHtml)
     .then((html) => {
       res.setHeader("Content-Type", "text/html");
