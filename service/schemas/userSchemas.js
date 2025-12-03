@@ -196,8 +196,8 @@ export const getOrganizationKeySchema = yup.object().shape({
 export const getMobileMapHtmlSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
-  lat: yup.string().required(),
-  lng: yup.string().required(),
+  lat: yup.string().nullable(),
+  lng: yup.string().nullable(),
 });
 
 export const addContentEngagementSchema = yup.object().shape({
