@@ -360,7 +360,7 @@ router.post("/content-engagement", async (req, res, next) => {
    * #route   POST /user/v1/user/content-engagement
    * #desc    Add content engagement
    */
-  const clientDetailId = req.header("x-client-detail-id");
+  const clientDetailId = req.header("x-client-detail-id") || null;
   const country = req.header("x-country-alpha-2");
   const language = req.header("x-language-alpha-2");
   const payload = req.body;
