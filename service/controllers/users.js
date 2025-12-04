@@ -762,13 +762,7 @@ export const getOrganizationKey = async ({ platform }) => {
   };
 };
 
-export const getMobileMapHtml = async ({
-  lat,
-  lng,
-  token,
-  country,
-  language,
-}) => {
+export const getMobileMapHtml = async ({ lat, lng }) => {
   if (!ORGANIZATIONS_KEY) {
     throw new Error("Organizations key not configured");
   }
@@ -784,6 +778,8 @@ export const getMobileMapHtml = async ({
   };
 
   const userLocation =
+    lat &&
+    lng &&
     bucharestCenter.lat !== initialCenter.lat &&
     bucharestCenter.lng !== initialCenter.lng;
 

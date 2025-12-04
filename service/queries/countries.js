@@ -17,7 +17,8 @@ export const getAllActiveCountries = async () =>
               "currency"."min_price", 
               "country"."local_name" AS local_name,
               "country"."videos_active" AS videos_active,
-              "country"."podcasts_active" AS podcasts_active
+              "country"."podcasts_active" AS podcasts_active,
+              "country"."has_normal_slots" AS has_normal_slots
       FROM "country"
         LEFT JOIN "country_currency_links" ON "country"."country_id" = "country_currency_links".country_id
         LEFT JOIN "currency" ON "country_currency_links".currency_id = "currency".currency_id

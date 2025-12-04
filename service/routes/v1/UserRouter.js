@@ -346,7 +346,7 @@ router.get("/mobile-map", securedRoute, async (req, res, next) => {
   return await getMobileMapHtmlSchema
     .noUnknown(true)
     .strict(true)
-    .validate({ country, language, lat, lng })
+    .validate({ country, language, lat: lat || null, lng: lng || null })
     .then(getMobileMapHtml)
     .then((html) => {
       res.setHeader("Content-Type", "text/html");
@@ -360,7 +360,7 @@ router.post("/content-engagement", async (req, res, next) => {
    * #route   POST /user/v1/user/content-engagement
    * #desc    Add content engagement
    */
-  const clientDetailId = req.header("x-client-detail-id");
+  const clientDetailId = req.header("x-client-detail-id") || null;
   const country = req.header("x-country-alpha-2");
   const language = req.header("x-language-alpha-2");
   const payload = req.body;
