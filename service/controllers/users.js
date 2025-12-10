@@ -1138,6 +1138,8 @@ export const getCountryContentEngagements = async ({
   sex,
   yearOfBirth,
   urbanRural,
+  startDate,
+  endDate,
 }) => {
   const countryId = await getCountryByAlpha2CodeQuery({ country })
     .then((res) => {
@@ -1153,9 +1155,8 @@ export const getCountryContentEngagements = async ({
   let engagements = await getCountryContentEngagementsQuery({
     countryId,
     contentType: contentType === "all" ? null : contentType,
-    sex,
-    yearOfBirth,
-    urbanRural,
+    startDate,
+    endDate,
   }).then((res) => {
     if (res.rowCount > 0) {
       return res.rows;
@@ -1163,7 +1164,6 @@ export const getCountryContentEngagements = async ({
     return [];
   });
 
-  console.log(countryId);
   if (sex || yearOfBirth || urbanRural) {
     const clientDetailIds = engagements.map(
       (engagement) => engagement.client_detail_id
