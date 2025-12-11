@@ -535,6 +535,8 @@ export const getContentEngagementsByIdQuery = async ({
 export const getCountryContentEngagementsQuery = async ({
   countryId,
   contentType,
+  startDate,
+  endDate,
 }) => {
   const pool = getDBPool("masterDb");
 
@@ -549,9 +551,11 @@ export const getCountryContentEngagementsQuery = async ({
     WHERE 1=1 
       AND country_id = $1
       AND ($2::content_type IS NULL OR content_type = $2)
+      AND ($3::timestamp IS NULL OR created_at >= $3::timestamp)
+      AND ($4::timestamp IS NULL OR created_at <= $4::timestamp + interval '1 day')
     ORDER BY created_at DESC;
     `,
-    [countryId, contentType]
+    [countryId, contentType, startDate, endDate]
   );
 };
 
