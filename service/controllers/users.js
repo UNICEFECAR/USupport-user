@@ -788,6 +788,8 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
     <html>
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="referrer" content="origin">
+        <meta http-equiv="origin-trial" content="">
         <style>
             body, html {
                 margin: 0;
@@ -1007,10 +1009,20 @@ export const getMobileMapHtml = async ({ lat, lng }) => {
 
             // Initialize map when Google Maps API is loaded
             window.initMap = initMap;
+
+            // Handle Google Maps API load error
+            window.gm_authFailure = function() {
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                    type: 'AUTH_FAILURE',
+                    message: 'Google Maps API authentication failed. Check API key restrictions.'
+                }));
+                document.getElementById('loading').innerHTML = 'Map authentication failed. Please check API key configuration.';
+            };
         </script>
 
         <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=${ORGANIZATIONS_KEY}&callback=initMap&libraries=marker">
+            src="https://maps.googleapis.com/maps/api/js?key=${ORGANIZATIONS_KEY}&callback=initMap&libraries=marker"
+            onerror="window.ReactNativeWebView.postMessage(JSON.stringify({type:'SCRIPT_LOAD_ERROR',message:'Failed to load Google Maps script'}))">
         </script>
     </body>
     </html>
