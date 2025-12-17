@@ -244,4 +244,6 @@ export const getCountryContentEngagementsSchema = yup.object().shape({
     .nullable(),
   yearOfBirth: yup.mixed().oneOf([null, "parent", Number.isInteger]).nullable(),
   urbanRural: yup.mixed().oneOf(["urban", "rural", null]).nullable(),
+  startDate: yup.string().nullable(),
+  endDate: yup.string().nullable(),
 });
