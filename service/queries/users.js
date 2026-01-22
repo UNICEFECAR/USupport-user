@@ -537,6 +537,7 @@ export const getCountryContentEngagementsQuery = async ({
   contentType,
   startDate,
   endDate,
+  hasDemographicFilters,
 }) => {
   const pool = getDBPool("masterDb");
 
@@ -553,9 +554,15 @@ export const getCountryContentEngagementsQuery = async ({
       AND ($2::content_type IS NULL OR content_type = $2)
       AND ($3::timestamp IS NULL OR created_at >= $3::timestamp)
       AND ($4::timestamp IS NULL OR created_at <= $4::timestamp + interval '1 day')
+        AND (
+        CASE 
+          WHEN $5::boolean = false THEN TRUE
+          ELSE client_detail_id IS NOT NULL
+        END
+      )
     ORDER BY created_at DESC;
     `,
-    [countryId, contentType, startDate, endDate]
+    [countryId, contentType, startDate, endDate, !!hasDemographicFilters]    
   );
 };
 
@@ -563,7 +570,8 @@ export const getClientDetailIdsByDemographicsQuery = async ({
   country,
   clientDetailIds,
   sex,
-  yearOfBirth,
+  yearOfBirthFrom,
+  yearOfBirthTo,
   urbanRural,
 }) => {
   return await getDBPool("piiDb", country).query(
@@ -572,9 +580,15 @@ export const getClientDetailIdsByDemographicsQuery = async ({
     FROM client_detail
     WHERE client_detail_id = ANY($1)
     AND ($2::sex_type IS NULL OR sex = $2)
-    AND ($3::character varying IS NULL OR year_of_birth = $3)
-    AND ($4::urban_rural_type IS NULL OR urban_rural = $4)
+    AND (
+      ($3::varchar IS NULL AND $4::varchar IS NULL) 
+      OR (year_of_birth ~ '^[0-9]+$' 
+          AND ($3::varchar IS NULL OR CAST(year_of_birth AS INTEGER) >= CAST($3 AS INTEGER))
+          AND ($4::varchar IS NULL OR CAST(year_of_birth AS INTEGER) <= CAST($4 AS INTEGER))
+      )
+    )
+    AND ($5::urban_rural_type IS NULL OR urban_rural = $5)
   `,
-    [clientDetailIds, sex, yearOfBirth, urbanRural]
+    [clientDetailIds, sex, yearOfBirthFrom, yearOfBirthTo, urbanRural]
   );
 };
