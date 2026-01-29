@@ -1148,11 +1148,13 @@ export const getCountryContentEngagements = async ({
   language,
   contentType,
   sex,
-  yearOfBirth,
+  yearOfBirthFrom,
+  yearOfBirthTo,
   urbanRural,
   startDate,
   endDate,
 }) => {
+
   const countryId = await getCountryByAlpha2CodeQuery({ country })
     .then((res) => {
       if (res.rowCount === 0) {
@@ -1164,19 +1166,26 @@ export const getCountryContentEngagements = async ({
       console.log("Error getting country id", err);
     });
 
+  const hasDemographicFilters = sex || yearOfBirthFrom || yearOfBirthTo || urbanRural;
+
   let engagements = await getCountryContentEngagementsQuery({
     countryId,
     contentType: contentType === "all" ? null : contentType,
     startDate,
     endDate,
+    hasDemographicFilters,
   }).then((res) => {
     if (res.rowCount > 0) {
       return res.rows;
     }
     return [];
   });
+  console.log("engagements", engagements.length);
+  console.log(engagements);
 
-  if (sex || yearOfBirth || urbanRural) {
+  // Apply demographic filters (sex, yearOfBirth, urbanRural)
+  // When year filters are set, only include users with valid year of birth in the range
+  if (sex || yearOfBirthFrom || yearOfBirthTo || urbanRural) {
     const clientDetailIds = engagements.map(
       (engagement) => engagement.client_detail_id
     );
@@ -1185,7 +1194,8 @@ export const getCountryContentEngagements = async ({
         country,
         clientDetailIds,
         sex,
-        yearOfBirth,
+        yearOfBirthFrom,
+        yearOfBirthTo,
         urbanRural,
       })
         .then((res) => {
