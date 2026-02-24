@@ -18,7 +18,12 @@ export const getAllActiveCountries = async () =>
               "country"."local_name" AS local_name,
               "country"."videos_active" AS videos_active,
               "country"."podcasts_active" AS podcasts_active,
-              "country"."has_normal_slots" AS has_normal_slots
+              "country"."has_normal_slots" AS has_normal_slots,
+              "country"."has_payments" AS has_payments,
+              "country"."has_coupons" AS has_coupons,
+              "country"."has_free_consultations" AS has_free_consultations,
+              "country"."default_billing_type" AS default_billing_type,
+              "country"."default_coupon_code" AS default_coupon_code
       FROM "country"
         LEFT JOIN "country_currency_links" ON "country"."country_id" = "country_currency_links".country_id
         LEFT JOIN "currency" ON "country_currency_links".currency_id = "currency".currency_id
@@ -58,6 +63,10 @@ export const getCountriesWithLanguagesQuery = async () => {
               country.local_name AS local_name,
               country.podcasts_active AS podcasts_active,
               country.videos_active AS videos_active,
+              country.has_payments AS has_payments,
+              country.has_coupons AS has_coupons,
+              country.has_free_consultations AS has_free_consultations,
+              country.default_billing_type AS default_billing_type,
               JSON_AGG(DISTINCT 
                   JSONB_BUILD_OBJECT(
                       'language_id', l.language_id,
