@@ -3,6 +3,7 @@ import {
   getCountriesWithLanguagesQuery,
   getCountryByAlpha2CodeQuery,
   addCountryEventQuery,
+  getActiveCountriesArticlesQuery,
 } from "#queries/countries";
 
 import { countryNotFound } from "#utils/errors";
@@ -79,6 +80,17 @@ export const addCountryEvent = async ({
     .then((res) => {
       if (res.rowCount > 0) return { success: true };
       return { success: false };
+    })
+    .catch((err) => {
+      throw err;
+    });
+};
+
+export const getActiveCountriesArticles = async () => {
+  return await getActiveCountriesArticlesQuery()
+    .then((res) => {
+      console.log("res", res.rows);
+      return res.rows || [];
     })
     .catch((err) => {
       throw err;

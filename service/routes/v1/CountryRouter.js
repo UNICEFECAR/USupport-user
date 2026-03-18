@@ -4,6 +4,7 @@ import {
   getActiveCountriesWithLanguages,
   getAllCountries,
   getCountryByAlpha2Code,
+  getActiveCountriesArticles,
 } from "#controllers/countries";
 
 import { getCountryByAlpha2CodeSchema } from "#schemas/countrySchemas";
@@ -49,6 +50,17 @@ router.get("/countries-with-languages", async (req, res, next) => {
   const platform = req.header("x-platform");
 
   return await getActiveCountriesWithLanguages({ platform })
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.get("/articles/active", async (req, res, next) => {
+  /**
+   * #route   GET /user/v1/countries/articles/active
+   * #desc    Get article IDs for all active countries
+   */
+  console.log("here");
+  return await getActiveCountriesArticles()
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
