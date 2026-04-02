@@ -87,6 +87,20 @@ export const getCountriesWithLanguagesQuery = async () => {
   );
 };
 
+export const getActiveCountriesArticlesQuery = async () => {
+  return await getDBPool("masterDb").query(
+    `
+      SELECT
+        country.alpha2,
+        country.article_ids,
+        country.name
+      FROM country
+      WHERE country.is_active = true
+      ORDER BY country.name ASC;
+    `
+  );
+};
+
 export const addCountryEventQuery = async ({
   countryId,
   eventType,
