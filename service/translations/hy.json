@@ -23,7 +23,7 @@
   "too_many_login_requests_error": "Համակարգ մուտք գործելու չափից ավելի փորձեր, խնդրում ենք փորձել {1} րոպեից։",
   "valid_email": "Please provide a valid email",
   "by": "By: {1}",
-  "reading_time": "Reading time: {1} min read",
+  "reading_time": "Ընթերցման տևողություն՝ {1} րոպե",
   "category": "Category: {1}",
   "labels": "Labels:"
 }
