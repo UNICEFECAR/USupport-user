@@ -208,7 +208,7 @@ export const addContentEngagementSchema = yup.object().shape({
   contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
   action: yup
     .string()
-    .oneOf(["like", "dislike", "view", "share", "download"])
+    .oneOf(["like", "dislike", "view", "share", "download", "listen"])
     .required(),
 });
 
