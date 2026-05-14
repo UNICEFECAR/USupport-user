@@ -286,7 +286,7 @@ router.post("/generate-pdf", async (req, res, next) => {
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
-        `attachment; filename="${validData.contentType}-${Date.now()}.pdf"`
+        `attachment; filename="${validData.contentType}-${Date.now()}.pdf"`,
       );
       res.setHeader("Content-Length", pdfBuffer.length);
 
@@ -436,8 +436,15 @@ router.get("/country-content-engagements", async (req, res, next) => {
   const country = req.header("x-country-alpha-2");
   const language = req.header("x-language-alpha-2");
 
-  const { contentType, sex, yearOfBirthFrom, yearOfBirthTo, urbanRural, startDate, endDate } = req.query;
-
+  const {
+    contentType,
+    sex,
+    yearOfBirthFrom,
+    yearOfBirthTo,
+    urbanRural,
+    startDate,
+    endDate,
+  } = req.query;
 
   return await getCountryContentEngagementsSchema
     .noUnknown(true)
@@ -447,8 +454,8 @@ router.get("/country-content-engagements", async (req, res, next) => {
       language,
       contentType: contentType || null,
       sex: sex || null,
-      yearOfBirthFrom: yearOfBirthFrom? Number(yearOfBirthFrom) : null,
-      yearOfBirthTo: yearOfBirthTo? Number(yearOfBirthTo) : null,
+      yearOfBirthFrom: yearOfBirthFrom ? Number(yearOfBirthFrom) : null,
+      yearOfBirthTo: yearOfBirthTo ? Number(yearOfBirthTo) : null,
       urbanRural: urbanRural || null,
       startDate: startDate || null,
       endDate: endDate || null,
