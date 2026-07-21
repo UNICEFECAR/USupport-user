@@ -59,7 +59,6 @@ router.get("/articles/active", async (req, res, next) => {
    * #route   GET /user/v1/countries/articles/active
    * #desc    Get article IDs for all active countries
    */
-  console.log("here");
   return await getActiveCountriesArticles()
     .then((result) => res.status(200).send(result))
     .catch(next);
