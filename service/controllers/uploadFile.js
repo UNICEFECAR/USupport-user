@@ -1,5 +1,5 @@
 /* eslint-disable no-useless-catch */
-import AWS from "aws-sdk";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
@@ -14,22 +14,24 @@ const AWS_BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 export const uploadFile = async (props) => {
   const { fileName, fileContent, mimeType } = props;
 
-  const s3 = new AWS.S3({
-    accessKeyId: AWS_ACCESS_KEY_ID,
-    secretAccessKey: AWS_SECRET_ACCESS_KEY,
+  const s3 = new S3Client({
     region: AWS_REGION,
+    credentials: {
+      accessKeyId: AWS_ACCESS_KEY_ID,
+      secretAccessKey: AWS_SECRET_ACCESS_KEY,
+    },
   });
 
-  const params = {
-    Bucket: AWS_BUCKET_NAME,
-    Key: fileName,
-    Body: Buffer.from(fileContent, "binary"),
-    ContentType: mimeType,
-    ACL: "public-read",
-  };
-
   try {
-    await s3.upload(params).promise();
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: AWS_BUCKET_NAME,
+        Key: fileName,
+        Body: Buffer.from(fileContent, "binary"),
+        ContentType: mimeType,
+        ACL: "public-read",
+      }),
+    );
   } catch (err) {
     throw err;
   }
