@@ -428,6 +428,7 @@ export const addContentEngagementQuery = async ({
   contentId,
   contentType,
   action, // 'like' | 'dislike' | 'view' | 'share' | 'download'
+  visitorId,
 }) => {
   const pool = getDBPool("masterDb");
 
@@ -447,24 +448,25 @@ export const addContentEngagementQuery = async ({
       updated AS (
         UPDATE content_engagement_event
         SET action = $5::action_type,
-            created_at = now()
+            created_at = now(),
+            visitor_id = COALESCE($6::uuid, visitor_id)
         WHERE id IN (SELECT id FROM existing)
         RETURNING id
       )
-      INSERT INTO content_engagement_event (client_detail_id, country_id, content_type, content_id, action)
-      SELECT $1, $2, $3, $4, $5::action_type
+      INSERT INTO content_engagement_event (client_detail_id, country_id, content_type, content_id, action, visitor_id)
+      SELECT $1, $2, $3, $4, $5::action_type, $6::uuid
       WHERE NOT EXISTS (SELECT 1 FROM updated);
       `,
-      [clientDetailId, countryId, contentType, contentId, action]
+      [clientDetailId, countryId, contentType, contentId, action, visitorId]
     );
   } else {
     // Append-only for views, shares, downloads
     return await pool.query(
       `
-      INSERT INTO content_engagement_event (client_detail_id, country_id, content_type, content_id, action)
-      VALUES ($1, $2, $3, $4, $5::action_type);
+      INSERT INTO content_engagement_event (client_detail_id, country_id, content_type, content_id, action, visitor_id)
+      VALUES ($1, $2, $3, $4, $5::action_type, $6::uuid);
       `,
-      [clientDetailId, countryId, contentType, contentId, action]
+      [clientDetailId, countryId, contentType, contentId, action, visitorId]
     );
   }
 };

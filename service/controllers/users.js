@@ -1038,6 +1038,7 @@ export const addContentEngagement = async ({
   action,
   country,
   language,
+  visitorId,
 }) => {
   const countryId = await getCountryByAlpha2CodeQuery({ country })
     .then((res) => {
@@ -1056,6 +1057,7 @@ export const addContentEngagement = async ({
     contentType,
     action,
     countryId,
+    visitorId,
   })
     .then((res) => {
       if (res.rowCount > 0) return { success: true };

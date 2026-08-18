@@ -363,12 +363,13 @@ router.post("/content-engagement", async (req, res, next) => {
   const clientDetailId = req.header("x-client-detail-id") || null;
   const country = req.header("x-country-alpha-2");
   const language = req.header("x-language-alpha-2");
+  const visitorId = req.header("x-visitor-id") || null;
   const payload = req.body;
 
   return await addContentEngagementSchema
     .noUnknown(true)
     .strict(true)
-    .validate({ clientDetailId, country, language, ...payload })
+    .validate({ clientDetailId, country, language, visitorId, ...payload })
     .then(addContentEngagement)
     .then((result) => res.status(200).send(result))
     .catch(next);
