@@ -247,6 +247,7 @@ export const getMobileMapHtmlSchema = yup.object().shape({
 
 export const addContentEngagementSchema = yup.object().shape({
   clientDetailId: yup.string().uuid().nullable(),
+  visitorId: yup.string().uuid().nullable(),
   country: yup.string().required(),
   language: yup.string().required(),
   contentId: yup.number().required(),
