@@ -72,7 +72,7 @@ passport.use(
       try {
         const country = req.header("x-country-alpha-2");
         const { countryID, password, userType, clientData, providerData } =
-          await createUserSchema(language)
+          await createUserSchema(language, country)
             .noUnknown(true)
             .strict()
             .validate({

@@ -1,5 +1,9 @@
 import * as yup from "yup";
 import { t } from "#translations/index";
+import {
+  getProviderSpecializationsForCountry,
+  PEER_SUPPORT,
+} from "#utils/specializations";
 
 export const PASSWORD_REGEX = new RegExp(
   "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}"
@@ -15,13 +19,53 @@ const sexTypeSchema = yup
   .string()
   .oneOf(["male", "female", "unspecified", "notMentioned"]);
 
-const specializationsTypeSchema = yup
-  .array()
-  .of(
-    yup
-      .string()
-      .oneOf(["psychologist", "psychotherapist", "psychiatrist", "coach"])
-  );
+const resolveCountry = (getCountry, context) => {
+  if (typeof getCountry === "function") {
+    const resolved = getCountry(context);
+    if (resolved) {
+      return resolved;
+    }
+  } else if (typeof getCountry === "string") {
+    return getCountry;
+  }
+
+  const root = context.from?.[context.from.length - 1]?.value;
+  return root?.country ?? context.parent?.country;
+};
+
+const createSpecializationsTypeSchema = (getCountry) =>
+  yup
+    .array()
+    .of(
+      yup.string().test("allowed-specialization", function (value) {
+        if (!value) {
+          return true;
+        }
+
+        const country = resolveCountry(getCountry, this);
+        const allowed = getProviderSpecializationsForCountry(country);
+
+        if (!allowed.includes(value)) {
+          return this.createError({
+            message: `must be one of the following values: ${allowed.join(", ")}`,
+          });
+        }
+
+        return true;
+      })
+    )
+    .test(
+      "peer-support-exclusive",
+      `${PEER_SUPPORT} must be the only specialization when selected`,
+      function (value) {
+        if (!value?.length) {
+          return true;
+        }
+
+        return !(value.includes(PEER_SUPPORT) && value.length > 1);
+      }
+    );
+
 const urbanRuralTypeSchema = yup.string().oneOf(["urban", "rural"]);
 
 const createClientSchema = (language) =>
@@ -52,33 +96,34 @@ const createClientSchema = (language) =>
     ["userAccessToken", "email"]
   );
 
-const createProviderSchema = yup.object().shape({
-  name: yup.string().required(),
-  patronym: yup.string().notRequired(),
-  surname: yup.string().required(),
-  nickname: yup.string().notRequired(),
-  email: yup
-    .string()
-    .email({
-      tlds: { allow: false },
-    })
-    .required(),
-  phone: yup.string().notRequired(),
-  specializations: specializationsTypeSchema.notRequired(),
-  street: yup.string().notRequired(),
-  city: yup.string().notRequired(),
-  postcode: yup.string().notRequired(),
-  education: yup.array().of(yup.string()).notRequired(),
-  sex: sexTypeSchema.notRequired(),
-  consultationPrice: yup.number().min(0).notRequired(),
-  description: yup.string().notRequired(),
-  workWithIds: yup.array().of(yup.string().uuid()).notRequired(),
-  languageIds: yup.array().of(yup.string().uuid()).notRequired(),
-  organizationIds: yup.array().of(yup.string().uuid()).notRequired(),
-  videoLink: yup.string().notRequired(),
-});
+const createProviderSchema = (country) =>
+  yup.object().shape({
+    name: yup.string().required(),
+    patronym: yup.string().notRequired(),
+    surname: yup.string().required(),
+    nickname: yup.string().notRequired(),
+    email: yup
+      .string()
+      .email({
+        tlds: { allow: false },
+      })
+      .required(),
+    phone: yup.string().notRequired(),
+    specializations: createSpecializationsTypeSchema(country).notRequired(),
+    street: yup.string().notRequired(),
+    city: yup.string().notRequired(),
+    postcode: yup.string().notRequired(),
+    education: yup.array().of(yup.string()).notRequired(),
+    sex: sexTypeSchema.notRequired(),
+    consultationPrice: yup.number().min(0).notRequired(),
+    description: yup.string().notRequired(),
+    workWithIds: yup.array().of(yup.string().uuid()).notRequired(),
+    languageIds: yup.array().of(yup.string().uuid()).notRequired(),
+    organizationIds: yup.array().of(yup.string().uuid()).notRequired(),
+    videoLink: yup.string().notRequired(),
+  });
 
-export const createUserSchema = (language) =>
+export const createUserSchema = (language, country) =>
   yup.object().shape(
     {
       userType: yup.string().default("client"),
@@ -92,9 +137,9 @@ export const createUserSchema = (language) =>
         is: "client",
         then: createClientSchema(language).required(),
       }),
-      providerData: createProviderSchema.when("userType", {
+      providerData: createProviderSchema(country).when("userType", {
         is: "provider",
-        then: createProviderSchema.required(),
+        then: createProviderSchema(country).required(),
       }),
       isMobile: yup.boolean().notRequired(),
     },
