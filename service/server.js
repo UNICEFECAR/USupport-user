@@ -27,6 +27,7 @@ app.use("/user/v1/upload-file", v1.UploadFileRouter);
 app.use("/user/v1/languages", v1.LanguageRouter);
 app.use("/user/v1/countries", v1.CountryRouter);
 app.use("/user/v1/work-with", v1.WorkWithRouter);
+app.use("/user/v1/app-version", v1.AppVersionRouter);
 
 /* ------------- Error middleware ------------- */
 
