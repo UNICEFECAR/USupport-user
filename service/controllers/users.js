@@ -1079,7 +1079,7 @@ export const removeContentEngagement = async ({
     contentId,
     contentType,
   })
-    .then((res) => {
+    .then(() => {
       return { success: true };
     })
     .catch((err) => {
