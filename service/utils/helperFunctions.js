@@ -94,3 +94,19 @@ const countriesMap = {
 export const getCountryLabelFromAlpha2 = (alpha2) => {
   return countriesMap[alpha2.toLocaleLowerCase()];
 };
+
+/**
+ * Compare two "major.minor.patch" version strings
+ * @returns {number} -1 if a < b, 0 if equal, 1 if a > b
+ */
+export const compareVersions = (a, b) => {
+  const aParts = String(a).split(".").map(Number);
+  const bParts = String(b).split(".").map(Number);
+  const length = Math.max(aParts.length, bParts.length);
+
+  for (let i = 0; i < length; i++) {
+    const diff = (aParts[i] || 0) - (bParts[i] || 0);
+    if (diff !== 0) return diff > 0 ? 1 : -1;
+  }
+  return 0;
+};
