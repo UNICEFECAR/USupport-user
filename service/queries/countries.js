@@ -19,6 +19,7 @@ export const getAllActiveCountries = async () =>
               "country"."videos_active" AS videos_active,
               "country"."podcasts_active" AS podcasts_active,
               "country"."has_normal_slots" AS has_normal_slots,
+              "country"."has_30_min_slots" AS has_30_min_slots,
               "country"."has_payments" AS has_payments,
               "country"."has_coupons" AS has_coupons,
               "country"."has_free_consultations" AS has_free_consultations,
