@@ -7,15 +7,17 @@ import {
 } from "#queries/countries";
 
 import { countryNotFound } from "#utils/errors";
+import {
+  EVENT_COUNTRIES,
+  isCountryListedOnPlatform,
+} from "#utils/programCountries";
 
 export const getAllCountries = async ({ platform }) => {
   return await getAllActiveCountries()
     .then((res) => {
-      let countries = res.rows;
-      if (platform !== "country-admin" && platform !== "website") {
-        countries = countries.filter((x) => x.alpha2 !== "PS");
-      }
-      return countries;
+      return res.rows.filter((x) =>
+        isCountryListedOnPlatform(x.alpha2, platform)
+      );
     })
     .catch((err) => {
       throw err;
@@ -41,11 +43,9 @@ export const getActiveCountriesWithLanguages = async ({ platform }) => {
     .then((res) => {
       if (!res.rows?.length) return [];
 
-      let countries = res.rows;
-      if (platform !== "country-admin" && platform !== "website") {
-        countries = countries.filter((x) => x.alpha2 !== "PS");
-      }
-      return countries;
+      return res.rows.filter((x) =>
+        isCountryListedOnPlatform(x.alpha2, platform)
+      );
     })
     .catch((err) => {
       throw err;
@@ -59,11 +59,12 @@ export const addCountryEvent = async ({
   clientDetailId,
   visitorId,
 }) => {
+  // Visits to the global website have no country
   const countryId =
     eventType === "global_visit"
       ? null
       : await getCountryByAlpha2CodeQuery({
-          country: country,
+          country: EVENT_COUNTRIES[eventType] || country,
         }).then((res) => {
           if (res.rowCount === 0) {
             throw countryNotFound(language);
