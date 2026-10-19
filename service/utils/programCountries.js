@@ -5,7 +5,7 @@ export const HOSN_EL_HAL_COUNTRY = "XH";
 
 const PROGRAM_COUNTRY_PLATFORMS = {
   [PLAY_AND_HEAL_COUNTRY]: ["country-admin", "website"],
-  [HOSN_EL_HAL_COUNTRY]: ["country-admin", "global-admin"],
+  [HOSN_EL_HAL_COUNTRY]: ["country-admin", "website"],
 };
 
 // Events always recorded under a programme country, whatever country the
