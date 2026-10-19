@@ -13,7 +13,9 @@ export const getAllCountries = async ({ platform }) => {
     .then((res) => {
       let countries = res.rows;
       if (platform !== "country-admin" && platform !== "website") {
-        countries = countries.filter((x) => x.alpha2 !== "PS");
+        countries = countries.filter(
+          (x) => x.alpha2 !== "PS" && x.alpha2 !== "XH"
+        );
       }
       return countries;
     })
@@ -43,7 +45,9 @@ export const getActiveCountriesWithLanguages = async ({ platform }) => {
 
       let countries = res.rows;
       if (platform !== "country-admin" && platform !== "website") {
-        countries = countries.filter((x) => x.alpha2 !== "PS");
+        countries = countries.filter(
+          (x) => x.alpha2 !== "PS" && x.alpha2 !== "XH"
+        );
       }
       return countries;
     })
