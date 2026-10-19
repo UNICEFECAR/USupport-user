@@ -26,6 +26,7 @@ export const addCountryEventSchema = yup.object().shape({
       "global_visit",
       "playandheal_visit",
       "playandheal_visit_qr",
+      "hosnelhal_visit",
       "web_my_qa_nav_click",
     ])
     .required(),
