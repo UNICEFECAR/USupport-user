@@ -251,7 +251,10 @@ export const addContentEngagementSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
   contentId: yup.number().required(),
-  contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
+  contentType: yup
+    .string()
+    .oneOf(["article", "video", "podcast", "hosn_asset"])
+    .required(),
   action: yup
     .string()
     .oneOf(["like", "dislike", "view", "share", "download", "listen"])
@@ -261,7 +264,10 @@ export const addContentEngagementSchema = yup.object().shape({
 export const removeContentEngagementSchema = yup.object().shape({
   clientDetailId: yup.string().uuid().required(),
   contentId: yup.number().required(),
-  contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
+  contentType: yup
+    .string()
+    .oneOf(["article", "video", "podcast", "hosn_asset"])
+    .required(),
 });
 
 export const getContentEngagementsSchema = yup.object().shape({
@@ -273,7 +279,10 @@ export const getContentEngagementsSchema = yup.object().shape({
 export const getContentEngagementsByIdSchema = yup.object().shape({
   country: yup.string().required(),
   language: yup.string().required(),
-  contentType: yup.string().oneOf(["article", "video", "podcast"]).required(),
+  contentType: yup
+    .string()
+    .oneOf(["article", "video", "podcast", "hosn_asset"])
+    .required(),
   ids: yup.array().of(yup.number()).min(1).required(),
 });
 
@@ -282,7 +291,7 @@ export const getCountryContentEngagementsSchema = yup.object().shape({
   language: yup.string().required(),
   contentType: yup
     .string()
-    .oneOf(["article", "video", "podcast", "all"])
+    .oneOf(["article", "video", "podcast", "hosn_asset", "all"])
     .nullable(),
   sex: yup
     .mixed()
