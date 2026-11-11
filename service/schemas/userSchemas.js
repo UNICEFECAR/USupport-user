@@ -303,3 +303,11 @@ export const getCountryContentEngagementsSchema = yup.object().shape({
   startDate: yup.string().nullable(),
   endDate: yup.string().nullable(),
 });
+
+export const joinPlayAndHealWaitlistSchema = yup.object().shape({
+  country: yup.string().required(),
+  language: yup.string().max(10).required(),
+  fullName: yup.string().max(150).required(),
+  email: yup.string().email().max(254).required(),
+  location: yup.string().max(150).nullable(),
+});
