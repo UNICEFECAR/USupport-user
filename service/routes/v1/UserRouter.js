@@ -23,6 +23,7 @@ import {
 } from "#controllers/users";
 
 import { addCountryEvent } from "#controllers/countries";
+import { joinPlayAndHealWaitlist } from "#controllers/playandhealWaitlist";
 
 import { securedRoute } from "#middlewares/auth";
 import {
@@ -45,6 +46,7 @@ import {
   getContentEngagementsSchema,
   getContentEngagementsByIdSchema,
   getCountryContentEngagementsSchema,
+  joinPlayAndHealWaitlistSchema,
 } from "#schemas/userSchemas";
 
 import { addCountryEventSchema } from "#schemas/countrySchemas";
@@ -168,6 +170,33 @@ router.route("/add-contact-form").post(async (req, res, next) => {
     .strict(true)
     .validate({ country, language, ...payload })
     .then(addContactForm)
+    .then((result) => res.status(200).send(result))
+    .catch(next);
+});
+
+router.route("/playandheal-waitlist").post(async (req, res, next) => {
+  /**
+   * #route   POST /user/v1/user/playandheal-waitlist
+   * #desc    Add a Play and Heal facilitators-network waiting-list signup
+   */
+  const country = req.header("x-country-alpha-2");
+  const headerLanguage = req.header("x-language-alpha-2");
+  const payload = req.body || {};
+
+  const asTrimmed = (value) =>
+    typeof value === "string" ? value.trim() : value;
+
+  return await joinPlayAndHealWaitlistSchema
+    .noUnknown(true)
+    .strict(true)
+    .validate({
+      country,
+      language: asTrimmed(payload.language) || headerLanguage,
+      fullName: asTrimmed(payload.fullName),
+      email: asTrimmed(payload.email),
+      location: asTrimmed(payload.location) || null,
+    })
+    .then(joinPlayAndHealWaitlist)
     .then((result) => res.status(200).send(result))
     .catch(next);
 });
